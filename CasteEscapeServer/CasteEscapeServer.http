@@ -1,0 +1,6 @@
+@CasteEscapeServer_HostAddress = http://localhost:5035
+
+GET {{CasteEscapeServer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
