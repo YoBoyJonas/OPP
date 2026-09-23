@@ -79,10 +79,6 @@ public static class LevelBuilder
                 item.GrantedPower = obstacleType == CellType.Water ? PowerType.Swim : PowerType.Jump;
                 item.GrantDurationSeconds = 10;
             }
-            else if (kind == ItemKind.Reward)
-            {
-                item.ScoreValue = 10;
-            }
             else
             {
                 item.HealthValue = 1;

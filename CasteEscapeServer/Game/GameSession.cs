@@ -134,7 +134,6 @@ public class GameSession
     private bool IsTraversable(int x, int y, PlayerState player) => _level.CellAt(x, y) switch
     {
         CellType.Wall => false,
-        CellType.Hazard => false,
         CellType.Water => player.HasPower(PowerType.Swim),
         CellType.Pit => player.HasPower(PowerType.Jump),
         _ => true
@@ -205,9 +204,6 @@ public class GameSession
             {
                 case ItemKind.Health:
                     player.Health = Math.Min(player.MaxHealth, player.Health + item.HealthValue);
-                    break;
-                case ItemKind.Reward:
-                    player.Score += item.ScoreValue;
                     break;
                 case ItemKind.Power:
                     if (item.GrantedPower.HasValue)
