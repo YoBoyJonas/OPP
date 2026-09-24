@@ -51,7 +51,6 @@ public class GameSession
         }
     }
 
-    // Exposed so GameLogicSelfCheck can drive ticks synchronously without SignalR.
     public GameStateSnapshot RunTick()
     {
         lock (_gate)
