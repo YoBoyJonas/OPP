@@ -7,6 +7,5 @@ public class CharacterDefinition
     public int MaxHealth { get; set; }
     public double BaseMoveSpeed { get; set; }
     public double BaseJumpForce { get; set; }
-    public PowerType InnatePowers { get; set; }
     public StatModifiers BaseModifiers { get; set; } = new();
 }

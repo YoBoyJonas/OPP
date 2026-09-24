@@ -1,8 +1,8 @@
 namespace CastleEscapeClient.Models;
 
-public class PowerGrant
+public abstract class PowerGrant
 {
-    public PowerType Power { get; set; }
+    public abstract PowerType Power { get; }
     public double DurationSeconds { get; set; }
     public StatModifiers Modifiers { get; set; } = new();
 }

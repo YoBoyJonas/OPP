@@ -4,7 +4,5 @@ public enum ObstacleKind
 {
     Wall,
     Pit,
-    Water,
-    Hazard,
-    Crate
+    Water
 }

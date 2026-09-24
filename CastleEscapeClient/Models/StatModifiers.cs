@@ -7,4 +7,11 @@ public class StatModifiers
     public double MoveSpeedMultiplier { get; set; } = 1.0;
     public double JumpForceMultiplier { get; set; } = 1.0;
     public double SwimSpeedMultiplier { get; set; } = 1.0;
+
+    public StatModifiers Combine(StatModifiers other) => new()
+    {
+        MoveSpeedMultiplier = MoveSpeedMultiplier * other.MoveSpeedMultiplier,
+        JumpForceMultiplier = JumpForceMultiplier * other.JumpForceMultiplier,
+        SwimSpeedMultiplier = SwimSpeedMultiplier * other.SwimSpeedMultiplier
+    };
 }
