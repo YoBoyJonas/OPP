@@ -1,6 +1,6 @@
 namespace CastleEscapeClient.Models;
 
-public class ZombieDefinition
+public class Zombie
 {
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;

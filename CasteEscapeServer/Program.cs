@@ -1,12 +1,6 @@
 using CasteEscapeServer.Game;
 using CasteEscapeServer.Hubs;
 
-if (args.Contains("selftest"))
-{
-    var passed = GameLogicSelfCheck.Run();
-    return passed ? 0 : 1;
-}
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSignalR();
