@@ -15,6 +15,7 @@ public class LevelState(LevelDefinition definition, int seed, Grid grid)
     private readonly List<Lever> _levers = [];
     private readonly List<GridPos> _exitTiles = [];
     private readonly List<GridPos> _startTiles = [];
+    private readonly Dictionary<string, int> _idCounters = [];
 
     public LevelDefinition Definition { get; } = definition;
     public int Index => Definition.Index;
@@ -31,6 +32,14 @@ public class LevelState(LevelDefinition definition, int seed, Grid grid)
 
     /// <summary>Player 1's and player 2's start tiles, in that order.</summary>
     public IReadOnlyList<GridPos> StartTiles => _startTiles;
+
+    /// <summary>A new entity id unique in this level, e.g. "item-3".</summary>
+    public string NextEntityId(string prefix)
+    {
+        var next = _idCounters.GetValueOrDefault(prefix) + 1;
+        _idCounters[prefix] = next;
+        return $"{prefix}-{next}";
+    }
 
     public void AddItem(ItemEntity item) => _items.Add(item);
     public bool RemoveItem(ItemEntity item) => _items.Remove(item);

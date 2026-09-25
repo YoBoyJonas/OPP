@@ -17,6 +17,20 @@ public class PatternEndpointTests(WebApplicationFactory<Program> factory) : ICla
         Assert.All(patterns.GroupBy(p => p.Owner), g => Assert.Equal(3, g.Count()));
     }
 
+    public static TheoryData<string> DemoKeys => new(CastleEscape.Game.PatternDemos.PatternDemoCatalog.All.Select(d => d.Key));
+
+    [Theory]
+    [MemberData(nameof(DemoKeys))]
+    public async Task EveryDemo_HasAWorkingEndpoint(string key)
+    {
+        var response = await factory.CreateClient().PostAsync($"/api/patterns/{key}/demo", null, Api.Ct);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<PatternDemoResponse>(Api.Json, Api.Ct);
+
+        Assert.NotNull(result);
+        Assert.NotEmpty(result.Trace);
+    }
+
     [Fact]
     public async Task UnknownPattern_Is404()
     {

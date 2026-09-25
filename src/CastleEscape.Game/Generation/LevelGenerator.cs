@@ -1,5 +1,6 @@
 using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
+using CastleEscape.Game.Items;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Generation;
@@ -192,7 +193,7 @@ public class LevelGenerator(ContentCatalog catalog, GameOptions game, Generation
             }
             var spot = spots[rng.Next(spots.Count)];
             occupied.Add(spot);
-            level.AddItem(new ItemEntity($"item-{i + 1}", consumable, spot));
+            ItemSpawners.Spawn(level, consumable, spot);
         }
 
         // 8. Zombies, far enough from both starts.

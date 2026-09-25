@@ -2,7 +2,6 @@ using CastleEscape.Contracts;
 using CastleEscape.Contracts.Realtime;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Events;
-using CastleEscape.Game.Powers;
 
 namespace CastleEscape.Game.World;
 
@@ -18,6 +17,7 @@ public static class InteractionResolver
     public static void CollectItems(LevelState level, IReadOnlyList<PlayerEntity> players, IReadOnlyList<PowerCombo> combos,
         InteractionSettings settings, List<PendingEvent> events)
     {
+        var context = new ItemEffectContext(combos, settings, events);
         foreach (var player in players)
         {
             if (level.ItemAt(player.Tile) is not { } item)
@@ -25,24 +25,7 @@ public static class InteractionResolver
                 continue;
             }
 
-            switch (item.Kind)
-            {
-                case ConsumableKind.Health:
-                    player.GainLives(item.Definition.HealthValue);
-                    break;
-                case ConsumableKind.Reward:
-                    player.AddScore(item.Definition.ScoreValue);
-                    break;
-                case ConsumableKind.Power:
-                    var grant = item.Definition.Grant!;
-                    var power = player.GainPower(grant, grant.DurationSeconds ?? settings.DefaultPowerDurationSeconds,
-                        settings.MaxPowerStackLevel);
-                    events.Add(PendingEvent.Of(GameEventTypes.PowerGained, player.PlayerId,
-                        $"{player.Name} gained {power.Power} (level {power.Level}).",
-                        new { power = power.Power, level = power.Level, remainingSeconds = Math.Round(power.RemainingSeconds, 1) }));
-                    PowerRules.RefreshCombos(player, combos, events);
-                    break;
-            }
+            item.Apply(player, context);   // each item kind knows its own effect
 
             level.RemoveItem(item);
             events.Add(PendingEvent.Of(GameEventTypes.ItemCollected, player.PlayerId,

@@ -114,7 +114,7 @@ notifier observer; Facade last because it wraps the final subsystems.
 ## Progress (2026-09-25)
 
 Done on `backend/p1` (not pushed): Phases 0–3 (tag `p1-prototype-before-patterns`), pattern
-infrastructure (`bbc8925`), **Singleton** (`81ca652`), **Adapter** (`77e9002`). 107 tests green.
+infrastructure (`bbc8925`), **Singleton** (`81ca652`), **Adapter** (`77e9002`), **Factory Method**.
 
 Conventions every pattern commit follows:
 - `[DesignPattern("<Name>", "<Role>")]` on each participant, plus a one-line XML doc summary.

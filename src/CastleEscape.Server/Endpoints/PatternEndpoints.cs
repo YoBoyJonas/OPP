@@ -37,6 +37,12 @@ public static class PatternEndpoints
             "Serializes a real tick state through IMessageSerializer (`format=json|xml`), round-trips it, and counts "
             + "the members of the 3-member target against the adaptees JsonSerializer and DataContractSerializer.");
 
+        app.MapDemo("factory-method",
+            (string kind = "all") => Run("factory-method", ("kind", kind)),
+            "Factory Method: item spawners",
+            "Spawns items on the tutorial level through ItemSpawners.For(consumable) (`kind=health|reward|power|all`), "
+            + "applies each to a player, and lists the product family (HealthItem, RewardItem, PowerItem).");
+
         return app;
     }
 

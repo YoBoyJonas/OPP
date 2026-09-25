@@ -1,5 +1,6 @@
 using CastleEscape.Contracts;
 using CastleEscape.Game.Content;
+using CastleEscape.Game.Items;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Generation;
@@ -39,7 +40,7 @@ public static class PresetLevelParser
         var pit = catalog.Obstacles.OfType<Pit>().First();
         var zombieType = definition.ZombieTable.Count > 0 ? catalog.GetZombie(definition.ZombieTable[0].Id) : catalog.Zombies[0];
         GridPos? start1 = null, start2 = null;
-        int items = 0, zombies = 0, levers = 0;
+        int zombies = 0, levers = 0;
 
         foreach (var pos in grid.Positions())
         {
@@ -63,14 +64,14 @@ public static class PresetLevelParser
                 case MapLegend.Exit: level.AddExitTile(pos); break;
                 case MapLegend.ZombieSpawn: level.AddZombie(new ZombieEntity($"zombie-{++zombies}", zombieType, pos)); break;
                 case MapLegend.HealthItem:
-                    level.AddItem(new ItemEntity($"item-{++items}", catalog.Consumables.First(i => i.Kind == ConsumableKind.Health), pos));
+                    ItemSpawners.Spawn(level, catalog.Consumables.First(i => i.Kind == ConsumableKind.Health), pos);
                     break;
                 case MapLegend.RewardItem:
-                    level.AddItem(new ItemEntity($"item-{++items}", catalog.Consumables.First(i => i.Kind == ConsumableKind.Reward), pos));
+                    ItemSpawners.Spawn(level, catalog.Consumables.First(i => i.Kind == ConsumableKind.Reward), pos);
                     break;
                 case MapLegend.JumpItem or MapLegend.SprintItem or MapLegend.SwimItem:
                     var power = MapLegend.PowerOf(c);
-                    level.AddItem(new ItemEntity($"item-{++items}", catalog.Consumables.First(i => i.Grant?.Power == power), pos));
+                    ItemSpawners.Spawn(level, catalog.Consumables.First(i => i.Grant?.Power == power), pos);
                     break;
             }
         }

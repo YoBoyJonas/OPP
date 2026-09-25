@@ -1,5 +1,6 @@
 using CastleEscape.Contracts;
 using CastleEscape.Game.Content;
+using CastleEscape.Game.Items;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Tests.World;
@@ -101,8 +102,7 @@ public class WorldModelTests
     public void LevelState_FindsAndRemovesItems()
     {
         var level = new LevelState(new LevelDefinition { Id = "l", Index = 1 }, seed: 1, new Grid(20, 15));
-        var item = new ItemEntity("i1", new Health { Id = "h", HealthValue = 1 }, new GridPos(4, 4));
-        level.AddItem(item);
+        var item = ItemSpawners.Spawn(level, new Health { Id = "h", HealthValue = 1 }, new GridPos(4, 4));
 
         Assert.Same(item, level.ItemAt(new GridPos(4, 4)));
         Assert.True(level.RemoveItem(item));
