@@ -1,0 +1,56 @@
+using CastleEscape.Contracts.Patterns;
+using CastleEscape.Game.PatternDemos;
+using CastleEscape.Game.Patterns;
+using CastleEscape.Server.OpenApi;
+using Microsoft.AspNetCore.Http.HttpResults;
+
+namespace CastleEscape.Server.Endpoints;
+
+/// <summary>Course demos: the P1 patterns, their participants (by reflection) and one demo endpoint per pattern.</summary>
+public static class PatternEndpoints
+{
+    public static IEndpointRouteBuilder MapPatternEndpoints(this IEndpointRouteBuilder app)
+    {
+        var group = app.MapGroup("/api/patterns").WithTags(ApiTags.Patterns);
+
+        group.MapGet("", () => Describe())
+            .WithName("ListPatterns")
+            .WithSummary("All P1 patterns")
+            .WithDescription("Name, owner, the problem solved, the course requirement and how it is met, "
+                             + "and the participants found in the code by the [DesignPattern] attribute.");
+
+        group.MapGet("/{pattern}", GetPattern)
+            .WithName("GetPattern")
+            .WithSummary("One pattern")
+            .WithDescription("Details and participants (type, role, source file) of one pattern, by key, e.g. `decorator`.")
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        return app;
+    }
+
+    /// <summary>Maps a demo endpoint; the handler turns its typed query parameters into demo options.</summary>
+    public static RouteHandlerBuilder MapDemo(this IEndpointRouteBuilder group, string key, Delegate handler, string summary, string description) =>
+        group.MapPost($"/api/patterns/{key}/demo", handler)
+            .WithTags(ApiTags.Patterns)
+            .WithName($"Demo{string.Concat(key.Split('-').Select(p => char.ToUpperInvariant(p[0]) + p[1..]))}")
+            .WithSummary(summary)
+            .WithDescription(description);
+
+    /// <summary>Runs a demo by key with the given options.</summary>
+    public static PatternDemoResponse Run(string key, params (string Name, object? Value)[] options) =>
+        (PatternDemoCatalog.Find(key) ?? throw new InvalidOperationException($"No demo '{key}'."))
+        .Run(new DemoOptions(options.Where(o => o.Value is not null)
+            .ToDictionary(o => o.Name, o => Convert.ToString(o.Value, System.Globalization.CultureInfo.InvariantCulture)!)));
+
+    private static PatternDto[] Describe() =>
+        PatternCatalog.Describe(typeof(PatternCatalog).Assembly, typeof(PatternEndpoints).Assembly);
+
+    private static Results<Ok<PatternDto>, ProblemHttpResult> GetPattern(string pattern)
+    {
+        var found = Describe().FirstOrDefault(p => p.Key.Equals(pattern, StringComparison.OrdinalIgnoreCase));
+        return found is null
+            ? TypedResults.Problem($"Unknown pattern '{pattern}'. Known: {string.Join(", ", PatternCatalog.Keys)}.",
+                statusCode: StatusCodes.Status404NotFound, title: "Pattern not found")
+            : TypedResults.Ok(found);
+    }
+}

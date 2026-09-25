@@ -73,6 +73,7 @@ app.MapDiagnosticsEndpoints();
 app.MapContentEndpoints();
 app.MapSessionEndpoints();
 app.MapGameplayEndpoints();
+app.MapPatternEndpoints();
 app.MapHub<GameHub>("/hubs/game");
 
 app.Run();
