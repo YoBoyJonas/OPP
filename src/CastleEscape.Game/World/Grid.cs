@@ -26,6 +26,16 @@ public class Grid
         }
     }
 
+    /// <summary>A copy with its own tile array. Tiles are immutable, so both grids can share them.</summary>
+    private Grid(Grid source)
+    {
+        Width = source.Width;
+        Height = source.Height;
+        _tiles = (Tile[,])source._tiles.Clone();
+    }
+
+    public Grid Copy() => new(this);
+
     public int Width { get; }
     public int Height { get; }
 

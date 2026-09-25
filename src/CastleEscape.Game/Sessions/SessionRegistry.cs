@@ -7,7 +7,7 @@ using CastleEscape.Game.Generation;
 namespace CastleEscape.Game.Sessions;
 
 /// <summary>All sessions on this server, found by id or join code (join-session activity diagram).</summary>
-public class SessionRegistry(ContentCatalog catalog, ILevelProvider levels, GameOptions options)
+public class SessionRegistry(ContentCatalog catalog, ILevelProvider levels, GameOptions options, PatternOptions? patterns = null)
 {
     private const string CodeAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O, 1/I
     private const int MaxNameLength = 24;
@@ -26,7 +26,7 @@ public class SessionRegistry(ContentCatalog catalog, ILevelProvider levels, Game
         GameSession session;
         lock (_createGate)
         {
-            session = new GameSession(Guid.NewGuid(), NewJoinCode(), catalog, levels, options, seed ?? Random.Shared.Next());
+            session = new GameSession(Guid.NewGuid(), NewJoinCode(), catalog, levels, options, seed ?? Random.Shared.Next(), patterns);
             _sessions[session.Id] = session;
         }
         return (session, session.AddPlayer(name));

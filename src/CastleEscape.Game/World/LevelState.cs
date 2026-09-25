@@ -1,5 +1,7 @@
 using CastleEscape.Contracts;
+using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
+using CastleEscape.Game.Patterns;
 
 namespace CastleEscape.Game.World;
 
@@ -7,8 +9,10 @@ namespace CastleEscape.Game.World;
 /// One generated level: terrain plus everything placed on it. Players are not part of it;
 /// they belong to the session and move from level to level.
 /// Collections are private and changed only through methods (seam for P2 Iterator/Composite/Visitor).
+/// A freshly built level is kept as the prototype: every play and restart runs on a clone of it.
 /// </summary>
-public class LevelState(LevelDefinition definition, int seed, Grid grid)
+[DesignPattern("Prototype", "ConcretePrototype")]
+public class LevelState(LevelDefinition definition, int seed, Grid grid) : ILevelPrototype<LevelState>
 {
     private readonly List<ItemEntity> _items = [];
     private readonly List<ZombieEntity> _zombies = [];
@@ -54,6 +58,36 @@ public class LevelState(LevelDefinition definition, int seed, Grid grid)
 
     public void AddExitTile(GridPos pos) => _exitTiles.Add(pos);
     public bool IsExitTile(GridPos pos) => _exitTiles.Contains(pos);
+
+    // ---------------------------------------------------------------- Prototype
+
+    public LevelState Clone(CloneMode mode) => mode == CloneMode.Deep ? DeepClone() : ShallowClone();
+
+    /// <summary>
+    /// Copies only this object: the grid, the lists and the entities in them are shared with the original.
+    /// Playing on it changes the original too (collected items stay collected after a restart).
+    /// </summary>
+    public LevelState ShallowClone() => (LevelState)MemberwiseClone();
+
+    /// <summary>
+    /// A fully independent level: its own grid array, lists and entity objects. Shared: the immutable
+    /// tiles and content definitions, which nothing changes during play.
+    /// </summary>
+    public LevelState DeepClone()
+    {
+        var copy = new LevelState(Definition, Seed, Grid.Copy());
+        copy._items.AddRange(_items.Select(i => (ItemEntity)i.CloneEntity()));
+        copy._zombies.AddRange(_zombies.Select(z => (ZombieEntity)z.CloneEntity()));
+        copy._levers.AddRange(_levers.Select(l => (Lever)l.CloneEntity()));
+        copy._exitTiles.AddRange(_exitTiles);
+        copy._startTiles.AddRange(_startTiles);
+        foreach (var (prefix, count) in _idCounters)
+        {
+            copy._idCounters[prefix] = count;
+        }
+        copy.Door = (ExitDoor?)Door?.CloneEntity();
+        return copy;
+    }
 
     public void AddStartTile(GridPos pos)
     {

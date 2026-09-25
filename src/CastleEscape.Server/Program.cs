@@ -43,7 +43,8 @@ builder.Services.AddSingleton<ILevelProvider>(sp => new LevelProvider(
 builder.Services.AddSingleton(sp => new SessionRegistry(
     sp.GetRequiredService<ContentCatalog>(),
     sp.GetRequiredService<ILevelProvider>(),
-    sp.GetRequiredService<IOptions<GameOptions>>().Value));
+    sp.GetRequiredService<IOptions<GameOptions>>().Value,
+    sp.GetRequiredService<IOptions<PatternOptions>>().Value));
 builder.Services.AddSingleton<GameLoopStats>();
 builder.Services.AddHostedService<GameLoopService>();
 

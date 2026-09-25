@@ -55,6 +55,13 @@ public static class PatternEndpoints
             "LevelDirector builds level `level` with ProceduralLevelBuilder (random, `seed`) and PresetLevelBuilder "
             + "(the `preset` map: tutorial or arena), using the same step order. Returns both results as map rows.");
 
+        app.MapDemo("prototype",
+            (string mode = "both") => Run("prototype", ("mode", mode)),
+            "Prototype: deep vs shallow level copies",
+            "Clones the tutorial level (`mode=Deep|Shallow|both`) and reports, for the level and its parts, the memory "
+            + "address and identity hash in the original and the clone. Then plays on the clone and restarts from the "
+            + "pristine level: deep restores it, shallow does not. The game itself uses `Patterns:PrototypeCloneMode`.");
+
         return app;
     }
 

@@ -45,9 +45,11 @@ public sealed class TestGame
         string character2 = "scout", params string[][] moreLevels) =>
         Start(new RowsLevelProvider(Catalog, [rows, .. moreLevels]), options, character1, character2);
 
-    public static TestGame Start(ILevelProvider levels, GameOptions? options = null, string character1 = "scout", string character2 = "scout")
+    public static TestGame Start(ILevelProvider levels, GameOptions? options = null, string character1 = "scout", string character2 = "scout",
+        PatternOptions? patterns = null)
     {
-        var session = new GameSession(Guid.NewGuid(), "TEST01", Catalog, levels, options ?? new GameOptions { LevelTransitionSeconds = 0 }, baseSeed: 1);
+        var session = new GameSession(Guid.NewGuid(), "TEST01", Catalog, levels, options ?? new GameOptions { LevelTransitionSeconds = 0 }, baseSeed: 1,
+            patterns);
         var p1 = session.AddPlayer("Ana");
         var p2 = session.AddPlayer("Ben");
         session.SelectCharacter(p1.PlayerId, character1);

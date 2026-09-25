@@ -26,6 +26,7 @@ public class GameSession
     private readonly ContentCatalog _catalog;
     private readonly ILevelProvider _levels;
     private readonly GameOptions _options;
+    private readonly PatternOptions _patterns;
     private readonly InteractionSettings _interaction;
     private readonly int _baseSeed;
 
@@ -36,14 +37,18 @@ public class GameSession
     private double _levelElapsed;
     private double _transitionLeft;
     private LevelState? _level;
+    private LevelState? _pristine; // the level as built; never played on (Prototype)
     private ExitMechanism? _exit;
     private LevelCheckpoint? _checkpoint;
     private LevelStartedMessage? _lastLevelStarted;
     private TickStateMessage? _lastState;
     private volatile SessionSnapshot _snapshot;
 
-    public GameSession(Guid id, string joinCode, ContentCatalog catalog, ILevelProvider levels, GameOptions options, int baseSeed)
+    /// <param name="patterns">Read on every restart, so a runtime switch of the clone mode takes effect immediately.</param>
+    public GameSession(Guid id, string joinCode, ContentCatalog catalog, ILevelProvider levels, GameOptions options, int baseSeed,
+        PatternOptions? patterns = null)
     {
+        _patterns = patterns ?? new PatternOptions();
         Id = id;
         JoinCode = joinCode;
         _catalog = catalog;
@@ -387,7 +392,8 @@ public class GameSession
             slot.Entity = new PlayerEntity(slot.PlayerId, slot.Name, _catalog.GetCharacter(slot.CharacterId!), level.StartTiles[slot.Slot - 1]);
         }
         _checkpoint = new LevelCheckpoint(Players().ToDictionary(p => p.PlayerId, p => (p.Lives, p.Score)));
-        StartLevel(level);
+        _pristine = level;
+        StartLevel(level.Clone(_patterns.PrototypeCloneMode));
         Emit(PendingEvent.Of(GameEventTypes.LevelStarted, null, $"Level {index} ({level.Theme}) started.", new { level = index }));
     }
 
@@ -409,11 +415,14 @@ public class GameSession
         Send(ClientMethods.LevelStarted, _lastLevelStarted);
     }
 
-    /// <summary>D8: the same level again (regenerated from its seed), lives and score back to the level start.</summary>
+    /// <summary>
+    /// D8: the same level again, as a fresh clone of the pristine level (Prototype); lives and score back
+    /// to the level start. With <see cref="CloneMode.Shallow"/> the "fresh" copy shares its items, zombies and
+    /// levers with the level just played, so the restart visibly fails (the defence switch).
+    /// </summary>
     private void RestartLevel(PlayerEntity requestedBy)
     {
-        var current = _level!;
-        var level = _levels.CreateLevel(current.Index, current.Seed);
+        var level = _pristine!.Clone(_patterns.PrototypeCloneMode);
         foreach (var player in Players())
         {
             var (lives, score) = _checkpoint!.Players[player.PlayerId];
