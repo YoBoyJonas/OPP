@@ -317,7 +317,7 @@ public class GameSession
             }
             if (player.IsMoving)
             {
-                distance = PlayerAbilities.SpeedOn(player, level.Grid.GetTile(player.NextTile!.Value)) * seconds;
+                distance = player.Abilities.SpeedOn(level.Grid.GetTile(player.NextTile!.Value)) * seconds;
             }
 
             // One arrival per tick at most; leftover distance carries into the next step.
@@ -406,7 +406,7 @@ public class GameSession
         foreach (var slot in _slots)
         {
             slot.Entity!.PlaceAt(level.StartTiles[slot.Slot - 1]);
-            slot.Entity.ClearPowers();
+            slot.Entity.Powers.Clear();
         }
         SetPhase(SessionPhase.Playing);
 

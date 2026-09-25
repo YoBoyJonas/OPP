@@ -87,7 +87,7 @@ public class FactoryMethodTests
 
         Assert.Equal(livesBefore + First(ConsumableKind.Health).HealthValue, player.Lives);
         Assert.Equal(First(ConsumableKind.Reward).ScoreValue, player.Score);
-        Assert.NotNull(player.GetPower(power.Grant.Power));
+        Assert.NotNull(player.Powers.Get(power.Grant.Power));
         Assert.Contains(events, e => e.Type == GameEventTypes.PowerGained);
     }
 

@@ -33,7 +33,7 @@ public sealed class PowerItem(string id, Power definition, GridPos tile) : ItemE
     public override void Apply(PlayerEntity player, ItemEffectContext context)
     {
         var settings = context.Settings;
-        var power = player.GainPower(Grant, Grant.DurationSeconds ?? settings.DefaultPowerDurationSeconds, settings.MaxPowerStackLevel);
+        var power = player.Powers.Gain(Grant, Grant.DurationSeconds ?? settings.DefaultPowerDurationSeconds, settings.MaxPowerStackLevel);
         context.Events.Add(PendingEvent.Of(GameEventTypes.PowerGained, player.PlayerId,
             $"{player.Name} gained {power.Power} (level {power.Level}).",
             new { power = power.Power, level = power.Level, remainingSeconds = Math.Round(power.RemainingSeconds, 1) }));

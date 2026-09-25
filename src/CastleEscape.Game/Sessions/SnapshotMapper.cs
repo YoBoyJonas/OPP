@@ -53,7 +53,7 @@ public static class SnapshotMapper
             {
                 var p = s.Entity!;
                 return new HudPlayerDto(p.PlayerId, s.Slot, p.Name, p.Character.Id, p.Lives, p.MaxLives, p.Score,
-                    ToPowers(p), p.Combos.Select(c => c.Granted).ToArray(), new Dictionary<string, int>(s.Stats));
+                    ToPowers(p), p.Powers.Combos.Select(c => c.Granted).ToArray(), new Dictionary<string, int>(s.Stats));
             }).ToArray());
 
     /// <summary>The level as legend rows: terrain, with entity characters at their starting positions.</summary>
@@ -100,11 +100,11 @@ public static class SnapshotMapper
         var (x, y) = p.RenderPosition;
         return new PlayerStateDto(p.PlayerId, slot.Slot, p.Name, p.Character.Id, p.Tile.X, p.Tile.Y,
             Math.Round(x, 3), Math.Round(y, 3), p.Facing, p.IsMoving, p.Lives, p.MaxLives, p.Score,
-            ToPowers(p), p.Combos.Select(c => c.Granted).ToArray());
+            ToPowers(p), p.Powers.Combos.Select(c => c.Granted).ToArray());
     }
 
     private static ActivePowerDto[] ToPowers(PlayerEntity p) =>
-        p.Powers.OrderBy(a => a.Power).Select(a => new ActivePowerDto(a.Power, Math.Round(a.RemainingSeconds, 2), a.Level)).ToArray();
+        p.Powers.Active.OrderBy(a => a.Power).Select(a => new ActivePowerDto(a.Power, Math.Round(a.RemainingSeconds, 2), a.Level)).ToArray();
 
     private static ZombieStateDto ToZombieState(ZombieEntity z)
     {

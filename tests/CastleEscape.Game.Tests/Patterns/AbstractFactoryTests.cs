@@ -4,7 +4,6 @@ using CastleEscape.Game.Content;
 using CastleEscape.Game.Generation;
 using CastleEscape.Game.Generation.Themes;
 using CastleEscape.Game.PatternDemos;
-using CastleEscape.Game.Powers;
 using CastleEscape.Game.Sessions;
 using CastleEscape.Game.World;
 
@@ -67,7 +66,7 @@ public class AbstractFactoryTests
         var spike = new Tile(TerrainKind.Pit, ThemeFactories.For(LevelTheme.Dungeon, Catalog).CreatePit());
         var abyss = new Tile(TerrainKind.Pit, ThemeFactories.For(LevelTheme.Crypt, Catalog).CreatePit());
 
-        Assert.Equal(PlayerAbilities.SpeedOn(player, spike) * AbyssPit.SpeedMultiplier, PlayerAbilities.SpeedOn(player, abyss), 6);
+        Assert.Equal(player.Abilities.SpeedOn(spike) * AbyssPit.SpeedMultiplier, player.Abilities.SpeedOn(abyss), 6);
     }
 
     [Fact]

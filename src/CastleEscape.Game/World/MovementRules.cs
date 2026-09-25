@@ -1,5 +1,3 @@
-using CastleEscape.Game.Powers;
-
 namespace CastleEscape.Game.World;
 
 /// <summary>
@@ -24,7 +22,7 @@ public static class MovementRules
         {
             return false;
         }
-        if (!PlayerAbilities.CanTraverse(player, terrain))
+        if (!player.Abilities.CanEnter(terrain))
         {
             return false;
         }

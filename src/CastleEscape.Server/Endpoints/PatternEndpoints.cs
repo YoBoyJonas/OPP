@@ -69,6 +69,13 @@ public static class PatternEndpoints
             + "running up to `steps` steps with each. Greedy gets stuck, BFS and A* go around, Predictive aims where the "
             + "player is heading. Also compares BFS and A* search cost.");
 
+        app.MapDemo("decorator",
+            (string character = "scout", int sprints = 2) => Run("decorator", ("character", character), ("sprints", sprints)),
+            "Decorator: power stacking",
+            "Gives a character (`character=warrior|scout|swimmer`) `sprints` Sprint pickups, then Jump and Swim. After each "
+            + "pickup it prints the decorator chain, its depth and the floor/water/pit speeds. The combos JumpDash and FastSwim "
+            + "are added as decorators too. Then all timers expire and the chain unwinds.");
+
         return app;
     }
 

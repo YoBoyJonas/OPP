@@ -40,11 +40,11 @@ public sealed class FactoryMethodDemo : IPatternDemo
             free.MoveNext();
             var item = spawner.Spawn(level, definition, free.Current);
 
-            var before = (player.Lives, player.Score, Powers: player.Powers.Count);
+            var before = (player.Lives, player.Score, Powers: player.Powers.Active.Count);
             item.Apply(player, context);
             trace.Line($"{spawner.GetType().Name}.Spawn(\"{definition.Id}\") -> CreateItem() made {item.GetType().Name} {item.Id} at {item.Tile}; "
                        + $"Apply: lives {before.Lives}->{player.Lives}, score {before.Score}->{player.Score}, "
-                       + $"active powers {before.Powers}->{player.Powers.Count}.");
+                       + $"active powers {before.Powers}->{player.Powers.Active.Count}.");
             created.Add(new()
             {
                 ["creator"] = spawner.GetType().Name,

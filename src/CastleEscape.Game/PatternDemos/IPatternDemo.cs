@@ -87,6 +87,7 @@ public static class PatternDemoCatalog
         new BuilderDemo(),
         new PrototypeDemo(),
         new StrategyDemo(),
+        new DecoratorDemo(),
     ];
 
     public static IPatternDemo? Find(string key) => All.FirstOrDefault(d => d.Key == key);

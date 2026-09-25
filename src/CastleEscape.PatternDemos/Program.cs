@@ -40,5 +40,12 @@ static string Format(object? value) => value switch
 {
     null => "null",
     string or ValueType => Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture) ?? "",
-    _ => System.Text.Json.JsonSerializer.Serialize(value, CastleEscape.Game.Messaging.JsonDefaults.Create()),
+    _ => System.Text.Json.JsonSerializer.Serialize(value, ConsoleJson),
 };
+
+partial class Program
+{
+    // Readable in a terminal: no +-style escapes (nothing here is embedded in HTML).
+    private static readonly System.Text.Json.JsonSerializerOptions ConsoleJson =
+        new(CastleEscape.Game.Messaging.JsonDefaults.Create()) { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+}

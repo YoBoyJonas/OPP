@@ -24,5 +24,4 @@ public class ActivePower(PowerGrant grant, double durationSeconds)
 
     public void Tick(double seconds) => RemainingSeconds -= seconds;
 
-    public ActivePower Copy() => new(Grant, RemainingSeconds) { Level = Level };
 }
