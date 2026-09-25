@@ -343,27 +343,28 @@ public class GameSession
         return true;
     }
 
-    /// <summary>ZMB-1: when a zombie stands on a tile it picks its next step towards the nearest player.</summary>
+    /// <summary>ZMB-1: when a zombie stands on a tile, its strategy picks the next step towards the nearest player.</summary>
     private void MoveZombies(IReadOnlyList<PlayerEntity> players, double seconds)
     {
         var level = _level!;
+        var world = new WorldView(level, players);
         foreach (var zombie in level.Zombies)
         {
             if (!zombie.IsMoving)
             {
-                TryStartZombieStep(zombie, level, players);
+                TryStartZombieStep(zombie, world);
             }
-            if (zombie.Advance(zombie.Speed * seconds, out var leftover) && TryStartZombieStep(zombie, level, players))
+            if (zombie.Advance(zombie.Speed * seconds, out var leftover) && TryStartZombieStep(zombie, world))
             {
                 zombie.Advance(Math.Min(leftover, 0.99), out _);
             }
         }
     }
 
-    private static bool TryStartZombieStep(ZombieEntity zombie, LevelState level, IReadOnlyList<PlayerEntity> players)
+    private static bool TryStartZombieStep(ZombieEntity zombie, WorldView world)
     {
-        var direction = ZombieAi.NextStep(zombie, level, players);
-        if (direction == Direction.None || !MovementRules.CanZombieEnter(zombie.Tile.Step(direction), level))
+        var direction = zombie.Strategy.NextStep(zombie, world);
+        if (direction == Direction.None || !world.CanZombieEnter(zombie.Tile.Step(direction)))
         {
             return false;
         }

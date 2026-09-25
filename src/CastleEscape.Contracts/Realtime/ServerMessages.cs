@@ -90,6 +90,7 @@ public sealed record ActivePowerDto(
     [property: DataMember] double RemainingSeconds,
     [property: DataMember] int Level);
 
+/// <summary>A zombie in the tick state. <c>Strategy</c> is how it chases right now (it can be swapped at runtime).</summary>
 [DataContract(Namespace = Xml.Namespace)]
 public sealed record ZombieStateDto(
     [property: DataMember] string Id,
@@ -98,7 +99,8 @@ public sealed record ZombieStateDto(
     [property: DataMember] int TileY,
     [property: DataMember] double X,
     [property: DataMember] double Y,
-    [property: DataMember] Direction Facing);
+    [property: DataMember] Direction Facing,
+    [property: DataMember] MovementStrategyKind Strategy);
 
 /// <summary>An item on the map. <c>Power</c> is set for Power items.</summary>
 [DataContract(Namespace = Xml.Namespace)]

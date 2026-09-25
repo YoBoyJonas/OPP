@@ -62,6 +62,13 @@ public static class PatternEndpoints
             + "address and identity hash in the original and the clone. Then plays on the clone and restarts from the "
             + "pristine level: deep restores it, shallow does not. The game itself uses `Patterns:PrototypeCloneMode`.");
 
+        app.MapDemo("strategy",
+            (string strategy = "all", int steps = 12) => Run("strategy", ("strategy", strategy), ("steps", steps)),
+            "Strategy: zombie chase algorithms",
+            "Puts the same zombie behind a wall and swaps its strategy (`strategy=Greedy|Bfs|AStar|Predictive|all`), "
+            + "running up to `steps` steps with each. Greedy gets stuck, BFS and A* go around, Predictive aims where the "
+            + "player is heading. Also compares BFS and A* search cost.");
+
         return app;
     }
 
