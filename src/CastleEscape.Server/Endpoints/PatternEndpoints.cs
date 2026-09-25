@@ -76,6 +76,13 @@ public static class PatternEndpoints
             + "pickup it prints the decorator chain, its depth and the floor/water/pit speeds. The combos JumpDash and FastSwim "
             + "are added as decorators too. Then all timers expire and the chain unwinds.");
 
+        app.MapDemo("command",
+            (bool undoRestart = true) => Run("command", ("undoRestart", undoRestart)),
+            "Command: inputs with undo",
+            "Plays a scripted two-player session. Both players step into the same tile, and the later StartStep command is "
+            + "undone (D7). One player collects a coin, the other restarts the level, and UndoLastCommand() (`undoRestart`) "
+            + "puts the pre-restart level, score and positions back. Returns the command history.");
+
         return app;
     }
 

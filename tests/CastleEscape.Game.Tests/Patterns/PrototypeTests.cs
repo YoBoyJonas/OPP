@@ -1,5 +1,6 @@
 using CastleEscape.Contracts;
 using CastleEscape.Game.Configuration;
+using CastleEscape.Game.Generation;
 using CastleEscape.Game.Generation.Themes;
 using CastleEscape.Game.PatternDemos;
 using CastleEscape.Game.Sessions;

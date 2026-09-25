@@ -1,6 +1,7 @@
 using CastleEscape.Contracts;
 using CastleEscape.Contracts.Realtime;
 using CastleEscape.Game.Configuration;
+using CastleEscape.Game.Generation;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Tests.Sessions;

@@ -8,20 +8,6 @@ using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Tests.Sessions;
 
-/// <summary>Serves hand-written ASCII maps as levels (no validation, so maps can be tiny).</summary>
-public sealed class RowsLevelProvider(ContentCatalog catalog, params string[][] levels) : ILevelProvider
-{
-    /// <summary>Use this level definition (and its first zombie type) instead of the level being loaded.</summary>
-    public int? DefinitionIndex { get; init; }
-
-    public LevelState CreateLevel(int levelIndex, int seed)
-    {
-        var rows = levels[Math.Min(levelIndex, levels.Length) - 1];
-        return new LevelDirector(catalog, new GenerationOptions())
-            .Assemble(new PresetLevelBuilder(catalog, rows), catalog.GetLevel(DefinitionIndex ?? levelIndex), seed);
-    }
-}
-
 /// <summary>A session on a tiny map, ticked by hand at 20 Hz, with every message it sent recorded.</summary>
 public sealed class TestGame
 {

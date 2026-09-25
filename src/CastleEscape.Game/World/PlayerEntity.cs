@@ -22,6 +22,9 @@ public class PlayerEntity(Guid playerId, string name, CharacterDefinition charac
     /// <summary>The direction key currently held by the client (MOV-3: each player independently).</summary>
     public Direction HeldDirection { get; set; }
 
+    /// <summary>Sequence of the input that set <see cref="HeldDirection"/>; the later of two conflicting steps loses (D7).</summary>
+    public long DirectionSequence { get; set; }
+
     public bool IsDead => Lives <= 0;
 
     public void LoseLives(int amount) => Lives = Math.Max(0, Lives - amount);
@@ -43,6 +46,13 @@ public class PlayerEntity(Guid playerId, string name, CharacterDefinition charac
         StartTile = start;
         HeldDirection = Direction.None;
         TeleportTo(start);
+    }
+
+    /// <summary>Moves back to a tile within the same level (undoing a restart), standing still.</summary>
+    public void ReturnTo(GridPos tile)
+    {
+        HeldDirection = Direction.None;
+        TeleportTo(tile);
     }
 
     /// <summary>Restores lives and score to a checkpoint (restart level, D8).</summary>

@@ -6,7 +6,8 @@ namespace CastleEscape.Game.World;
 /// </summary>
 public static class MovementRules
 {
-    public static bool CanPlayerEnter(PlayerEntity player, GridPos target, LevelState level, IEnumerable<PlayerEntity> otherPlayers)
+    /// <param name="claimedByOthers">Tiles other players stand on or are stepping into (D7).</param>
+    public static bool CanPlayerEnter(PlayerEntity player, GridPos target, LevelState level, IReadOnlyCollection<GridPos> claimedByOthers)
     {
         if (!level.Grid.InBounds(target))
         {
@@ -28,7 +29,7 @@ public static class MovementRules
         }
 
         // D7: never share a tile, and never enter a tile another player is standing on or stepping into.
-        return otherPlayers.All(other => other.Tile != target && other.NextTile != target);
+        return !claimedByOthers.Contains(target);
     }
 
     public static bool CanZombieEnter(GridPos target, LevelState level)

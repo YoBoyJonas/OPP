@@ -24,4 +24,7 @@ public class ActivePower(PowerGrant grant, double durationSeconds)
 
     public void Tick(double seconds) => RemainingSeconds -= seconds;
 
+    /// <summary>An independent copy (to put a power back exactly as it was, e.g. on undo).</summary>
+    public ActivePower Copy() => new(Grant, RemainingSeconds) { Level = Level };
+
 }

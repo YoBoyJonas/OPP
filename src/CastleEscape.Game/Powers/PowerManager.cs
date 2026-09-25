@@ -86,6 +86,20 @@ public sealed class PowerManager
         return started;
     }
 
+    /// <summary>Puts a power back to an earlier state (a copy), or removes it if it wasn't active.</summary>
+    public void Restore(PowerType type, ActivePower? previous)
+    {
+        if (previous is null)
+        {
+            _powers.Remove(type);
+        }
+        else
+        {
+            _powers[type] = previous.Copy();
+        }
+        Rebuild();
+    }
+
     public void Clear()
     {
         _powers.Clear();

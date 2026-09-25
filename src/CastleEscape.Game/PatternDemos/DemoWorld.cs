@@ -30,6 +30,31 @@ public static class DemoWorld
         return (p1, p2);
     }
 
+    /// <summary>A real two-player session on a hand-made map, already playing level 1 (both players are scouts).</summary>
+    public static (GameSession Session, PlayerSlot P1, PlayerSlot P2) PlayingSession(string[] rows, PatternOptions? patterns = null)
+    {
+        var session = new GameSession(Guid.NewGuid(), "DEMO01", Catalog, new RowsLevelProvider(Catalog, rows),
+            new GameOptions { LevelTransitionSeconds = 0 }, baseSeed: 1, patterns);
+        var p1 = session.AddPlayer("Ana");
+        var p2 = session.AddPlayer("Ben");
+        session.SelectCharacter(p1.PlayerId, "scout");
+        session.SelectCharacter(p2.PlayerId, "scout");
+        session.Tick(session.TickSeconds); // loads level 1
+        return (session, p1, p2);
+    }
+
+    /// <summary>Ticks the session until <paramref name="done"/> holds (at most <paramref name="maxTicks"/> ticks).</summary>
+    public static int RunUntil(GameSession session, Func<bool> done, int maxTicks = 400)
+    {
+        var ticks = 0;
+        while (!done() && ticks < maxTicks)
+        {
+            session.Tick(session.TickSeconds);
+            ticks++;
+        }
+        return ticks;
+    }
+
     /// <summary>A realistic per-tick state message built by the real snapshot mapper.</summary>
     public static TickStateMessage SampleState()
     {

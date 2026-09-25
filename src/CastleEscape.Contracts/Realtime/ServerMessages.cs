@@ -174,6 +174,7 @@ public static class GameEventTypes
     public const string LevelCompleted = "LevelCompleted";
     public const string GameWon = "GameWon";
     public const string PhaseChanged = "PhaseChanged";
+    public const string CommandUndone = "CommandUndone";
 }
 
 /// <summary>XML settings shared by the data contracts.</summary>

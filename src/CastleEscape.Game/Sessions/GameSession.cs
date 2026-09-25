@@ -1,7 +1,7 @@
-using System.Collections.Concurrent;
 using CastleEscape.Contracts;
 using CastleEscape.Contracts.Realtime;
 using CastleEscape.Game.AI;
+using CastleEscape.Game.Commands;
 using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Events;
@@ -12,34 +12,28 @@ using CastleEscape.Game.World;
 namespace CastleEscape.Game.Sessions;
 
 /// <summary>
-/// One two-player game. Owns its world, which only <see cref="Tick"/> changes. Lobby calls and inputs from
-/// the hub/REST are either short locked updates (join, pick character) or queued for the next tick.
-/// After every tick an immutable <see cref="Snapshot"/> is published for readers.
+/// One two-player game: lobby, phases and messages. The playing field is a <see cref="GameWorld"/>,
+/// which only <see cref="Tick"/> changes. Player inputs become commands, queued from any thread and
+/// run at the start of the next tick. After every tick an immutable <see cref="Snapshot"/> is published for readers.
 /// </summary>
 public class GameSession
 {
     private readonly object _gate = new();
-    private readonly ConcurrentQueue<PlayerInput> _inputs = new();
     private readonly List<PlayerSlot> _slots = [];
     private readonly List<OutgoingMessage> _outbox = [];
-    private readonly List<PendingEvent> _events = [];
+    private readonly CommandProcessor _commands = new();
+    private readonly GameWorld _world;
     private readonly ContentCatalog _catalog;
     private readonly ILevelProvider _levels;
     private readonly GameOptions _options;
-    private readonly PatternOptions _patterns;
     private readonly InteractionSettings _interaction;
     private readonly int _baseSeed;
 
-    private long _inputSequence;
     private long _messageSequence;
     private long _tick;
     private int _levelIndex;
-    private double _levelElapsed;
+    private int _announcedLevelVersion;
     private double _transitionLeft;
-    private LevelState? _level;
-    private LevelState? _pristine; // the level as built; never played on (Prototype)
-    private ExitMechanism? _exit;
-    private LevelCheckpoint? _checkpoint;
     private LevelStartedMessage? _lastLevelStarted;
     private TickStateMessage? _lastState;
     private volatile SessionSnapshot _snapshot;
@@ -48,13 +42,13 @@ public class GameSession
     public GameSession(Guid id, string joinCode, ContentCatalog catalog, ILevelProvider levels, GameOptions options, int baseSeed,
         PatternOptions? patterns = null)
     {
-        _patterns = patterns ?? new PatternOptions();
         Id = id;
         JoinCode = joinCode;
         _catalog = catalog;
         _levels = levels;
         _options = options;
         _baseSeed = baseSeed;
+        _world = new GameWorld(_slots, options, patterns ?? new PatternOptions());
         _interaction = new InteractionSettings(options.PowerDurationSeconds, options.MaxPowerStackLevel, options.RespawnPlayerOnHit);
         _snapshot = BuildSnapshot();
     }
@@ -179,13 +173,53 @@ public class GameSession
         }
     }
 
-    // ---------------------------------------------------------------- input (queued)
+    // ---------------------------------------------------------------- input (commands, queued)
 
     public void SubmitDirection(Guid playerId, Direction direction) =>
-        _inputs.Enqueue(new PlayerInput(Interlocked.Increment(ref _inputSequence), playerId, PlayerInputKind.SetDirection, direction));
+        _commands.Enqueue(new SetDirectionCommand(_commands.NextSequence(), playerId, direction));
 
     public void RequestRestart(Guid playerId) =>
-        _inputs.Enqueue(new PlayerInput(Interlocked.Increment(ref _inputSequence), playerId, PlayerInputKind.RequestRestart));
+        _commands.Enqueue(new RestartLevelCommand(_commands.NextSequence(), playerId));
+
+    /// <summary>Dev tools: gives a base power without an item, from the next tick.</summary>
+    public void GivePower(Guid playerId, PowerType power, double? durationSeconds = null)
+    {
+        lock (_gate)
+        {
+            GetSlot(playerId);
+        }
+        var grant = _catalog.Consumables.Select(c => c.Grant).FirstOrDefault(g => g?.Power == power)
+            ?? throw new GameException(GameErrorCode.InvalidRequest, $"No item grants {power}; only base powers can be given.");
+        _commands.Enqueue(new GivePowerCommand(_commands.NextSequence(), playerId, grant,
+            durationSeconds ?? grant.DurationSeconds ?? _options.PowerDurationSeconds, _options.MaxPowerStackLevel, _catalog.Combos));
+    }
+
+    /// <summary>Undoes the most recent command (optionally only one of a player's). Returns its name, or null if none.</summary>
+    public string? UndoLastCommand(Guid? playerId = null)
+    {
+        lock (_gate)
+        {
+            if (Phase != SessionPhase.Playing)
+            {
+                throw new GameException(GameErrorCode.WrongPhase, $"Commands can only be undone while playing, not in phase {Phase}.");
+            }
+            var undone = _commands.UndoLast(_world, playerId);
+            AnnounceLevelIfReplaced();
+            FlushEvents();
+            SendState();
+            _snapshot = BuildSnapshot();
+            return undone?.Name;
+        }
+    }
+
+    /// <summary>The last <see cref="CommandProcessor.HistoryLimit"/> commands, oldest first.</summary>
+    public IReadOnlyList<CommandRecord> CommandHistory()
+    {
+        lock (_gate)
+        {
+            return _commands.History();
+        }
+    }
 
     /// <summary>Takes the messages produced since the last call, in order.</summary>
     public List<OutgoingMessage> DrainOutbox()
@@ -209,7 +243,7 @@ public class GameSession
             switch (Phase)
             {
                 case SessionPhase.LoadingLevel:
-                    DiscardInputs();
+                    _commands.DiscardPending();
                     LoadLevel(_levelIndex);
                     break;
 
@@ -218,7 +252,7 @@ public class GameSession
                     break;
 
                 case SessionPhase.LevelComplete:
-                    DiscardInputs();
+                    _commands.DiscardPending();
                     _transitionLeft -= seconds;
                     if (_transitionLeft <= 0)
                     {
@@ -227,7 +261,7 @@ public class GameSession
                     break;
 
                 default: // WaitingForPlayers, CharacterSelect, Victory, Defeat, Aborted: nothing moves.
-                    DiscardInputs();
+                    _commands.DiscardPending();
                     break;
             }
 
@@ -238,26 +272,26 @@ public class GameSession
 
     private void TickPlaying(double seconds)
     {
-        var level = _level!;
-        var players = Players();
-        _levelElapsed += seconds;
+        _commands.ExecutePending(_world, _tick);                                          // 1. inputs (commands)
+        AnnounceLevelIfReplaced();                                                        //    a restart replaces the level
 
-        ApplyInputs();                                                                   // 1. inputs
-        if (Phase != SessionPhase.Playing) return;
-        PowerRules.TickPowers(players, _catalog.Combos, seconds, _events);                // 2. power timers, combos
-        MovePlayers(players, seconds);                                                    // 3. players
+        var level = _world.Level!;
+        var players = _world.Players;
+        var events = _world.Events;
+        _world.LevelElapsed += seconds;
+        PowerRules.TickPowers(players, _catalog.Combos, seconds, events);                 // 2. power timers, combos
+        PlayerMovement.Move(_world, _commands, _tick, seconds);                           // 3. players
         MoveZombies(players, seconds);                                                    // 4. zombies
-        InteractionResolver.CollectItems(level, players, _catalog.Combos, _interaction, _events); // 5. interactions
-        InteractionResolver.ResolveZombieContacts(level, players, _interaction, _events);
-        _exit!.UpdateLevers(players, _events);
+        InteractionResolver.CollectItems(level, players, _catalog.Combos, _interaction, events); // 5. interactions
+        InteractionResolver.ResolveZombieContacts(level, players, _interaction, events);
+        _world.Exit!.UpdateLevers(players, events);
 
-        if (players.Any(p => p.IsDead))                                                   // 6. defeat / door / exit
+        if (players.FirstOrDefault(p => p.IsDead) is { } dead)                           // 6. defeat / door / exit
         {
-            var dead = players.First(p => p.IsDead);
             Emit(PendingEvent.Of(GameEventTypes.GameLost, dead.PlayerId, $"{dead.Name} has no lives left. Game over."));
             SetPhase(SessionPhase.Defeat);
         }
-        else if (_exit.Update(players, _events))
+        else if (_world.Exit.Update(players, events))
         {
             Emit(PendingEvent.Of(GameEventTypes.LevelCompleted, null, $"Level {level.Index} complete!", new { level = level.Index }));
             _transitionLeft = _options.LevelTransitionSeconds;
@@ -267,86 +301,10 @@ public class GameSession
         SendState();                                                                      // 7. publish
     }
 
-    private void ApplyInputs()
-    {
-        var inputs = new List<PlayerInput>();
-        while (_inputs.TryDequeue(out var input))
-        {
-            inputs.Add(input);
-        }
-
-        foreach (var input in inputs.OrderBy(i => i.Sequence))
-        {
-            var player = _slots.FirstOrDefault(s => s.PlayerId == input.PlayerId)?.Entity;
-            if (player is null)
-            {
-                continue;
-            }
-
-            switch (input.Kind)
-            {
-                case PlayerInputKind.SetDirection:
-                    player.HeldDirection = input.Direction;
-                    break;
-                case PlayerInputKind.RequestRestart:
-                    RestartLevel(player);
-                    break;
-            }
-        }
-    }
-
-    private void DiscardInputs()
-    {
-        while (_inputs.TryDequeue(out _))
-        {
-        }
-    }
-
-    /// <summary>MOV-1/MOV-3: each player steps tile by tile in their held direction, independently.</summary>
-    private void MovePlayers(IReadOnlyList<PlayerEntity> players, double seconds)
-    {
-        var level = _level!;
-        foreach (var player in players)
-        {
-            var others = players.Where(p => p != player).ToList();
-            var distance = 0.0;
-
-            if (!player.IsMoving)
-            {
-                TryStartStep(player, others, level);
-            }
-            if (player.IsMoving)
-            {
-                distance = player.Abilities.SpeedOn(level.Grid.GetTile(player.NextTile!.Value)) * seconds;
-            }
-
-            // One arrival per tick at most; leftover distance carries into the next step.
-            if (player.Advance(distance, out var leftover) && TryStartStep(player, others, level))
-            {
-                player.Advance(Math.Min(leftover, 0.99), out _);
-            }
-        }
-    }
-
-    private static bool TryStartStep(PlayerEntity player, IReadOnlyList<PlayerEntity> others, LevelState level)
-    {
-        if (player.HeldDirection == Direction.None)
-        {
-            return false;
-        }
-        var target = player.Tile.Step(player.HeldDirection);
-        if (!MovementRules.CanPlayerEnter(player, target, level, others)) // COL-1: rejected, stays put
-        {
-            return false;
-        }
-        player.BeginStep(player.HeldDirection);
-        return true;
-    }
-
     /// <summary>ZMB-1: when a zombie stands on a tile, its strategy picks the next step towards the nearest player.</summary>
     private void MoveZombies(IReadOnlyList<PlayerEntity> players, double seconds)
     {
-        var level = _level!;
+        var level = _world.Level!;
         var world = new WorldView(level, players);
         foreach (var zombie in level.Zombies)
         {
@@ -392,46 +350,25 @@ public class GameSession
         {
             slot.Entity = new PlayerEntity(slot.PlayerId, slot.Name, _catalog.GetCharacter(slot.CharacterId!), level.StartTiles[slot.Slot - 1]);
         }
-        _checkpoint = new LevelCheckpoint(Players().ToDictionary(p => p.PlayerId, p => (p.Lives, p.Score)));
-        _pristine = level;
-        StartLevel(level.Clone(_patterns.PrototypeCloneMode));
+        _world.BeginLevel(level);
+        AnnounceLevelIfReplaced();
         Emit(PendingEvent.Of(GameEventTypes.LevelStarted, null, $"Level {index} ({level.Theme}) started.", new { level = index }));
     }
 
-    private void StartLevel(LevelState level)
+    /// <summary>Sends LevelStarted when the world's level was replaced (new level, restart, undone restart).</summary>
+    private void AnnounceLevelIfReplaced()
     {
-        _level = level;
-        _exit = new ExitMechanism(level, _options.DoorMode);
-        _levelElapsed = 0;
-        foreach (var slot in _slots)
+        if (_world.LevelVersion == _announcedLevelVersion)
         {
-            slot.Entity!.PlaceAt(level.StartTiles[slot.Slot - 1]);
-            slot.Entity.Powers.Clear();
+            return;
         }
+        _announcedLevelVersion = _world.LevelVersion;
         SetPhase(SessionPhase.Playing);
 
-        var state = SnapshotMapper.ToTickState(Id, _messageSequence, _tick, Phase, level, _slots);
+        var state = SnapshotMapper.ToTickState(Id, _messageSequence, _tick, Phase, _world.Level!, _slots);
         _lastState = state;
-        _lastLevelStarted = SnapshotMapper.ToLevelStarted(Id, NextSeq(), _tick, level, state);
+        _lastLevelStarted = SnapshotMapper.ToLevelStarted(Id, NextSeq(), _tick, _world.Level!, state);
         Send(ClientMethods.LevelStarted, _lastLevelStarted);
-    }
-
-    /// <summary>
-    /// D8: the same level again, as a fresh clone of the pristine level (Prototype); lives and score back
-    /// to the level start. With <see cref="CloneMode.Shallow"/> the "fresh" copy shares its items, zombies and
-    /// levers with the level just played, so the restart visibly fails (the defence switch).
-    /// </summary>
-    private void RestartLevel(PlayerEntity requestedBy)
-    {
-        var level = _pristine!.Clone(_patterns.PrototypeCloneMode);
-        foreach (var player in Players())
-        {
-            var (lives, score) = _checkpoint!.Players[player.PlayerId];
-            player.RestoreStats(lives, score);
-        }
-        StartLevel(level);
-        Emit(PendingEvent.Of(GameEventTypes.LevelRestarted, requestedBy.PlayerId,
-            $"{requestedBy.Name} restarted level {level.Index}.", new { level = level.Index }));
     }
 
     /// <summary>LVL-1, WIN-1: next level, or victory after the last one.</summary>
@@ -461,12 +398,13 @@ public class GameSession
         Send(ClientMethods.SessionUpdated, new SessionUpdatedMessage(Id, NextSeq(), _tick, SessionDto()));
     }
 
-    private void Emit(PendingEvent e) => _events.Add(e);
+    private void Emit(PendingEvent e) => _world.Events.Add(e);
 
     /// <summary>Counts each event for the HUD statistics and sends it to the clients.</summary>
     private void FlushEvents()
     {
-        foreach (var e in _events)
+        var events = _world.Events;
+        foreach (var e in events)
         {
             if (e.PlayerId is { } playerId && _slots.FirstOrDefault(s => s.PlayerId == playerId) is { } slot)
             {
@@ -474,12 +412,12 @@ public class GameSession
             }
             Send(ClientMethods.GameEvent, new GameEventMessage(Id, NextSeq(), _tick, e.Type, e.PlayerId, e.Message, new Dictionary<string, string>(e.Data)));
         }
-        _events.Clear();
+        events.Clear();
     }
 
     private void SendState()
     {
-        _lastState = SnapshotMapper.ToTickState(Id, NextSeq(), _tick, Phase, _level!, _slots);
+        _lastState = SnapshotMapper.ToTickState(Id, NextSeq(), _tick, Phase, _world.Level!, _slots);
         Send(ClientMethods.StateUpdated, _lastState);
     }
 
@@ -498,13 +436,11 @@ public class GameSession
         SessionDto(),
         _lastLevelStarted,
         _lastState,
-        _level is null ? null : SnapshotMapper.ToLayout(Id, _level),
-        SnapshotMapper.ToHud(Id, Phase, _level?.Index ?? 0, MaxLevel, _tick, _levelElapsed, _level, _slots));
+        _world.Level is null ? null : SnapshotMapper.ToLayout(Id, _world.Level),
+        SnapshotMapper.ToHud(Id, Phase, _world.Level?.Index ?? 0, MaxLevel, _tick, _world.LevelElapsed, _world.Level, _slots));
 
     private Contracts.Sessions.SessionDto SessionDto() =>
-        SnapshotMapper.ToSessionDto(Id, JoinCode, Phase, _level?.Index ?? 0, MaxLevel, _slots);
-
-    private List<PlayerEntity> Players() => _slots.Where(s => s.Entity is not null).Select(s => s.Entity!).ToList();
+        SnapshotMapper.ToSessionDto(Id, JoinCode, Phase, _world.Level?.Index ?? 0, MaxLevel, _slots);
 
     private PlayerSlot GetSlot(Guid playerId) =>
         _slots.FirstOrDefault(s => s.PlayerId == playerId)
