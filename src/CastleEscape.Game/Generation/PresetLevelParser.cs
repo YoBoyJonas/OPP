@@ -1,5 +1,6 @@
 using CastleEscape.Contracts;
 using CastleEscape.Game.Content;
+using CastleEscape.Game.Generation.Themes;
 using CastleEscape.Game.Items;
 using CastleEscape.Game.World;
 
@@ -35,12 +36,13 @@ public static class PresetLevelParser
 
         var grid = new Grid(rows[0].Length, rows.Count);
         var level = new LevelState(definition, seed, grid);
-        var wall = catalog.Obstacles.OfType<Wall>().First();
-        var water = catalog.Obstacles.OfType<Water>().First();
-        var pit = catalog.Obstacles.OfType<Pit>().First();
+        var theme = ThemeFactories.For(definition, catalog);
+        var wall = theme.CreateWall();
+        var water = theme.CreateWater();
+        var pit = theme.CreatePit();
         var zombieType = definition.ZombieTable.Count > 0 ? catalog.GetZombie(definition.ZombieTable[0].Id) : catalog.Zombies[0];
         GridPos? start1 = null, start2 = null;
-        int zombies = 0, levers = 0;
+        var levers = 0;
 
         foreach (var pos in grid.Positions())
         {
@@ -62,7 +64,7 @@ public static class PresetLevelParser
                 case MapLegend.Lever: level.AddLever(new Lever($"lever-{++levers}", pos)); break;
                 case MapLegend.Door: level.SetDoor(new ExitDoor("door", pos)); break;
                 case MapLegend.Exit: level.AddExitTile(pos); break;
-                case MapLegend.ZombieSpawn: level.AddZombie(new ZombieEntity($"zombie-{++zombies}", zombieType, pos)); break;
+                case MapLegend.ZombieSpawn: level.AddZombie(theme.CreateZombie(level.NextEntityId("zombie"), zombieType, pos)); break;
                 case MapLegend.HealthItem:
                     ItemSpawners.Spawn(level, catalog.Consumables.First(i => i.Kind == ConsumableKind.Health), pos);
                     break;

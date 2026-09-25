@@ -30,7 +30,7 @@ public static class ZombieAi
             return Direction.None;
         }
 
-        switch (zombie.Definition.MovementStrategy)
+        switch (zombie.MovementStrategy)
         {
             case MovementStrategyKind.Greedy:
                 // Step that most reduces Manhattan distance; stays put if no step gets closer.

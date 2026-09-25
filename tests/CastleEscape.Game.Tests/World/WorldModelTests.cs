@@ -1,5 +1,6 @@
 using CastleEscape.Contracts;
 using CastleEscape.Game.Content;
+using CastleEscape.Game.Generation.Themes;
 using CastleEscape.Game.Items;
 using CastleEscape.Game.World;
 
@@ -58,7 +59,7 @@ public class WorldModelTests
     [Fact]
     public void MovableEntity_AdvancesAndArrives_WithLeftover()
     {
-        var zombie = new ZombieEntity("z", new ZombieDefinition { Id = "z", Speed = 1 }, new GridPos(2, 2));
+        var zombie = new DungeonZombie("z", new ZombieDefinition { Id = "z", Speed = 1 }, new GridPos(2, 2));
         zombie.BeginStep(Direction.Right);
 
         Assert.False(zombie.Advance(0.4, out _));
@@ -73,7 +74,7 @@ public class WorldModelTests
     [Fact]
     public void Zombie_ResetToSpawn_CancelsStep()
     {
-        var zombie = new ZombieEntity("z", new ZombieDefinition { Id = "z", Speed = 1 }, new GridPos(2, 2));
+        var zombie = new DungeonZombie("z", new ZombieDefinition { Id = "z", Speed = 1 }, new GridPos(2, 2));
         zombie.BeginStep(Direction.Down);
         zombie.Advance(1, out _);
         zombie.BeginStep(Direction.Down);

@@ -10,6 +10,22 @@ namespace CastleEscape.Game.Content;
 [JsonDerivedType(typeof(Pit), nameof(ObstacleKind.Pit))]
 public abstract class Obstacle
 {
+    protected Obstacle()
+    {
+    }
+
+    /// <summary>Copies a template's values; themed variants (Abstract Factory products) start from the JSON template.</summary>
+    protected Obstacle(Obstacle template)
+    {
+        Id = template.Id;
+        Name = template.Name;
+        TraversalRequirements = template.TraversalRequirements;
+        BlocksZombies = template.BlocksZombies;
+        MinSize = template.MinSize;
+        MaxSize = template.MaxSize;
+        MoveSpeedMultiplier = template.MoveSpeedMultiplier;
+    }
+
     public string Id { get; init; } = string.Empty;
     public string Name { get; init; } = string.Empty;
 

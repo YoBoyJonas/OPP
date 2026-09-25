@@ -56,6 +56,7 @@ public static class PlayerAbilities
             case TerrainKind.Pit:
                 // Decision C9: the jump parameter is the speed factor over pits.
                 speed *= character.BaseJumpForce * baseMods.JumpForceMultiplier;
+                speed *= tile.Obstacle?.MoveSpeedMultiplier ?? 1.0; // themed pits differ (Abstract Factory)
                 if (player.GetPower(PowerType.Jump) is { } jump)
                 {
                     speed *= Math.Pow(jump.Grant.Modifiers.JumpForceMultiplier, jump.Level);

@@ -35,10 +35,10 @@ foreach (var demo in demos)
 }
 return 0;
 
+// Plain values print as text; lists and objects print as compact JSON.
 static string Format(object? value) => value switch
 {
     null => "null",
-    string s => s,
-    System.Collections.IEnumerable items => string.Join(", ", items.Cast<object?>().Select(Format)),
-    _ => value.ToString() ?? "",
+    string or ValueType => Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture) ?? "",
+    _ => System.Text.Json.JsonSerializer.Serialize(value, CastleEscape.Game.Messaging.JsonDefaults.Create()),
 };

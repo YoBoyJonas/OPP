@@ -1,5 +1,6 @@
 using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
+using CastleEscape.Game.Generation.Themes;
 using CastleEscape.Game.Items;
 using CastleEscape.Game.World;
 
@@ -41,7 +42,8 @@ public class LevelGenerator(ContentCatalog catalog, GameOptions game, Generation
         var height = definition.RoomSize?.Height ?? game.GridHeight;
         var grid = new Grid(width, height);
         var level = new LevelState(definition, seed, grid);
-        var wall = catalog.Obstacles.OfType<Wall>().First();
+        var theme = ThemeFactories.For(definition, catalog);   // one family for the whole level
+        var wall = theme.CreateWall();
         var reserved = new HashSet<GridPos>();
 
         // 1. Border walls.
@@ -148,7 +150,7 @@ public class LevelGenerator(ContentCatalog catalog, GameOptions game, Generation
         var placedPatches = 0;
         for (var tries = 0; tries < definition.ObstacleCount * 10 && placedPatches < definition.ObstacleCount; tries++)
         {
-            var obstacle = PickWeighted(rng, definition.ObstacleTable, id => catalog.GetObstacle(id));
+            var obstacle = theme.CreateObstacle(PickWeighted(rng, definition.ObstacleTable, id => catalog.GetObstacle(id)).Kind);
             if (obstacle.Kind == ObstacleKind.Wall)
             {
                 continue;
@@ -215,7 +217,7 @@ public class LevelGenerator(ContentCatalog catalog, GameOptions game, Generation
             zombieSpots.Remove(spot);
             occupied.Add(spot);
             var type = PickWeighted(rng, definition.ZombieTable, id => catalog.GetZombie(id));
-            level.AddZombie(new ZombieEntity($"zombie-{i + 1}", type, spot));
+            level.AddZombie(theme.CreateZombie(level.NextEntityId("zombie"), type, spot));
         }
 
         return level;

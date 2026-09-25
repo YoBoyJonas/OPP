@@ -43,6 +43,12 @@ public static class PatternEndpoints
             "Spawns items on the tutorial level through ItemSpawners.For(consumable) (`kind=health|reward|power|all`), "
             + "applies each to a player, and lists the product family (HealthItem, RewardItem, PowerItem).");
 
+        app.MapDemo("abstract-factory",
+            (string theme = "both", int seed = 7) => Run("abstract-factory", ("theme", theme), ("seed", seed)),
+            "Abstract Factory: level themes",
+            "Creates the product family of each theme factory (`theme=dungeon|crypt|both`): wall, water, pit and zombie with "
+            + "their gameplay values. Then generates a real level of that theme and checks every placed part comes from the same family.");
+
         return app;
     }
 

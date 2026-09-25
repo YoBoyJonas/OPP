@@ -9,6 +9,7 @@ namespace CastleEscape.Contracts.Gameplay;
 /// <param name="Height">Height in tiles.</param>
 /// <param name="Rows">One string per row, map legend characters.</param>
 /// <param name="Legend">Meaning of every legend character.</param>
+/// <param name="Obstacles">The themed obstacle variants this level uses (one family per theme).</param>
 public sealed record LevelLayoutResponse(
     Guid SessionId,
     int LevelIndex,
@@ -17,7 +18,17 @@ public sealed record LevelLayoutResponse(
     int Width,
     int Height,
     string[] Rows,
-    Dictionary<string, string> Legend);
+    Dictionary<string, string> Legend,
+    LevelObstacleDto[] Obstacles);
+
+/// <summary>An obstacle variant used in a level, e.g. Crypt's poison water.</summary>
+/// <param name="Legend">Map legend character of its terrain.</param>
+/// <param name="Id">Variant id, e.g. <c>poison-water</c>.</param>
+/// <param name="Name">Display name.</param>
+/// <param name="Variant">Class name of the themed variant, e.g. <c>PoisonWater</c>.</param>
+/// <param name="RequiredPower">Power needed to enter it; <c>None</c> for walls.</param>
+/// <param name="MoveSpeedMultiplier">Speed factor while crossing it.</param>
+public sealed record LevelObstacleDto(string Legend, string Id, string Name, string Variant, PowerType RequiredPower, double MoveSpeedMultiplier);
 
 /// <summary>The "View game state" table (view-game-state activity diagram).</summary>
 /// <param name="SessionId">Session id.</param>

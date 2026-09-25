@@ -30,7 +30,17 @@ public static class SnapshotMapper
 
     public static LevelLayoutResponse ToLayout(Guid sessionId, LevelState level) =>
         new(sessionId, level.Index, level.Theme, level.Seed, level.Grid.Width, level.Grid.Height, ToRows(level),
-            MapLegend.Descriptions.ToDictionary(kv => kv.Key.ToString(), kv => kv.Value));
+            MapLegend.Descriptions.ToDictionary(kv => kv.Key.ToString(), kv => kv.Value), ToObstacles(level));
+
+    private static LevelObstacleDto[] ToObstacles(LevelState level) =>
+        level.Grid.Positions()
+            .Select(p => level.Grid.GetTile(p))
+            .Where(t => t.Obstacle is not null)
+            .DistinctBy(t => t.Obstacle!.GetType())
+            .Select(t => new LevelObstacleDto(MapLegend.ForTerrain(t.Terrain).ToString(), t.Obstacle!.Id, t.Obstacle.Name,
+                t.Obstacle.GetType().Name, t.Obstacle.TraversalRequirements, t.Obstacle.MoveSpeedMultiplier))
+            .OrderBy(o => o.Legend, StringComparer.Ordinal)
+            .ToArray();
 
     public static HudResponse ToHud(Guid sessionId, SessionPhase phase, int levelIndex, int maxLevel, long tick,
         double levelElapsedSeconds, LevelState? level, IEnumerable<PlayerSlot> slots) =>
