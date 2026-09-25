@@ -25,6 +25,12 @@ public static class PatternEndpoints
             .WithDescription("Details and participants (type, role, source file) of one pattern, by key, e.g. `decorator`.")
             .ProducesProblem(StatusCodes.Status404NotFound);
 
+        app.MapDemo("singleton",
+            (int threads = 64, bool naive = true) => Run("singleton", ("threads", threads), ("naive", naive)),
+            "Singleton: thread safety",
+            "Starts `threads` threads through a Barrier; all read ContentCatalog.Instance at once. Reports distinct "
+            + "instances (1) and creations (1). With `naive=true` the same race against a lock-free holder makes several.");
+
         return app;
     }
 

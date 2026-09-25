@@ -8,80 +8,80 @@ public class ContentCatalogValidationTests
     [Fact]
     public void Validate_EmptyCatalog_HasNoErrors()
     {
-        Assert.Empty(new ContentCatalog().Validate());
+        Assert.Empty(ContentCatalog.FromData(new ContentData()).Validate());
     }
 
     [Fact]
     public void Validate_DuplicateCharacterId_ReportsError()
     {
-        var catalog = new ContentCatalog { Characters = [Character("warrior"), Character("warrior"), Character("scout")] };
+        var catalog = new ContentData { Characters = [Character("warrior"), Character("warrior"), Character("scout")] };
 
-        Assert.Contains(catalog.Validate(), e => e.Contains("duplicate Id 'warrior'"));
+        Assert.Contains(ContentCatalog.FromData(catalog).Validate(), e => e.Contains("duplicate Id 'warrior'"));
     }
 
     [Fact]
     public void Validate_FewerThanThreeCharacters_ReportsPlr1()
     {
-        var catalog = new ContentCatalog { Characters = [Character("warrior"), Character("scout")] };
+        var catalog = new ContentData { Characters = [Character("warrior"), Character("scout")] };
 
-        Assert.Contains(catalog.Validate(), e => e.StartsWith("PLR-1"));
+        Assert.Contains(ContentCatalog.FromData(catalog).Validate(), e => e.StartsWith("PLR-1"));
     }
 
     [Fact]
     public void Validate_LevelReferencesUnknownZombie_ReportsError()
     {
-        var catalog = new ContentCatalog
+        var catalog = new ContentData
         {
             Obstacles = [Water()],
             Levels = [Level(1, zombies: 1, zombieIds: ["ghoul"])],
         };
 
-        Assert.Contains(catalog.Validate(), e => e.Contains("unknown zombie 'ghoul'"));
+        Assert.Contains(ContentCatalog.FromData(catalog).Validate(), e => e.Contains("unknown zombie 'ghoul'"));
     }
 
     [Fact]
     public void Validate_ZombieCountDecreases_ReportsZmb4()
     {
-        var catalog = new ContentCatalog
+        var catalog = new ContentData
         {
             Obstacles = [Water()],
             Zombies = [new ZombieDefinition { Id = "z", Speed = 1 }],
             Levels = [Level(1, zombies: 3, zombieIds: ["z"]), Level(2, zombies: 2, zombieIds: ["z"])],
         };
 
-        Assert.Contains(catalog.Validate(), e => e.StartsWith("ZMB-4"));
+        Assert.Contains(ContentCatalog.FromData(catalog).Validate(), e => e.StartsWith("ZMB-4"));
     }
 
     [Fact]
     public void Validate_LevelWithoutPowerObstacle_ReportsGen3()
     {
         var wall = new Wall { Id = "wall", TraversalRequirements = PowerType.None };
-        var catalog = new ContentCatalog
+        var catalog = new ContentData
         {
             Obstacles = [wall],
             Levels = [new LevelDefinition { Id = "l1", Index = 1, ObstacleCount = 1, ObstacleTable = [new SpawnTableEntry { Id = "wall" }] }],
         };
 
-        Assert.Contains(catalog.Validate(), e => e.StartsWith("GEN-3"));
+        Assert.Contains(ContentCatalog.FromData(catalog).Validate(), e => e.StartsWith("GEN-3"));
     }
 
     [Fact]
     public void Validate_ComboWithOnePower_ReportsError()
     {
-        var catalog = new ContentCatalog
+        var catalog = new ContentData
         {
             Combos = [new PowerCombo { Id = "bad", RequiredPowers = [PowerType.Jump], Granted = PowerType.JumpDash }],
         };
 
-        Assert.Contains(catalog.Validate(), e => e.Contains("two different required powers"));
+        Assert.Contains(ContentCatalog.FromData(catalog).Validate(), e => e.Contains("two different required powers"));
     }
 
     [Fact]
     public void Validate_PowerItemWithoutGrant_ReportsError()
     {
-        var catalog = new ContentCatalog { Consumables = [new Power { Id = "empty" }] };
+        var catalog = new ContentData { Consumables = [new Power { Id = "empty" }] };
 
-        Assert.Contains(catalog.Validate(), e => e.Contains("has no Grant"));
+        Assert.Contains(ContentCatalog.FromData(catalog).Validate(), e => e.Contains("has no Grant"));
     }
 
     [Fact]
@@ -93,26 +93,26 @@ public class ContentCatalogValidationTests
             RoomSize = new GridSize { Width = 10, Height = 10 },
             ObstacleTable = [new SpawnTableEntry { Id = "water" }],
         };
-        var catalog = new ContentCatalog { Obstacles = [Water()], Levels = [level] };
+        var catalog = new ContentData { Obstacles = [Water()], Levels = [level] };
 
-        Assert.Contains(catalog.Validate(), e => e.StartsWith("LVL-2"));
+        Assert.Contains(ContentCatalog.FromData(catalog).Validate(), e => e.StartsWith("LVL-2"));
     }
 
     [Fact]
     public void ValidateOrThrow_InvalidCatalog_Throws()
     {
-        var catalog = new ContentCatalog { Obstacles = [new Wall { Id = "stone", MinSize = 3, MaxSize = 1 }] };
+        var catalog = new ContentData { Obstacles = [new Wall { Id = "stone", MinSize = 3, MaxSize = 1 }] };
 
-        Assert.Throws<InvalidOperationException>(catalog.ValidateOrThrow);
+        Assert.Throws<InvalidOperationException>(ContentCatalog.FromData(catalog).ValidateOrThrow);
     }
 
     [Fact]
     public void ComputeContentHash_SameContent_SameHash()
     {
-        var a = new ContentCatalog { Characters = [Character("scout")] };
-        var b = new ContentCatalog { Characters = [Character("scout")] };
+        var a = new ContentData { Characters = [Character("scout")] };
+        var b = new ContentData { Characters = [Character("scout")] };
 
-        Assert.Equal(a.ComputeContentHash(), b.ComputeContentHash());
+        Assert.Equal(ContentCatalog.FromData(a).ComputeContentHash(), ContentCatalog.FromData(b).ComputeContentHash());
     }
 
     private static CharacterDefinition Character(string id) =>

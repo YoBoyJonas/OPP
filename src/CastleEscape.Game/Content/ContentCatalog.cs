@@ -2,23 +2,58 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using CastleEscape.Contracts;
+using CastleEscape.Game.Patterns;
 
 namespace CastleEscape.Game.Content;
 
 /// <summary>
 /// All static game content: characters, items, combos, obstacles, zombie types and levels.
-/// Loaded once from <c>content/*.json</c> (see <see cref="ContentLoader"/>) and never changed.
+/// Singleton: loaded once from <c>content/*.json</c> on first use of <see cref="Instance"/>, validated,
+/// and shared (read-only) by every session, generator and endpoint.
 /// </summary>
-public class ContentCatalog
+[DesignPattern("Singleton", "Singleton")]
+public sealed class ContentCatalog
 {
     private static readonly PowerType[] BasePowers = [PowerType.Jump, PowerType.Sprint, PowerType.Swim];
 
-    public IReadOnlyList<CharacterDefinition> Characters { get; init; } = [];
-    public IReadOnlyList<Consumable> Consumables { get; init; } = [];
-    public IReadOnlyList<PowerCombo> Combos { get; init; } = [];
-    public IReadOnlyList<Obstacle> Obstacles { get; init; } = [];
-    public IReadOnlyList<ZombieDefinition> Zombies { get; init; } = [];
-    public IReadOnlyList<LevelDefinition> Levels { get; init; } = [];
+    // ExecutionAndPublication: if many threads ask at once, exactly one runs the factory; all get its result.
+    private static readonly Lazy<ContentCatalog> LazyInstance = new(CreateInstance, LazyThreadSafetyMode.ExecutionAndPublication);
+    private static int _instanceCreations;
+
+    /// <summary>The one shared catalog. Thread-safe; loads and validates the content on first access.</summary>
+    public static ContentCatalog Instance => LazyInstance.Value;
+
+    /// <summary>How many times <see cref="Instance"/> has been created (always 0 or 1). Used by the demo.</summary>
+    public static int InstanceCreations => Volatile.Read(ref _instanceCreations);
+
+    private static ContentCatalog CreateInstance()
+    {
+        Interlocked.Increment(ref _instanceCreations);
+        var catalog = new ContentCatalog(ContentLoader.ReadDirectory(ContentLoader.DefaultDirectory));
+        catalog.ValidateOrThrow();
+        return catalog;
+    }
+
+    // Private: nobody outside can make a second catalog.
+    private ContentCatalog(ContentData data)
+    {
+        Characters = data.Characters;
+        Consumables = data.Consumables;
+        Combos = data.Combos;
+        Obstacles = data.Obstacles;
+        Zombies = data.Zombies;
+        Levels = data.Levels;
+    }
+
+    /// <summary>A separate, unvalidated catalog for unit tests of the validation rules. Not for game code.</summary>
+    internal static ContentCatalog FromData(ContentData data) => new(data);
+
+    public IReadOnlyList<CharacterDefinition> Characters { get; }
+    public IReadOnlyList<Consumable> Consumables { get; }
+    public IReadOnlyList<PowerCombo> Combos { get; }
+    public IReadOnlyList<Obstacle> Obstacles { get; }
+    public IReadOnlyList<ZombieDefinition> Zombies { get; }
+    public IReadOnlyList<LevelDefinition> Levels { get; }
 
     public CharacterDefinition? FindCharacter(string id) => Characters.FirstOrDefault(c => c.Id == id);
 

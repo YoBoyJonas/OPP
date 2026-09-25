@@ -7,7 +7,7 @@ namespace CastleEscape.Game.Tests.Content;
 /// <summary>Checks the real files in /content, as copied to the test output.</summary>
 public class ContentFilesTests
 {
-    private static readonly ContentCatalog Catalog = ContentLoader.LoadFromDirectory(ContentLoader.DefaultDirectory);
+    private static readonly ContentCatalog Catalog = ContentCatalog.Instance;
 
     [Fact]
     public void Load_ReadsEveryFile()

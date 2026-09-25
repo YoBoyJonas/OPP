@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace CastleEscape.Game.Content;
 
-/// <summary>Reads the content JSON files into a validated <see cref="ContentCatalog"/>.</summary>
+/// <summary>Reads the content JSON files. <see cref="ContentCatalog.Instance"/> uses it once.</summary>
 public static class ContentLoader
 {
     /// <summary>The <c>content</c> folder copied next to the running assembly.</summary>
@@ -18,14 +18,14 @@ public static class ContentLoader
         Converters = { new JsonStringEnumConverter() },
     };
 
-    public static ContentCatalog LoadFromDirectory(string directory)
+    public static ContentData ReadDirectory(string directory)
     {
         if (!Directory.Exists(directory))
         {
             throw new DirectoryNotFoundException($"Content directory not found: {directory}");
         }
 
-        var catalog = new ContentCatalog
+        return new ContentData
         {
             Characters = Read<CharacterDefinition>(directory, "characters.json"),
             Consumables = Read<Consumable>(directory, "consumables.json"),
@@ -34,9 +34,6 @@ public static class ContentLoader
             Zombies = Read<ZombieDefinition>(directory, "zombies.json"),
             Levels = Read<LevelDefinition>(directory, "levels.json"),
         };
-
-        catalog.ValidateOrThrow();
-        return catalog;
     }
 
     private static IReadOnlyList<T> Read<T>(string directory, string fileName)

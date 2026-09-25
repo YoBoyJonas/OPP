@@ -80,6 +80,7 @@ public static class PatternDemoCatalog
 {
     public static IReadOnlyList<IPatternDemo> All { get; } =
     [
+        new SingletonDemo(),
     ];
 
     public static IPatternDemo? Find(string key) => All.FirstOrDefault(d => d.Key == key);

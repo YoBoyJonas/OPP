@@ -24,7 +24,7 @@ public sealed class RowsLevelProvider(ContentCatalog catalog, params string[][] 
 /// <summary>A session on a tiny map, ticked by hand at 20 Hz, with every message it sent recorded.</summary>
 public sealed class TestGame
 {
-    public static readonly ContentCatalog Catalog = ContentLoader.LoadFromDirectory(ContentLoader.DefaultDirectory);
+    public static readonly ContentCatalog Catalog = ContentCatalog.Instance;
 
     private TestGame(GameSession session, PlayerSlot p1, PlayerSlot p2)
     {

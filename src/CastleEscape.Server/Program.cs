@@ -34,7 +34,8 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
     .AllowAnyMethod()
     .AllowCredentials())); // SignalR sends credentials, which rules out AllowAnyOrigin.
 
-builder.Services.AddSingleton(_ => ContentLoader.LoadFromDirectory(ContentLoader.DefaultDirectory));
+// The Singleton owns its own lifetime; DI just hands out the same instance.
+builder.Services.AddSingleton(_ => ContentCatalog.Instance);
 builder.Services.AddSingleton<ILevelProvider>(sp => new LevelProvider(
     sp.GetRequiredService<ContentCatalog>(),
     sp.GetRequiredService<IOptions<GameOptions>>().Value,
