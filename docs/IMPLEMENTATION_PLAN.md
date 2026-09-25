@@ -6,10 +6,11 @@ Branch `backend/p1` (from `main` @ `6e1eed7`). Never pushed by the agent. `dotne
 ## Final layout
 
 ```
-CastleEscape.slnx
+CastleEscape.sln
 src/
   CastleEscape.Contracts/     DTOs, enums (Direction, PowerType, SessionPhase…), hub messages
   CastleEscape.Game/          no ASP.NET reference
+    Configuration/            Game/Generation/Patterns/Realtime options (validated at startup)
     Content/                  ContentCatalog (Singleton), *Definition, StatModifiers, JSON loading
     World/                    GridPos, Direction helpers, Grid, TerrainKind, Entity, PlayerEntity,
                               ZombieEntity, Lever, ExitDoor, LevelState, WorldView, MovementRules,
@@ -42,8 +43,8 @@ docs/
 
 | # | Phase | Contents | Commit(s) |
 |---|---|---|---|
-| 0 | Audit | `REPO_AUDIT.md`, this file | `docs: repo audit and implementation plan` |
-| 1 | Skeleton | `git mv` server → `src/CastleEscape.Server`, content models → `src/CastleEscape.Game/Content` (compile-fixed), screenshot → `docs/diagrams/`; slnx; empty projects + test projects; OpenAPI + Scalar + `x-tagGroups` transformer + `X-Player-Token` scheme; `/health`; CORS; camelCase + string enums for HTTP and SignalR; ProblemDetails; options classes with validation; workflow path fix; pin patched `Microsoft.OpenApi` | `chore: restructure into solution layout`, `feat(server): OpenAPI, Scalar, health, options` |
+| 0 ✅ | Audit | `REPO_AUDIT.md`, this file | `docs: repo audit and implementation plan` |
+| 1 ✅ | Skeleton | `git mv` server → `src/CastleEscape.Server`, content models → `src/CastleEscape.Game/Content` (compile-fixed), screenshot → `docs/diagrams/`; `.sln`; empty projects + test projects; OpenAPI + Scalar + `x-tagGroups` transformer + `X-Player-Token` scheme; `/health`; CORS; camelCase + string enums for HTTP and SignalR; ProblemDetails; options classes with validation; workflow path fix; pin patched `Microsoft.OpenApi` | `chore: restructure into solution layout`, `feat(server): OpenAPI, Scalar, health, options` |
 | 2 | Content & domain | JSON content (3 characters, 5 consumables incl. Reward, 3 powers, 2 combos, obstacles for 2 themes, 3 zombie types, 10 levels, 2 presets), loader, validation; `GridPos`, `Grid`, entities, `LevelState` | `feat(content)…`, `feat(world)…` |
 | 3 | Naive prototype | lobby (create/join/select/leave), `SessionPhase` switch, `GameLoopService` (`PeriodicTimer`, 20 Hz, per-session exception isolation, snapshot swap), input queue, step movement, straight-line chase with a `switch` on zombie type, items via `switch`, powers as a plain dictionary + `if`s, levers/door latch/exit, lives, win/lose, restart by regenerating, hub + REST mirror, naive single-class generator + naive JSON-only state endpoint. Integration test: 2 SignalR clients finish a preset level | several `feat(game)…`; tag **`p1-prototype-before-patterns`** |
 | 4 | Patterns | one commit each, in dependency order: Singleton → Adapter → Factory Method → Abstract Factory → Builder → Prototype → Strategy → Decorator → Command → Observer → Bridge → Facade. Each: refactor, `[DesignPattern]` tags, demo runner, unit test for the course requirement, `docs/patterns/<Name>.md` with before/after Mermaid | `feat(patterns): apply <X> to <Y>` ×12 |
@@ -67,7 +68,33 @@ notifier observer; Facade last because it wraps the final subsystems.
   characters kept, level/zombie data instances instead of `L1..Ln` / `Z1..Zn` subclasses,
   `{id, weight}` table entries, `PowerCombo.RequiredPowers` as a list, hub path change.
 
-## Open questions (need your answer before Phase 1)
+## Answers (2026-09-25)
+
+1. Approved: move to `src/CastleEscape.Server`; CI builds the whole `.sln` and runs `dotnet test`. Done in Phase 1.
+2. Approved: console `Program.cs` deleted; models moved to `Game/Content`. Done in Phase 1.
+3. **Still open.** The reply contained both template options ("Team agreed" / "keep Jonas's
+   structure and list what you'd rewrite first"). Phase 1 follows the conservative reading:
+   Jonas's server files changed only in namespace and hub path. The rewrite list is below.
+   **Confirm it before Phase 3.**
+4. The inputs were in `~/Downloads`, not yet in the repo. I copied them into `docs/` (commit `810cb50`).
+5. **Still open** (both template options were left in). Both options switch to `/hubs/game`, so
+   the switch is done, and the migration is documented in `FRONTEND_INTEGRATION.md` either way.
+
+## Changes to Jonas's server code, in order
+
+| When | File | Change | Kept |
+|---|---|---|---|
+| Phase 1 ✅ | all | namespace `CasteEscapeServer` → `CastleEscape.Server` | everything else |
+| Phase 1 ✅ | `Program.cs` | adds OpenAPI, Scalar, CORS, options; hub path `/hubs/game` | `SessionManager` registration, `PORT` handling |
+| Phase 2 | `Models/Direction`, `PowerType` | move to `CastleEscape.Contracts` | values |
+| Phase 2 | `Game/Characters.cs` | data moves to `content/characters.json`; class deleted | ids and numbers (warrior/scout/swimmer) |
+| Phase 3 | `Game/SessionManager.cs` | replaced by `SessionRegistry`: create/join by code instead of auto-match | lock-per-registry idea |
+| Phase 3 | `Hubs/GameHub.cs` | `Hub<IGameClient>`; lobby moves to REST; `SendInput` → `SetDirection`; connects with session id + token | disconnect handling (becomes `Aborted` + notification) |
+| Phase 3 | `Game/GameSession.cs` | biggest change. The `Timer` is replaced by the shared `GameLoopService`, input goes through a queue, continuous movement becomes tile steps, and zombies path around walls. The door latches, and the session gets phases, restart and level-complete handling | method names and tick structure (`MovePlayers`, `MoveZombies`, `UpdateLevers`, `CollectItems`, `TickPowers`, `AdvanceLevel`) so the "before" UML stays recognisable |
+| Phase 3 | `Game/LevelBuilder.cs` | becomes the naive single-class `LevelGenerator` (random but validated) plus a preset loader; Phase 4 splits it into the Builder pattern | layout idea: border walls, obstacle band with a guaranteed gap |
+| Phase 3 | `Models/*State`, `GameStateSnapshot`, `JoinResult`, `PlayerInputMessage` | runtime state → `Game/World` entities; wire DTOs → `Contracts` records | field names where they still fit |
+
+## Open questions (asked at Phase 0)
 
 1. **Project move + CI.** OK to `git mv CasteEscapeServer → src/CastleEscape.Server` and update
    the Azure workflow's two paths on this branch? (Deploy only happens after you merge to `main`.)

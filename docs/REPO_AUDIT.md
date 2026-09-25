@@ -44,15 +44,23 @@ All commits are by one teammate (Jonas Armašauskas), 2026-09-14 … 09-24.
 
 The CI workflow only builds the server project, so CI is green despite the broken client.
 
-## 3. Missing inputs (§2 of the brief)
+**Update after Phase 1 (commit `cb832a4`):** the whole solution builds with 0 warnings and 0 errors.
+The client's broken names are fixed as part of the move, and NU1903 is resolved by pinning
+`Microsoft.OpenApi` 2.12.2. `dotnet test`: 14 passed.
 
-- `docs/requirements/reikalavimai_zaidimui.txt` — **missing**
-- `docs/requirements/course_context.md` — **missing**
-- `docs/diagrams/*.png` — **missing**; only the class diagram exists (as the root screenshot).
-  No use case or activity diagrams in the repo.
+## 3. Inputs (§2 of the brief)
 
-I will proceed on the brief's §3 rules unless these arrive; if they do, I diff them against §3
-into `DECISIONS.md`.
+Missing at audit time. Added on 2026-09-25 from the team's exports (commit `810cb50`):
+
+- `docs/requirements/reikalavimai_zaidimui.txt`: matches brief §3. Conflicts are recorded in
+  `DECISIONS.md` (D1 door, D13 duplicated section and PRI-ids).
+- `docs/requirements/course_context.md` (from `T120B516_pattern_analysis_context.txt`): matches
+  the brief's pattern requirements. Notes are in `DECISIONS.md` → "Course context notes".
+- `docs/diagrams/`: `useCaseDiagram.png`, `classDiagram.png` (a newer export of the root
+  screenshot, package `GameModels`), and all 13 activity diagrams. Diagram conflicts
+  with the requirements: pull lever (button, D2), use active power (button, D3), lose life
+  (respawn, D6), start level (button, D11), restart (dialog in the server lane, D8).
+  The use case diagram matches the brief's use case list.
 
 ## 4. Gaps vs. the game rules in the existing server
 
