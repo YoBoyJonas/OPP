@@ -21,6 +21,9 @@ does and why. Configurable decisions name their setting.
 | D11 | **Levels start automatically**: when both players have chosen characters, and after each completed level. "Start level" is a server event (`LevelStarted`); the loading screen is client-side. A generation failure is retried with new seeds (`Generation:MaxAttempts`), then reported as an error. | Start-level diagram: "Player presses start level". Requirements: "Įveikus lygį automatiškai užkraunamas kitas". | — |
 | D12 | `LevelDefinition.TimeLimitSeconds` is kept but not enforced. | In the class diagram, no requirement. | — |
 | D14 | Health items restore lives **up to the character's maximum** (as the first prototype did). | Requirements say only "+1 gyvybė". An uncapped counter would make the character choice (PLR-1) meaningless after a few potions. | — |
+| D15 | **Powers do not carry over between levels**: each level (and each restart) starts with no active powers. | Not specified. The checkpoint (D8) then only needs lives and score. A carried-over Swim would also let a player skip the next level's power obstacles. | — |
+| D16 | **"Nearest player" means straight-line distance** from the zombie, re-checked on every tile (ZMB-1). A zombie may switch targets as it moves. | "mažiausio atstumo žaidėjo" does not say which distance. Straight-line is simplest and is the same for every strategy. Path distance is a possible Strategy variant. | — |
+| D17 | A level completes when both players stand still on exit tiles; next comes a short `LevelComplete` pause (`Game:LevelTransitionSeconds`, default 2 s), then the next level loads automatically. | "Perėjimas įvyksta tik kai abu žaidėjai stovi ant išėjimo langelių" + clients need a moment to show "level complete". | `Game:LevelTransitionSeconds` |
 | D13 | The zombie section is duplicated under "Žemėlapio ir objektų generavimas"; the duplicate is ignored. The collision section's "PRI-2 + PRI-3" refers to the zombie rules (brief ZMB-2, ZMB-3). | Requirements text. | — |
 
 ## Content model
@@ -51,6 +54,8 @@ does and why. Configurable decisions name their setting.
 | P6 | Scalar and the OpenAPI document are served in every environment, Azure included. The Dev endpoints and the playground need `DevTools:Enabled` (true only in `appsettings.Development.json`). | The API reference is useful at the defence; the dev shortcuts must not be exposed on a public deployment by default. |
 | P7 | Options that the game rules read (`Game`, `Generation`, `Patterns`, `Realtime`) live in `CastleEscape.Game.Configuration`; host-only options (`Cors`, `DevTools`) live in the Server project. | The Game project must not depend on ASP.NET Core. |
 | P8 | Tests use xUnit v3 with plain `Assert`. | Brief §10. No licensed assertion libraries. |
+| P10 | **Threading**: each session has one lock. Only `Tick` changes the world. Hub/REST input is queued (sequence-numbered) and applied at the start of the next tick. Lobby calls (join, pick character, leave) take the lock briefly, because they must answer synchronously. REST reads use the immutable snapshot published after each tick and never take the lock. | Brief §4. The lobby exception keeps create/join responses immediate without a second queue. |
+| P11 | `Generation:PresetLevel` (e.g. `tutorial`) makes every level a preset map. Used by integration tests, demos and the playground. | Deterministic multiplayer runs without changing code. |
 | P9 | Changes to Jonas's server code stay minimal until the rewrite list in `IMPLEMENTATION_PLAN.md` is confirmed. Phase 1 changed only namespaces and the hub path. | The team hasn't confirmed the rewrite scope yet (open question 3). |
 
 ## Course context notes

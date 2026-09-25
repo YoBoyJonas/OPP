@@ -1,11 +1,14 @@
 using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
+using CastleEscape.Game.Generation;
+using CastleEscape.Game.Sessions;
 using CastleEscape.Server;
 using CastleEscape.Server.Endpoints;
-using CastleEscape.Server.Game;
 using CastleEscape.Server.Hubs;
 using CastleEscape.Server.OpenApi;
 using CastleEscape.Server.Options;
+using CastleEscape.Server.Realtime;
+using Microsoft.Extensions.Options;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +24,7 @@ AddValidatedOptions<DevToolsOptions>(builder.Services, DevToolsOptions.SectionNa
 builder.Services.ConfigureHttpJsonOptions(options => JsonDefaults.Apply(options.SerializerOptions));
 builder.Services.AddSignalR().AddJsonProtocol(options => JsonDefaults.Apply(options.PayloadSerializerOptions));
 builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GameExceptionHandler>();
 builder.Services.AddCastleEscapeOpenApi();
 
 var corsOrigins = builder.Configuration.GetSection(CorsSettings.SectionName).Get<CorsSettings>()?.AllowedOrigins ?? [];
@@ -31,7 +35,16 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
     .AllowCredentials())); // SignalR sends credentials, which rules out AllowAnyOrigin.
 
 builder.Services.AddSingleton(_ => ContentLoader.LoadFromDirectory(ContentLoader.DefaultDirectory));
-builder.Services.AddSingleton<SessionManager>();
+builder.Services.AddSingleton<ILevelProvider>(sp => new LevelProvider(
+    sp.GetRequiredService<ContentCatalog>(),
+    sp.GetRequiredService<IOptions<GameOptions>>().Value,
+    sp.GetRequiredService<IOptions<GenerationOptions>>().Value));
+builder.Services.AddSingleton(sp => new SessionRegistry(
+    sp.GetRequiredService<ContentCatalog>(),
+    sp.GetRequiredService<ILevelProvider>(),
+    sp.GetRequiredService<IOptions<GameOptions>>().Value));
+builder.Services.AddSingleton<GameLoopStats>();
+builder.Services.AddHostedService<GameLoopService>();
 
 // Azure Linux/container hosting sets PORT; Azure App Service and local dev don't.
 var port = Environment.GetEnvironmentVariable("PORT");
@@ -58,6 +71,8 @@ app.MapGet("/", () => Results.Redirect("/scalar")).ExcludeFromDescription();
 
 app.MapDiagnosticsEndpoints();
 app.MapContentEndpoints();
+app.MapSessionEndpoints();
+app.MapGameplayEndpoints();
 app.MapHub<GameHub>("/hubs/game");
 
 app.Run();

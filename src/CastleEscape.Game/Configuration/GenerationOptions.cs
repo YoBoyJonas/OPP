@@ -17,4 +17,10 @@ public sealed class GenerationOptions
     /// <summary>Minimum path distance in tiles between a zombie spawn and any start tile.</summary>
     [Range(0, 100)]
     public int MinZombieDistanceFromStart { get; set; } = 5;
+
+    /// <summary>
+    /// When set (e.g. "tutorial"), every level uses this preset map from content/presets instead of
+    /// being generated. For tests, demos and the playground.
+    /// </summary>
+    public string? PresetLevel { get; set; }
 }

@@ -29,10 +29,10 @@ Anything written against it must switch:
 |---|---|---|
 | Hub `/gamehub` | Hub `/hubs/game` | ✅ switched (Phase 1) |
 | Enums as numbers (`"direction": 1`) | Enums as strings (`"direction": "Up"`) | ✅ switched (Phase 1) |
-| `JoinSession(playerName, characterId)` hub method with auto-matchmaking | `POST /api/sessions`, `POST /api/sessions/join` (join code), `PUT …/players/me/character`; the hub connects with `?sessionId=…&playerToken=…` | Phase 3 |
-| `SendInput({ direction })` | `SetDirection(direction)`: send on key down, and `None` on key up | Phase 3 |
-| `GameStateUpdate(GameStateSnapshot)` every tick | `LevelStarted` (static layout) once per level, then `StateUpdated` (dynamic state) every tick; `GameEvent`, `SessionUpdated`, `Error` | Phase 3 |
-| `OpponentLeft` | `SessionUpdated` with phase `Aborted`, plus a `GameEvent` (`PlayerLeft`) | Phase 3 |
-| Continuous `x`/`y` doubles | Tile position plus step progress; a render position is still sent as doubles for interpolation | Phase 3 |
+| `JoinSession(playerName, characterId)` hub method with auto-matchmaking | `POST /api/sessions`, `POST /api/sessions/join` (join code), `PUT …/players/me/character`; the hub connects with `?sessionId=…&playerToken=…` | ✅ Phase 3 |
+| `SendInput({ direction })` | `SetDirection(direction)`: send on key down, and `None` on key up | ✅ Phase 3 |
+| `GameStateUpdate(GameStateSnapshot)` every tick | `LevelStarted` (static layout) once per level, then `StateUpdated` (dynamic state) every tick; `GameEvent`, `SessionUpdated`, `Error` | ✅ Phase 3 |
+| `OpponentLeft` | `SessionUpdated` with phase `Aborted`, plus a `GameEvent` (`PlayerLeft`) | ✅ Phase 3 |
+| Continuous `x`/`y` doubles | Tile position plus step progress; a render position is still sent as doubles for interpolation | ✅ Phase 3 |
 
-Until Phase 3 lands, the old hub methods still exist at the new path.
+The old hub methods (`JoinSession`, `SendInput`) were removed in Phase 3.

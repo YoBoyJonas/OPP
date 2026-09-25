@@ -30,6 +30,62 @@ public class PlayerEntity(Guid playerId, string name, CharacterDefinition charac
 
     public void AddScore(int points) => Score += points;
 
+    private readonly Dictionary<PowerType, ActivePower> _powers = [];
+    private readonly List<PowerCombo> _combos = [];
+
+    /// <summary>Base powers currently active (Jump, Sprint, Swim).</summary>
+    public IReadOnlyCollection<ActivePower> Powers => _powers.Values;
+
+    /// <summary>Super powers currently active (JumpDash, FastSwim).</summary>
+    public IReadOnlyList<PowerCombo> Combos => _combos;
+
+    public bool HasPower(PowerType power) => _powers.ContainsKey(power) || _combos.Any(c => c.Granted == power);
+
+    public ActivePower? GetPower(PowerType power) => _powers.GetValueOrDefault(power);
+
+    /// <summary>Adds a power, or stacks it if already active. Returns the resulting power.</summary>
+    public ActivePower GainPower(PowerGrant grant, double durationSeconds, int maxLevel)
+    {
+        if (_powers.TryGetValue(grant.Power, out var existing))
+        {
+            existing.Stack(durationSeconds, maxLevel);
+            return existing;
+        }
+        var power = new ActivePower(grant, durationSeconds);
+        _powers[grant.Power] = power;
+        return power;
+    }
+
+    /// <summary>Counts power timers down; returns the powers that just ran out.</summary>
+    public List<PowerType> TickPowers(double seconds)
+    {
+        var expired = new List<PowerType>();
+        foreach (var power in _powers.Values.ToList())
+        {
+            power.Tick(seconds);
+            if (power.IsExpired)
+            {
+                _powers.Remove(power.Power);
+                expired.Add(power.Power);
+            }
+        }
+        return expired;
+    }
+
+    public bool RemovePower(PowerType power) => _powers.Remove(power);
+
+    public void SetCombos(IEnumerable<PowerCombo> combos)
+    {
+        _combos.Clear();
+        _combos.AddRange(combos);
+    }
+
+    public void ClearPowers()
+    {
+        _powers.Clear();
+        _combos.Clear();
+    }
+
     /// <summary>Puts the player on a new level's start tile, standing still.</summary>
     public void PlaceAt(GridPos start)
     {

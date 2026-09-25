@@ -41,4 +41,12 @@ public sealed class GameOptions
     /// <summary>Number of levels in a run (LVL-1).</summary>
     [Range(1, 100)]
     public int MaxLevel { get; set; } = 10;
+
+    /// <summary>Pause between completing a level and loading the next one.</summary>
+    [Range(0, 60)]
+    public double LevelTransitionSeconds { get; set; } = 2;
+
+    /// <summary>Highest stack level a repeated power reaches (PWR-3); more pickups still extend the time.</summary>
+    [Range(1, 10)]
+    public int MaxPowerStackLevel { get; set; } = 3;
 }
