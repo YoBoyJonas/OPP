@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Domain, game rules and design patterns. Must not reference ASP.NET Core. -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\CastleEscape.Contracts\CastleEscape.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

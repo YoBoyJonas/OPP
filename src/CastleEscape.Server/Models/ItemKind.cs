@@ -1,4 +1,4 @@
-namespace CasteEscapeServer.Models;
+namespace CastleEscape.Server.Models;
 
 public enum ItemKind
 {

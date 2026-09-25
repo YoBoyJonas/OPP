@@ -1,4 +1,4 @@
-namespace CastleEscapeClient.Models;
+namespace CastleEscape.Game.Content;
 
 public class Wall : Obstacle
 {

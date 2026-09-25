@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
-namespace CastleEscapeClient.Models;
+namespace CastleEscape.Game.Content;
 
 public class ContentCatalog
 {
@@ -11,7 +11,7 @@ public class ContentCatalog
     public List<PowerCombo> Combos { get; set; } = new();
     public List<Obstacle> Obstacles { get; set; } = new();
     public List<ZombieDefinition> Zombies { get; set; } = new();
-    public List<Level> Levels { get; set; } = new();
+    public List<LevelDefinition> Levels { get; set; } = new();
 
     public List<string> Validate()
     {

@@ -1,6 +1,6 @@
-using CasteEscapeServer.Models;
+using CastleEscape.Server.Models;
 
-namespace CasteEscapeServer.Game;
+namespace CastleEscape.Server.Game;
 
 public static class Characters
 {

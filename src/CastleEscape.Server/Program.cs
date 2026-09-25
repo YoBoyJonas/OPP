@@ -1,5 +1,5 @@
-using CasteEscapeServer.Game;
-using CasteEscapeServer.Hubs;
+using CastleEscape.Server.Game;
+using CastleEscape.Server.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 

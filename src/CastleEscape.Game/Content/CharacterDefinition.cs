@@ -1,6 +1,6 @@
-namespace CastleEscapeClient.Models;
+namespace CastleEscape.Game.Content;
 
-public class Character
+public class CharacterDefinition
 {
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;

@@ -1,8 +1,8 @@
-using CasteEscapeServer.Game;
-using CasteEscapeServer.Models;
+using CastleEscape.Server.Game;
+using CastleEscape.Server.Models;
 using Microsoft.AspNetCore.SignalR;
 
-namespace CasteEscapeServer.Hubs;
+namespace CastleEscape.Server.Hubs;
 
 public class GameHub : Hub
 {

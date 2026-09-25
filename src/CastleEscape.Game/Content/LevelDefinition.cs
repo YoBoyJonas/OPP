@@ -1,6 +1,6 @@
-namespace CastleEscapeClient.Models;
+namespace CastleEscape.Game.Content;
 
-public class Level
+public class LevelDefinition
 {
     public string Id { get; set; } = string.Empty;
     public int Index { get; set; }

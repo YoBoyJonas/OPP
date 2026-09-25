@@ -1,6 +1,6 @@
-using CasteEscapeServer.Models;
+using CastleEscape.Server.Models;
 
-namespace CasteEscapeServer.Game;
+namespace CastleEscape.Server.Game;
 
 // ponytail: fixed/deterministic layouts, not a randomized generator with a
 // reachability solver. Good enough for the communication + core-rules pass;

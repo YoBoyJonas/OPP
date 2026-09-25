@@ -1,13 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+    <!-- Pinned directly: versions <= 2.7.4 have advisory GHSA-v5pm-xwqc-g5wc. AspNetCore.OpenApi 10 needs 2.x. -->
+    <PackageReference Include="Microsoft.OpenApi" Version="2.12.2" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.17.9" />
+  </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
+    <ProjectReference Include="..\CastleEscape.Contracts\CastleEscape.Contracts.csproj" />
+    <ProjectReference Include="..\CastleEscape.Game\CastleEscape.Game.csproj" />
   </ItemGroup>
 
 </Project>
