@@ -1,6 +1,11 @@
 @CastleEscape_HostAddress = http://localhost:5035
 
-GET {{CastleEscape_HostAddress}}/weatherforecast/
+### Health
+GET {{CastleEscape_HostAddress}}/health
+Accept: application/json
+
+### OpenAPI document (rendered by Scalar at /scalar)
+GET {{CastleEscape_HostAddress}}/openapi/v1.json
 Accept: application/json
 
 ###
