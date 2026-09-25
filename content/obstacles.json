@@ -1,0 +1,30 @@
+[
+  {
+    "type": "Wall",
+    "id": "wall",
+    "name": "Wall",
+    "traversalRequirements": "None",
+    "blocksZombies": true,
+    "minSize": 1,
+    "maxSize": 6
+  },
+  {
+    "type": "Water",
+    "id": "water",
+    "name": "Water",
+    "traversalRequirements": "Swim",
+    "blocksZombies": true,
+    "minSize": 2,
+    "maxSize": 6,
+    "moveSpeedMultiplier": 0.6
+  },
+  {
+    "type": "Pit",
+    "id": "pit",
+    "name": "Pit",
+    "traversalRequirements": "Jump",
+    "blocksZombies": true,
+    "minSize": 1,
+    "maxSize": 3
+  }
+]

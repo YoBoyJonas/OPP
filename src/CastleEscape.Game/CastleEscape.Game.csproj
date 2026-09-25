@@ -5,4 +5,9 @@
     <ProjectReference Include="..\CastleEscape.Contracts\CastleEscape.Contracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Content JSON and preset maps live in /content at the repo root; copied to every referencing output. -->
+    <None Include="..\..\content\**\*" Link="content\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

@@ -8,6 +8,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Using Include="CastleEscape.Contracts" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CastleEscape.Contracts\CastleEscape.Contracts.csproj" />
     <ProjectReference Include="..\CastleEscape.Game\CastleEscape.Game.csproj" />
   </ItemGroup>

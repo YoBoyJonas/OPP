@@ -1,4 +1,5 @@
 using CastleEscape.Game.Configuration;
+using CastleEscape.Game.Content;
 using CastleEscape.Server;
 using CastleEscape.Server.Endpoints;
 using CastleEscape.Server.Game;
@@ -29,6 +30,7 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
     .AllowAnyMethod()
     .AllowCredentials())); // SignalR sends credentials, which rules out AllowAnyOrigin.
 
+builder.Services.AddSingleton(_ => ContentLoader.LoadFromDirectory(ContentLoader.DefaultDirectory));
 builder.Services.AddSingleton<SessionManager>();
 
 // Azure Linux/container hosting sets PORT; Azure App Service and local dev don't.
@@ -39,6 +41,9 @@ if (!string.IsNullOrEmpty(port))
 }
 
 var app = builder.Build();
+
+// Load and validate content now, so a broken content file stops startup instead of the first request.
+app.Services.GetRequiredService<ContentCatalog>();
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
@@ -52,6 +57,7 @@ app.MapScalarApiReference(options => options
 app.MapGet("/", () => Results.Redirect("/scalar")).ExcludeFromDescription();
 
 app.MapDiagnosticsEndpoints();
+app.MapContentEndpoints();
 app.MapHub<GameHub>("/hubs/game");
 
 app.Run();

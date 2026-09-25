@@ -1,0 +1,44 @@
+[
+  {
+    "type": "Health",
+    "id": "health-potion",
+    "name": "Health Potion",
+    "healthValue": 1,
+    "iconPath": "icons/health-potion.png"
+  },
+  {
+    "type": "Reward",
+    "id": "gold-coin",
+    "name": "Gold Coin",
+    "scoreValue": 10,
+    "iconPath": "icons/gold-coin.png"
+  },
+  {
+    "type": "Reward",
+    "id": "ruby",
+    "name": "Ruby",
+    "scoreValue": 50,
+    "iconPath": "icons/ruby.png"
+  },
+  {
+    "type": "Power",
+    "id": "jump-boots",
+    "name": "Jump Boots",
+    "grant": { "type": "Jump", "modifiers": { "jumpForceMultiplier": 1.2 } },
+    "iconPath": "icons/jump-boots.png"
+  },
+  {
+    "type": "Power",
+    "id": "sprint-elixir",
+    "name": "Sprint Elixir",
+    "grant": { "type": "Sprint", "modifiers": { "moveSpeedMultiplier": 1.5 } },
+    "iconPath": "icons/sprint-elixir.png"
+  },
+  {
+    "type": "Power",
+    "id": "swim-fins",
+    "name": "Swim Fins",
+    "grant": { "type": "Swim", "modifiers": { "swimSpeedMultiplier": 1.2 } },
+    "iconPath": "icons/swim-fins.png"
+  }
+]

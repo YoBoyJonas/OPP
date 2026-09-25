@@ -100,7 +100,7 @@ public class SkeletonTests(WebApplicationFactory<Program> factory) : IClassFixtu
     {
         var options = factory.Services.GetRequiredService<IOptions<Microsoft.AspNetCore.SignalR.JsonHubProtocolOptions>>();
 
-        var json = JsonSerializer.Serialize(new { direction = CastleEscape.Server.Models.Direction.Up },
+        var json = JsonSerializer.Serialize(new { direction = CastleEscape.Contracts.Direction.Up },
             options.Value.PayloadSerializerOptions);
 
         Assert.Equal("""{"direction":"Up"}""", json);
