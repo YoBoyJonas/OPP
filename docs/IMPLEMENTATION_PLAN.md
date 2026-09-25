@@ -110,3 +110,97 @@ notifier observer; Facade last because it wraps the final subsystems.
    aren't in the repo. Will you add them, or should I go on the brief alone?
 5. **Protocol break.** Is anyone building a frontend against `/gamehub` + `GameStateUpdate`
    right now? If so, I can keep a thin compatibility alias for a while. Otherwise it's a clean switch to `/hubs/game`.
+
+## Progress (2026-09-25)
+
+Done on `backend/p1` (not pushed): Phases 0–3 (tag `p1-prototype-before-patterns`), pattern
+infrastructure (`bbc8925`), **Singleton** (`81ca652`), **Adapter** (`77e9002`). 107 tests green.
+
+Conventions every pattern commit follows:
+- `[DesignPattern("<Name>", "<Role>")]` on each participant, plus a one-line XML doc summary.
+- A demo class in `src/CastleEscape.Game/PatternDemos/<Name>Demo.cs`, registered in
+  `PatternDemoCatalog.All` (`IPatternDemo.cs`). `app.MapDemo(...)` in `Server/Endpoints/PatternEndpoints.cs`
+  with typed query parameters. `DemoWorld` has the shared real-game setups.
+- A test in `tests/CastleEscape.Game.Tests/Patterns/<Name>Tests.cs` proving the course requirement.
+- `docs/patterns/<Name>.md` (template: `Singleton.md` and `Adapter.md`), with before/after Mermaid.
+- Commit message `feat(patterns): apply <X> to <Y>`; `dotnet test` green before committing.
+- Shell tip: heredocs containing backticks break the Bash tool here; write files with the Write tool.
+
+### Remaining pattern designs (in order)
+
+3. **Factory Method (B)** — `Items/`: `ItemEntity` becomes abstract with `Apply(PlayerEntity, ItemEffectContext)`.
+   The products are `HealthItem`, `RewardItem` and `PowerItem`. The creator is `ItemSpawner` (abstract):
+   `Spawn(pos, level)` validates the tile, calls the factory method `CreateItem(id, pos)` and registers
+   the item. Concrete creators: `HealthItemSpawner`, `RewardItemSpawner`, `PowerItemSpawner`, chosen by
+   `ItemSpawners.For(consumable)`. `InteractionResolver.CollectItems` calls `item.Apply` (the kind
+   `switch` goes away). The generator and the preset parser use the spawners. `LevelState` gets
+   `NextEntityId(prefix)`.
+4. **Abstract Factory (A)** — `Generation/Themes/`: `IThemeFactory` has `CreateWall/CreateWater/CreatePit/CreateZombie(id, def, spawn)`.
+   `DungeonThemeFactory` makes `StoneWall : Wall`, `MurkyWater : Water` (0.6), `SpikePit : Pit` and
+   `DungeonZombie`. `CryptThemeFactory` makes `BoneWall`, `PoisonWater` (0.45), `AbyssPit` (0.8 speed)
+   and `CryptZombie` (speed ×1.2; Greedy upgraded to Bfs). Products derive from the content classes
+   and set their values in the constructor. `ZombieEntity` gets a virtual `MovementStrategy` kind,
+   used by the AI. `ThemeFactoryProvider.For(LevelDefinition)`.
+5. **Builder (A)** — `ILevelBuilder`: `Reset(def, seed, IThemeFactory)`, `BuildTerrain`, `PlaceStartTiles`,
+   `PlaceExitAndDoor` (exit on the border opposite the starts; the entry tile is cleared),
+   `PlaceLevers`, `PlacePowerObstacles`, `PlaceItems`, `PlaceZombies`, `GetResult`. Two builders:
+   `ProceduralLevelBuilder` (the current `LevelGenerator` logic split into steps) and
+   `PresetLevelBuilder(rows|name)` (the `PresetLevelParser` logic split). `LevelDirector.Construct(builder, def, seed)`
+   validates and retries (1 attempt for presets) and throws `LevelGenerationException`.
+   `LevelProvider` uses the director. `LevelGenerator` and `PresetLevelParser` are deleted; tests,
+   `TestGame.RowsLevelProvider` and `DemoWorld` are updated.
+6. **Prototype (A)** — `LevelState : ILevelPrototype<LevelState>` with `ShallowClone` (MemberwiseClone),
+   `DeepClone` (new Grid array, which shares the immutable Tile objects; new entities via a protected
+   `Entity.CloneEntity()`; definitions shared) and `Clone(CloneMode)`. The session keeps `_pristine`
+   and restart = `_pristine.Clone(mode)`. `PatternOptions` is passed into the session through the
+   registry. `ObjectAddress.Of(obj)` uses unsafe `__makeref` (`AllowUnsafeBlocks`) inside
+   `GC.TryStartNoGCRegion`. The demo reports ReferenceEquals, hash and address for level, grid,
+   items list and first item, then shows that the shallow copy loses the pristine item.
+7. **Strategy (B)** — `AI/`: `IZombieMovementStrategy.NextStep(zombie, WorldView)`, with
+   `GreedyChaseStrategy`, `BfsChaseStrategy`, `AStarChaseStrategy` and `PredictiveChaseStrategy`
+   (target = the player's `NextTile`, or up to 3 tiles ahead in `Facing`). `WorldView` is read-only
+   (grid, CanZombieEnter, players, NearestPlayer). `ZombieEntity.Strategy` is set from its kind
+   (`ZombieStrategies.Create`) and can be swapped at runtime. `ZombieAi` is deleted.
+8. **Decorator (B)** — `Powers/`: `IAbilities` (`MoveSpeed`, `CanEnter(TerrainKind)`, `SpeedOn(Tile)`,
+   `Describe()`). `CharacterAbilities` is the component; `AbilityDecorator` is the abstract decorator.
+   Concrete decorators: `JumpDecorator`, `SprintDecorator`, `SwimDecorator`, `JumpDashDecorator` and
+   `FastSwimDecorator` (water speed = `inner.MoveSpeed` × bonus). A `PowerManager` per player owns the
+   timers and rebuilds the chain on change: base → one decorator per stack level in Jump, Sprint,
+   Swim order → combo decorators. `PlayerAbilities` and the power dictionary on `PlayerEntity` are
+   deleted, and `PowerRules` is folded into `PowerManager`.
+9. **Command (D)** — `Commands/`: `IGameCommand { PlayerId, Sequence, Name, Execute(GameWorld), Undo(GameWorld) }`.
+   Commands: `SetDirectionCommand`, `StartStepCommand`, `RestartLevelCommand` (saves the current
+   level and stats) and `GivePowerCommand`. Invoker `CommandProcessor` has a queue, executes in
+   sequence order, keeps a bounded history (100) and supports `UndoLast`. D7 conflicts:
+   `CanPlayerEnter` checks only the other player's `Tile`, and when two `StartStepCommand`s target
+   the same tile, the one with the later sequence (the player's last direction input) is undone.
+   Extract `GameWorld` (level, pristine, players, checkpoint, exit mechanism) out of `GameSession`.
+10. **Observer (D)** — `Events/`: typed `GameEvent` records (base: `PlayerId`, `Message`; `Type` = class
+    name; `Data` from the record properties by reflection). `GameEventPublisher` offers
+    Attach/Detach/Publish. Observers: `ClientNotificationObserver` (to `GameEventMessage` in the
+    outbox), `SessionStatisticsObserver` (HUD stats), `EventLogObserver` (ring buffer 200, for
+    `/api/diagnostics/sessions/{id}/events`) and `SoundCueObserver` (e.g. LifeLost → cue
+    `life_lost`, sent as a GameEvent of type `SoundCue`). `PendingEvent` is deleted. Add a Mermaid
+    `sequenceDiagram` to the doc.
+11. **Bridge (C)** — `Messaging/`: abstraction `ClientNotifier(IClientChannel)` with refined
+    `StateNotifier` (LevelStarted, StateUpdated) and `EventNotifier` (GameEvent, SessionUpdated,
+    Error). Implementor `IClientChannel.SendAsync(sessionId, method, payload)`, with
+    `SignalRClientChannel` (Server, `IHubContext<GameHub>.Clients.Group().SendAsync(method, …)`) and
+    `PollingBufferChannel` (Game; per-session ring buffer of text serialized by `IMessageSerializer`,
+    `Read(afterSeq)`). The loop gives each outbox message to the notifiers built from
+    `Realtime:EnabledChannels` (the dispatch `switch` goes away). New endpoint
+    `GET /api/sessions/{id}/messages?afterSeq=&format=`.
+12. **Facade (D)** — `Sessions/GameFacade` exposes CreateSession, JoinSession, SelectCharacter,
+    LeaveSession, SubmitDirection, RequestRestart, GetSession, ListSessions, GetState, GetHud,
+    GetLevelLayout and Authenticate (for the hub). Its subsystems are SessionRegistry,
+    `GameLoopScheduler` (new; the loop ticks the scheduler's sessions), `LevelDirector` via the
+    provider, `CommandProcessor` and `ContentCatalog`. Its clients are GameHub,
+    Session/Gameplay endpoints and the console `FacadeDemo`, which plays a scripted game in-process.
+
+After Phase 4: Phase 5 (DevActions + Dev endpoints, Levels preview, Realtime protocol and
+example endpoints, diagnostics commands and events, `docs/openapi.json` export), then Phase 6
+(README, ARCHITECTURE, FRONTEND_INTEGRATION, USE_CASE_MAPPING, P2_ROADMAP, DEFENCE_NOTES,
+playground, and a final DoD check with two browser tabs).
+
+Open with the user: Q3 (is the team OK with rewriting Jonas's code?) was answered only
+implicitly ("build everything locally first, let's continue"). Nothing is pushed or merged.
