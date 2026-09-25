@@ -73,15 +73,13 @@ public class AbstractFactoryTests
     [Fact]
     public void GeneratedLevels_NeverMixFamilies()
     {
-        var generator = new LevelGenerator(Catalog, new GameOptions(), new GenerationOptions());
-
         foreach (var definition in Catalog.Levels)
         {
             var family = AbstractFactoryDemo.Family(ThemeFactories.For(definition, Catalog), Greedy)
                 .Select(p => p.GetType().Name).ToHashSet();
             for (var seed = 1; seed <= 5; seed++)
             {
-                var level = generator.Generate(definition, seed);
+                var level = DemoWorld.Generate(definition, seed);
                 Assert.All(AbstractFactoryDemo.PartsIn(level), part => Assert.Contains(part, family));
             }
         }
@@ -90,7 +88,7 @@ public class AbstractFactoryTests
     [Fact]
     public void LevelLayout_ListsTheThemedObstacles()
     {
-        var level = new LevelGenerator(Catalog, new GameOptions(), new GenerationOptions()).Generate(Catalog.GetLevel(8), seed: 3);
+        var level = DemoWorld.Generate(Catalog.GetLevel(8), seed: 3);
 
         var layout = SnapshotMapper.ToLayout(Guid.NewGuid(), level);
 

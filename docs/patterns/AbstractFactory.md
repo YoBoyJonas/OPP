@@ -2,7 +2,7 @@
 
 **Owner:** Student A · **Category:** Creational · **Code:** `src/CastleEscape.Game/Generation/Themes/`
 **Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- abstract-factory --theme crypt` · `POST /api/patterns/abstract-factory/demo?theme=dungeon|crypt|both&seed=7`
-**Used by:** `LevelGenerator` and `PresetLevelParser` (one factory per level); `GET /api/sessions/{id}/level` lists the variants used (`obstacles`).
+**Used by:** `ProceduralLevelBuilder` and `PresetLevelBuilder` (one factory per level); `GET /api/sessions/{id}/level` lists the variants used (`obstacles`).
 
 ## Problem in this game
 
@@ -30,7 +30,7 @@ and its products; the generator does not change.
 | ConcreteFactory | `DungeonThemeFactory`, `CryptThemeFactory` |
 | AbstractProduct | `Wall`, `Water`, `Pit` (content classes), `ZombieEntity` (now abstract) |
 | ConcreteProduct | Dungeon: `StoneWall`, `MurkyWater`, `SpikePit`, `DungeonZombie` · Crypt: `BoneWall`, `PoisonWater`, `AbyssPit`, `CryptZombie` |
-| Client | `LevelGenerator`, `PresetLevelParser` |
+| Client | `ProceduralLevelBuilder`, `PresetLevelBuilder` (Builder), which get the factory from `LevelDirector` |
 
 | Product | Dungeon | Crypt |
 |---|---|---|
@@ -112,20 +112,21 @@ classDiagram
     class ThemeFactories {
         +For(definition, catalog) IThemeFactory$
     }
-    class LevelGenerator
-    LevelGenerator ..> ThemeFactories
-    LevelGenerator --> IThemeFactory : one per level
+    class LevelDirector
+    class ProceduralLevelBuilder
+    LevelDirector ..> ThemeFactories
+    LevelDirector ..> ProceduralLevelBuilder : Reset(definition, seed, theme)
+    ProceduralLevelBuilder --> IThemeFactory : one per level
 ```
 
 ## Key code
 
 ```csharp
-var theme = ThemeFactories.For(definition, catalog);   // LevelGenerator: one family for the whole level
-var wall = theme.CreateWall();
-...
-var obstacle = theme.CreateObstacle(PickWeighted(rng, definition.ObstacleTable, ...).Kind);
-...
-level.AddZombie(theme.CreateZombie(level.NextEntityId("zombie"), type, spot));
+builder.Reset(definition, seed, ThemeFactories.For(definition, catalog));   // LevelDirector: one family per level
+
+_wall = theme.CreateWall();                                                  // ProceduralLevelBuilder
+var obstacle = _theme.CreateObstacle(PickWeighted(_definition.ObstacleTable, ...).Kind);
+_level.AddZombie(_theme.CreateZombie(_level.NextEntityId("zombie"), type, spot));
 ```
 
 ```csharp

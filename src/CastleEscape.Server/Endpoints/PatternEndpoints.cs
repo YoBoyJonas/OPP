@@ -49,6 +49,12 @@ public static class PatternEndpoints
             "Creates the product family of each theme factory (`theme=dungeon|crypt|both`): wall, water, pit and zombie with "
             + "their gameplay values. Then generates a real level of that theme and checks every placed part comes from the same family.");
 
+        app.MapDemo("builder",
+            (int level = 1, int seed = 7, string preset = "tutorial") => Run("builder", ("level", level), ("seed", seed), ("preset", preset)),
+            "Builder: level construction",
+            "LevelDirector builds level `level` with ProceduralLevelBuilder (random, `seed`) and PresetLevelBuilder "
+            + "(the `preset` map: tutorial or arena), using the same step order. Returns both results as map rows.");
+
         return app;
     }
 

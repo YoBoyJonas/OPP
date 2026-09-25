@@ -5,28 +5,29 @@ using CastleEscape.Game.World;
 namespace CastleEscape.Game.Generation;
 
 /// <summary>
-/// Default level source: generates each level, or loads the configured preset map for every level
-/// (<c>Generation:PresetLevel</c>) when testing.
+/// Default level source: the director builds each level with the procedural builder, or with the
+/// preset builder for every level when <c>Generation:PresetLevel</c> is set (tests, demos).
 /// </summary>
 public class LevelProvider(ContentCatalog catalog, GameOptions game, GenerationOptions generation) : ILevelProvider
 {
-    private readonly LevelGenerator _generator = new(catalog, game, generation);
+    private readonly LevelDirector _director = new(catalog, generation);
 
     public LevelState CreateLevel(int levelIndex, int seed)
     {
         var definition = catalog.GetLevel(levelIndex);
-
-        if (string.IsNullOrWhiteSpace(generation.PresetLevel))
+        try
         {
-            return _generator.Generate(definition, seed);
+            return _director.Construct(CreateBuilder(), definition, seed);
         }
-
-        var level = PresetLevelParser.Parse(PresetLevelParser.ReadRows(generation.PresetLevel), definition, catalog, seed);
-        var errors = LevelValidator.Validate(level, generation.MinZombieDistanceFromStart);
-        if (errors.Count > 0)
+        catch (LevelBuildException ex) // a bad preset name or map
         {
-            throw new LevelGenerationException(levelIndex, errors);
+            throw new LevelGenerationException(levelIndex, [ex.Message]);
         }
-        return level;
     }
+
+    /// <summary>Builders keep per-level state, so each level gets a new one.</summary>
+    private ILevelBuilder CreateBuilder() =>
+        string.IsNullOrWhiteSpace(generation.PresetLevel)
+            ? new ProceduralLevelBuilder(catalog, game, generation)
+            : PresetLevelBuilder.FromPreset(catalog, generation.PresetLevel);
 }

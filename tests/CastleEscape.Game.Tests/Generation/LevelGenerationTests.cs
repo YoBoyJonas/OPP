@@ -1,4 +1,5 @@
 using CastleEscape.Game.Configuration;
+using CastleEscape.Game.Content;
 using CastleEscape.Game.Generation;
 using CastleEscape.Game.Sessions;
 using CastleEscape.Game.Tests.Sessions;
@@ -6,10 +7,16 @@ using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Tests.Generation;
 
-public class LevelGeneratorTests
+public class LevelGenerationTests
 {
     private static readonly GenerationOptions Generation = new();
-    private static readonly LevelGenerator Generator = new(TestGame.Catalog, new GameOptions(), Generation);
+    private static readonly LevelDirector Director = new(TestGame.Catalog, Generation);
+
+    private static LevelState Generate(LevelDefinition definition, int seed) =>
+        Director.Construct(new ProceduralLevelBuilder(TestGame.Catalog, new GameOptions(), Generation), definition, seed);
+
+    private static LevelState Preset(string[] rows) =>
+        Director.Assemble(new PresetLevelBuilder(TestGame.Catalog, rows), TestGame.Catalog.GetLevel(1), seed: 0);
 
     public static TheoryData<int> LevelIndexes => new(Enumerable.Range(1, 10));
 
@@ -21,7 +28,7 @@ public class LevelGeneratorTests
 
         for (var seed = 0; seed < 25; seed++)
         {
-            var level = Generator.Generate(definition, seed * 101);
+            var level = Generate(definition, seed * 101);
 
             Assert.Empty(LevelValidator.Validate(level, Generation.MinZombieDistanceFromStart)); // GEN-1..3, D5, LVL-3
             Assert.Equal(definition.ZombieCount, level.Zombies.Count);                          // ZMB-4 via content
@@ -37,8 +44,8 @@ public class LevelGeneratorTests
     {
         var definition = TestGame.Catalog.GetLevel(4);
 
-        var a = SnapshotMapper.ToRows(Generator.Generate(definition, 1234));
-        var b = SnapshotMapper.ToRows(Generator.Generate(definition, 1234));
+        var a = SnapshotMapper.ToRows(Generate(definition, 1234));
+        var b = SnapshotMapper.ToRows(Generate(definition, 1234));
 
         Assert.Equal(a, b);
     }
@@ -48,8 +55,8 @@ public class LevelGeneratorTests
     {
         var definition = TestGame.Catalog.GetLevel(4);
 
-        var a = SnapshotMapper.ToRows(Generator.Generate(definition, 1));
-        var b = SnapshotMapper.ToRows(Generator.Generate(definition, 2));
+        var a = SnapshotMapper.ToRows(Generate(definition, 1));
+        var b = SnapshotMapper.ToRows(Generate(definition, 2));
 
         Assert.NotEqual(a, b);
     }
@@ -59,9 +66,9 @@ public class LevelGeneratorTests
     {
         // Restart (D8) relies on this: the stored seed is the attempt that succeeded.
         var definition = TestGame.Catalog.GetLevel(9);
-        var level = Generator.Generate(definition, 77);
+        var level = Generate(definition, 77);
 
-        var again = Generator.Generate(definition, level.Seed);
+        var again = Generate(definition, level.Seed);
 
         Assert.Equal(SnapshotMapper.ToRows(level), SnapshotMapper.ToRows(again));
     }
@@ -71,7 +78,7 @@ public class LevelGeneratorTests
     [InlineData("arena")]
     public void Presets_PassValidation(string preset)
     {
-        var level = PresetLevelParser.Parse(PresetLevelParser.ReadRows(preset), TestGame.Catalog.GetLevel(1), TestGame.Catalog);
+        var level = Preset(PresetMaps.ReadRows(preset));
 
         Assert.Empty(LevelValidator.Validate(level, Generation.MinZombieDistanceFromStart));
     }
@@ -79,7 +86,7 @@ public class LevelGeneratorTests
     [Fact]
     public void Validator_ReportsLeverBehindWater_D5()
     {
-        var level = PresetLevelParser.Parse(
+        var level = Preset(
         [
             "#########",
             "#1....L.#",
@@ -88,7 +95,7 @@ public class LevelGeneratorTests
             "####D####",
             "###.EE.##",
             "#########",
-        ], TestGame.Catalog.GetLevel(1), TestGame.Catalog);
+        ]);
 
         Assert.Contains(LevelValidator.Validate(level, 0), e => e.StartsWith("D5"));
     }

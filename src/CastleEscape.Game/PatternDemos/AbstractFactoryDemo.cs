@@ -21,7 +21,6 @@ public sealed class AbstractFactoryDemo : IPatternDemo
             : [Enum.Parse<LevelTheme>(themeOption, ignoreCase: true)];
         var seed = options.GetInt("seed", 7);
         var catalog = DemoWorld.Catalog;
-        var generator = new LevelGenerator(catalog, new GameOptions(), new GenerationOptions());
         var trace = new DemoTrace("Abstract Factory");
         var families = new Dictionary<string, object?>();
         var mixed = 0;
@@ -35,7 +34,7 @@ public sealed class AbstractFactoryDemo : IPatternDemo
 
             // A real level of this theme: every part must come from this one factory.
             var definition = catalog.Levels.First(l => l.Theme == theme && l.ZombieCount > 0);
-            var level = generator.Generate(definition, seed);
+            var level = DemoWorld.Generate(definition, seed);
             var used = PartsIn(level);
             var foreign = used.Except(family.Select(p => p.GetType().Name)).ToArray();
             mixed += foreign.Length;

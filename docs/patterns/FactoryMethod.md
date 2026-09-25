@@ -28,7 +28,7 @@ code no longer switches on the kind.
 | ConcreteProduct | `HealthItem`, `RewardItem`, `PowerItem` |
 | Creator | `ItemSpawner` (abstract; `Spawn()` is the template, `CreateItem()` the factory method) |
 | ConcreteCreator | `HealthItemSpawner`, `RewardItemSpawner`, `PowerItemSpawner` |
-| Client | `LevelGenerator`, `PresetLevelParser` (via `ItemSpawners.For(consumable)`), `InteractionResolver` (uses products) |
+| Client | `ProceduralLevelBuilder`, `PresetLevelBuilder` (via `ItemSpawners.For(consumable)`), `InteractionResolver` (uses products) |
 
 ## Before (tag `p1-prototype-before-patterns`)
 
@@ -93,8 +93,8 @@ classDiagram
     PowerItemSpawner ..> PowerItem : creates
     ItemSpawner ..> ItemEntity
     ItemSpawners --> ItemSpawner
-    LevelGenerator ..> ItemSpawners
-    PresetLevelParser ..> ItemSpawners
+    ProceduralLevelBuilder ..> ItemSpawners
+    PresetLevelBuilder ..> ItemSpawners
     InteractionResolver ..> ItemEntity : item.Apply()
 ```
 

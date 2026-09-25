@@ -1,5 +1,6 @@
 using CastleEscape.Contracts;
 using CastleEscape.Contracts.Realtime;
+using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Generation;
 using CastleEscape.Game.Sessions;
@@ -13,7 +14,12 @@ public static class DemoWorld
     public static ContentCatalog Catalog => ContentCatalog.Instance;
 
     public static LevelState TutorialLevel() =>
-        PresetLevelParser.Parse(PresetLevelParser.ReadRows("tutorial"), Catalog.GetLevel(1), Catalog, seed: 42);
+        new LevelDirector(Catalog, new GenerationOptions()).Construct(PresetLevelBuilder.FromPreset(Catalog, "tutorial"), Catalog.GetLevel(1), seed: 42);
+
+    /// <summary>A randomly generated level with the default options.</summary>
+    public static LevelState Generate(LevelDefinition definition, int seed) =>
+        new LevelDirector(Catalog, new GenerationOptions())
+            .Construct(new ProceduralLevelBuilder(Catalog, new GameOptions(), new GenerationOptions()), definition, seed);
 
     public static (PlayerSlot P1, PlayerSlot P2) TwoPlayers(LevelState level)
     {

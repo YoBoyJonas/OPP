@@ -17,7 +17,8 @@ public sealed class RowsLevelProvider(ContentCatalog catalog, params string[][] 
     public LevelState CreateLevel(int levelIndex, int seed)
     {
         var rows = levels[Math.Min(levelIndex, levels.Length) - 1];
-        return PresetLevelParser.Parse(rows, catalog.GetLevel(DefinitionIndex ?? levelIndex), catalog, seed);
+        return new LevelDirector(catalog, new GenerationOptions())
+            .Assemble(new PresetLevelBuilder(catalog, rows), catalog.GetLevel(DefinitionIndex ?? levelIndex), seed);
     }
 }
 
