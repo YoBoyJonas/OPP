@@ -23,7 +23,7 @@ public sealed class FactoryMethodDemo : IPatternDemo
         var (p1, _) = DemoWorld.TwoPlayers(level);
         var player = p1.Entity!;
         player.LoseLives(1); // so a health potion has something to restore
-        var events = new List<PendingEvent>();
+        var events = new List<GameEvent>();
         var context = new ItemEffectContext(DemoWorld.Catalog.Combos, new InteractionSettings(10, 3, false), events);
 
         trace.Line($"The tutorial preset already placed {level.Items.Count} items through the spawners: "

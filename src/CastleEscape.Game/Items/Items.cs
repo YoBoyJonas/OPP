@@ -1,4 +1,3 @@
-using CastleEscape.Contracts.Realtime;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Events;
 using CastleEscape.Game.Patterns;
@@ -34,9 +33,8 @@ public sealed class PowerItem(string id, Power definition, GridPos tile) : ItemE
     {
         var settings = context.Settings;
         var power = player.Powers.Gain(Grant, Grant.DurationSeconds ?? settings.DefaultPowerDurationSeconds, settings.MaxPowerStackLevel);
-        context.Events.Add(PendingEvent.Of(GameEventTypes.PowerGained, player.PlayerId,
-            $"{player.Name} gained {power.Power} (level {power.Level}).",
-            new { power = power.Power, level = power.Level, remainingSeconds = Math.Round(power.RemainingSeconds, 1) }));
+        context.Events.Add(new PowerGained(player.PlayerId, $"{player.Name} gained {power.Power} (level {power.Level}).",
+            power.Power, power.Level, Math.Round(power.RemainingSeconds, 1)));
         PowerRules.RefreshCombos(player, context.Combos, context.Events);
     }
 }

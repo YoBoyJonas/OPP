@@ -23,6 +23,8 @@ public class GameSession
     private readonly List<OutgoingMessage> _outbox = [];
     private readonly CommandProcessor _commands = new();
     private readonly GameWorld _world;
+    private readonly GameEventPublisher _events = new();
+    private readonly EventLogObserver _eventLog;
     private readonly ContentCatalog _catalog;
     private readonly ILevelProvider _levels;
     private readonly GameOptions _options;
@@ -49,6 +51,14 @@ public class GameSession
         _options = options;
         _baseSeed = baseSeed;
         _world = new GameWorld(_slots, options, patterns ?? new PatternOptions());
+
+        // Everyone who reacts to game events, notified in this order at the end of each tick.
+        _eventLog = new EventLogObserver(() => _tick);
+        _events.Attach(new ClientNotificationObserver(e =>
+            Send(ClientMethods.GameEvent, new GameEventMessage(Id, NextSeq(), _tick, e.Type, e.PlayerId, e.Message, e.Data()))));
+        _events.Attach(new SessionStatisticsObserver(_slots));
+        _events.Attach(_eventLog);
+        _events.Attach(new SoundCueObserver(_events));
         _interaction = new InteractionSettings(options.PowerDurationSeconds, options.MaxPowerStackLevel, options.RespawnPlayerOnHit);
         _snapshot = BuildSnapshot();
     }
@@ -81,7 +91,7 @@ public class GameSession
 
             var slot = new PlayerSlot(Guid.NewGuid(), Guid.NewGuid().ToString("N"), name, _slots.Count + 1);
             _slots.Add(slot);
-            Emit(PendingEvent.Of(GameEventTypes.PlayerJoined, slot.PlayerId, $"{name} joined as player {slot.Slot}."));
+            Emit(new PlayerJoined(slot.PlayerId, $"{name} joined as player {slot.Slot}.", slot.Slot));
             if (_slots.Count == 2)
             {
                 SetPhase(SessionPhase.CharacterSelect);
@@ -122,7 +132,7 @@ public class GameSession
         lock (_gate)
         {
             var slot = GetSlot(playerId);
-            Emit(PendingEvent.Of(GameEventTypes.PlayerLeft, playerId, $"{slot.Name} left the game."));
+            Emit(new PlayerLeft(playerId, $"{slot.Name} left the game."));
             if (!IsFinished)
             {
                 SetPhase(SessionPhase.Aborted);
@@ -212,6 +222,32 @@ public class GameSession
         }
     }
 
+    /// <summary>The last <see cref="EventLogObserver.DefaultCapacity"/> game events, oldest first.</summary>
+    public IReadOnlyList<EventLogEntry> RecentEvents()
+    {
+        lock (_gate)
+        {
+            return _eventLog.Entries;
+        }
+    }
+
+    /// <summary>Lets extra observers listen to this session's events (tests, demos, future features).</summary>
+    public void Attach(IGameEventObserver observer)
+    {
+        lock (_gate)
+        {
+            _events.Attach(observer);
+        }
+    }
+
+    public void Detach(IGameEventObserver observer)
+    {
+        lock (_gate)
+        {
+            _events.Detach(observer);
+        }
+    }
+
     /// <summary>The last <see cref="CommandProcessor.HistoryLimit"/> commands, oldest first.</summary>
     public IReadOnlyList<CommandRecord> CommandHistory()
     {
@@ -288,12 +324,12 @@ public class GameSession
 
         if (players.FirstOrDefault(p => p.IsDead) is { } dead)                           // 6. defeat / door / exit
         {
-            Emit(PendingEvent.Of(GameEventTypes.GameLost, dead.PlayerId, $"{dead.Name} has no lives left. Game over."));
+            Emit(new GameLost(dead.PlayerId, $"{dead.Name} has no lives left. Game over."));
             SetPhase(SessionPhase.Defeat);
         }
         else if (_world.Exit.Update(players, events))
         {
-            Emit(PendingEvent.Of(GameEventTypes.LevelCompleted, null, $"Level {level.Index} complete!", new { level = level.Index }));
+            Emit(new LevelCompleted(null, $"Level {level.Index} complete!", level.Index));
             _transitionLeft = _options.LevelTransitionSeconds;
             SetPhase(SessionPhase.LevelComplete);
         }
@@ -352,7 +388,7 @@ public class GameSession
         }
         _world.BeginLevel(level);
         AnnounceLevelIfReplaced();
-        Emit(PendingEvent.Of(GameEventTypes.LevelStarted, null, $"Level {index} ({level.Theme}) started.", new { level = index }));
+        Emit(new Events.LevelStarted(null, $"Level {index} ({level.Theme}) started.", index, level.Theme));
     }
 
     /// <summary>Sends LevelStarted when the world's level was replaced (new level, restart, undone restart).</summary>
@@ -376,7 +412,7 @@ public class GameSession
     {
         if (_levelIndex >= MaxLevel)
         {
-            Emit(PendingEvent.Of(GameEventTypes.GameWon, null, $"All {MaxLevel} levels cleared. Victory!"));
+            Emit(new GameWon(null, $"All {MaxLevel} levels cleared. Victory!"));
             SetPhase(SessionPhase.Victory);
             return;
         }
@@ -394,25 +430,21 @@ public class GameSession
         }
         var previous = Phase;
         Phase = phase;
-        Emit(PendingEvent.Of(GameEventTypes.PhaseChanged, null, $"{previous} -> {phase}", new { from = previous, to = phase }));
+        Emit(new PhaseChanged(null, $"{previous} -> {phase}", previous, phase));
         Send(ClientMethods.SessionUpdated, new SessionUpdatedMessage(Id, NextSeq(), _tick, SessionDto()));
     }
 
-    private void Emit(PendingEvent e) => _world.Events.Add(e);
+    private void Emit(GameEvent e) => _world.Events.Add(e);
 
     /// <summary>Counts each event for the HUD statistics and sends it to the clients.</summary>
     private void FlushEvents()
     {
-        var events = _world.Events;
+        var events = _world.Events.ToList();
+        _world.Events.Clear();
         foreach (var e in events)
         {
-            if (e.PlayerId is { } playerId && _slots.FirstOrDefault(s => s.PlayerId == playerId) is { } slot)
-            {
-                slot.Stats[e.Type] = slot.Stats.GetValueOrDefault(e.Type) + 1;
-            }
-            Send(ClientMethods.GameEvent, new GameEventMessage(Id, NextSeq(), _tick, e.Type, e.PlayerId, e.Message, new Dictionary<string, string>(e.Data)));
+            _events.Publish(e);
         }
-        events.Clear();
     }
 
     private void SendState()

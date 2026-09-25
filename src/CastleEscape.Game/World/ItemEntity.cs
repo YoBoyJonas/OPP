@@ -5,7 +5,7 @@ using CastleEscape.Game.Patterns;
 namespace CastleEscape.Game.World;
 
 /// <summary>What an item needs from the game when it is picked up.</summary>
-public sealed record ItemEffectContext(IReadOnlyList<PowerCombo> Combos, InteractionSettings Settings, List<PendingEvent> Events);
+public sealed record ItemEffectContext(IReadOnlyList<PowerCombo> Combos, InteractionSettings Settings, List<GameEvent> Events);
 
 /// <summary>
 /// An item lying on the map (ITM-2: removed when collected). Each kind applies its own effect,

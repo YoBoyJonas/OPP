@@ -1,5 +1,4 @@
 using CastleEscape.Contracts;
-using CastleEscape.Contracts.Realtime;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Events;
 
@@ -15,7 +14,7 @@ public sealed record InteractionSettings(double DefaultPowerDurationSeconds, int
 public static class InteractionResolver
 {
     public static void CollectItems(LevelState level, IReadOnlyList<PlayerEntity> players, IReadOnlyList<PowerCombo> combos,
-        InteractionSettings settings, List<PendingEvent> events)
+        InteractionSettings settings, List<GameEvent> events)
     {
         var context = new ItemEffectContext(combos, settings, events);
         foreach (var player in players)
@@ -28,9 +27,8 @@ public static class InteractionResolver
             item.Apply(player, context);   // each item kind knows its own effect
 
             level.RemoveItem(item);
-            events.Add(PendingEvent.Of(GameEventTypes.ItemCollected, player.PlayerId,
-                $"{player.Name} picked up {item.Definition.Name}.",
-                new { itemId = item.Id, consumableId = item.Definition.Id, kind = item.Kind, lives = player.Lives, score = player.Score }));
+            events.Add(new ItemCollected(player.PlayerId, $"{player.Name} picked up {item.Definition.Name}.",
+                item.Id, item.Definition.Id, item.Kind, player.Lives, player.Score));
         }
     }
 
@@ -53,7 +51,7 @@ public static class InteractionResolver
     public const double ContactDistance = 0.6;
 
     public static void ResolveZombieContacts(LevelState level, IReadOnlyList<PlayerEntity> players,
-        InteractionSettings settings, List<PendingEvent> events)
+        InteractionSettings settings, List<GameEvent> events)
     {
         foreach (var zombie in level.Zombies)
         {
@@ -70,9 +68,8 @@ public static class InteractionResolver
                 victim.PlaceAt(victim.StartTile);
             }
 
-            events.Add(PendingEvent.Of(GameEventTypes.LifeLost, victim.PlayerId,
-                $"{zombie.Definition.Name} caught {victim.Name}! {victim.Lives} lives left.",
-                new { zombieId = zombie.Id, lives = victim.Lives }));
+            events.Add(new LifeLost(victim.PlayerId, $"{zombie.Definition.Name} caught {victim.Name}! {victim.Lives} lives left.",
+                zombie.Id, victim.Lives));
         }
     }
 }

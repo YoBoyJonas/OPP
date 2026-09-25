@@ -28,7 +28,7 @@ public sealed class GameWorld(IReadOnlyList<PlayerSlot> slots, GameOptions optio
     public int LevelVersion { get; private set; }
 
     /// <summary>Events produced this tick, sent and counted by the session.</summary>
-    public List<PendingEvent> Events { get; } = [];
+    public List<GameEvent> Events { get; } = [];
 
     public IReadOnlyList<PlayerEntity> Players => slots.Where(s => s.Entity is not null).Select(s => s.Entity!).ToList();
 

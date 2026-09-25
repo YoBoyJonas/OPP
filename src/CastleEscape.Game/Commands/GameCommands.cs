@@ -1,5 +1,4 @@
 using CastleEscape.Contracts;
-using CastleEscape.Contracts.Realtime;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Events;
 using CastleEscape.Game.Patterns;
@@ -102,8 +101,7 @@ public sealed class RestartLevelCommand(long sequence, Guid playerId) : IGameCom
         }
 
         world.StartOn(world.FreshCopy());
-        world.Events.Add(PendingEvent.Of(GameEventTypes.LevelRestarted, playerId,
-            $"{requestedBy.Name} restarted level {world.Level!.Index}.", new { level = world.Level.Index }));
+        world.Events.Add(new LevelRestarted(playerId, $"{requestedBy.Name} restarted level {world.Level!.Index}.", world.Level.Index));
         return true;
     }
 
@@ -138,9 +136,8 @@ public sealed class GivePowerCommand(long sequence, Guid playerId, PowerGrant gr
         }
         _previous = player.Powers.Get(grant.Power)?.Copy();
         var power = player.Powers.Gain(grant, durationSeconds, maxLevel);
-        world.Events.Add(PendingEvent.Of(GameEventTypes.PowerGained, playerId,
-            $"{player.Name} was given {power.Power} (level {power.Level}).",
-            new { power = power.Power, level = power.Level, remainingSeconds = Math.Round(power.RemainingSeconds, 1) }));
+        world.Events.Add(new PowerGained(playerId, $"{player.Name} was given {power.Power} (level {power.Level}).",
+            power.Power, power.Level, Math.Round(power.RemainingSeconds, 1)));
         Powers.PowerRules.RefreshCombos(player, combos, world.Events);
         return true;
     }

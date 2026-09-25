@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using CastleEscape.Contracts.Realtime;
 using CastleEscape.Game.Events;
 using CastleEscape.Game.Patterns;
 using CastleEscape.Game.Sessions;
@@ -77,8 +76,7 @@ public sealed class CommandProcessor
         }
         command.Undo(world);
         entry.Undone = true;
-        world.Events.Add(PendingEvent.Of(GameEventTypes.CommandUndone, command.PlayerId, $"Undid {command.Name}: {reason}.",
-            new { command = command.Name, sequence = command.Sequence, reason }));
+        world.Events.Add(new CommandUndone(command.PlayerId, $"Undid {command.Name}: {reason}.", command.Name, command.Sequence, reason));
         return true;
     }
 

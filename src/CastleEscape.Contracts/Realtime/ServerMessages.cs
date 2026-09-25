@@ -175,6 +175,7 @@ public static class GameEventTypes
     public const string GameWon = "GameWon";
     public const string PhaseChanged = "PhaseChanged";
     public const string CommandUndone = "CommandUndone";
+    public const string SoundCue = "SoundCue";
 }
 
 /// <summary>XML settings shared by the data contracts.</summary>

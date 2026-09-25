@@ -83,6 +83,13 @@ public static class PatternEndpoints
             + "undone (D7). One player collects a coin, the other restarts the level, and UndoLastCommand() (`undoRestart`) "
             + "puts the pre-restart level, score and positions back. Returns the command history.");
 
+        app.MapDemo("observer",
+            () => Run("observer"),
+            "Observer: game events",
+            "Plays a scripted session with an extra Recorder observer attached: a coin pickup and a zombie hit. Shows what "
+            + "each observer did (client messages, HUD statistics, event log, sound cues), then detaches the Recorder and "
+            + "shows it no longer receives events.");
+
         return app;
     }
 

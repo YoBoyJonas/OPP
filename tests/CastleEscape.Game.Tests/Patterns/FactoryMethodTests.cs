@@ -15,7 +15,7 @@ public class FactoryMethodTests
 
     private static Consumable First(ConsumableKind kind) => Catalog.Consumables.First(c => c.Kind == kind);
 
-    private static ItemEffectContext Context(List<PendingEvent> events) =>
+    private static ItemEffectContext Context(List<GameEvent> events) =>
         new(Catalog.Combos, new InteractionSettings(10, 3, false), events);
 
     [Fact]
@@ -77,7 +77,7 @@ public class FactoryMethodTests
         var level = EmptyLevel();
         var player = new PlayerEntity(Guid.NewGuid(), "Ana", Catalog.GetCharacter("warrior"), new GridPos(1, 1));
         player.LoseLives(2);
-        var events = new List<PendingEvent>();
+        var events = new List<GameEvent>();
         var livesBefore = player.Lives;
 
         ItemSpawners.Spawn(level, First(ConsumableKind.Health), new GridPos(1, 2)).Apply(player, Context(events));

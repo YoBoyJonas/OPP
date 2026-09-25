@@ -1,5 +1,4 @@
 using CastleEscape.Contracts;
-using CastleEscape.Contracts.Realtime;
 using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Events;
 
@@ -14,7 +13,7 @@ public class ExitMechanism(LevelState level, DoorMode doorMode)
     private readonly HashSet<Guid> _playersOnExit = [];
 
     /// <summary>A lever is active while a player stands on it (D2).</summary>
-    public void UpdateLevers(IReadOnlyList<PlayerEntity> players, List<PendingEvent> events)
+    public void UpdateLevers(IReadOnlyList<PlayerEntity> players, List<GameEvent> events)
     {
         foreach (var lever in level.Levers)
         {
@@ -26,20 +25,19 @@ public class ExitMechanism(LevelState level, DoorMode doorMode)
             }
 
             lever.IsActive = active;
-            events.Add(PendingEvent.Of(GameEventTypes.LeverChanged, standing?.PlayerId,
-                active ? $"{standing!.Name} pulled {lever.Id}." : $"{lever.Id} was released.",
-                new { leverId = lever.Id, active }));
+            events.Add(new LeverChanged(standing?.PlayerId,
+                active ? $"{standing!.Name} pulled {lever.Id}." : $"{lever.Id} was released.", lever.Id, active));
         }
     }
 
     /// <summary>Opens or closes the door, then checks the exit. Returns true when the level is complete.</summary>
-    public bool Update(IReadOnlyList<PlayerEntity> players, List<PendingEvent> events)
+    public bool Update(IReadOnlyList<PlayerEntity> players, List<GameEvent> events)
     {
         UpdateDoor(events);
         return UpdateExit(players, events);
     }
 
-    private void UpdateDoor(List<PendingEvent> events)
+    private void UpdateDoor(List<GameEvent> events)
     {
         if (level.Door is not { } door)
         {
@@ -60,18 +58,18 @@ public class ExitMechanism(LevelState level, DoorMode doorMode)
 
         door.IsOpen = shouldBeOpen;
         events.Add(shouldBeOpen
-            ? PendingEvent.Of(GameEventTypes.DoorOpened, null, "The exit door is open!", new { doorMode })
-            : PendingEvent.Of(GameEventTypes.DoorClosed, null, "The exit door closed.", new { doorMode }));
+            ? new DoorOpened(null, "The exit door is open!", doorMode)
+            : new DoorClosed(null, "The exit door closed.", doorMode));
     }
 
-    private bool UpdateExit(IReadOnlyList<PlayerEntity> players, List<PendingEvent> events)
+    private bool UpdateExit(IReadOnlyList<PlayerEntity> players, List<GameEvent> events)
     {
         foreach (var player in players)
         {
             var onExit = !player.IsMoving && level.IsExitTile(player.Tile);
             if (onExit && _playersOnExit.Add(player.PlayerId))
             {
-                events.Add(PendingEvent.Of(GameEventTypes.PlayerReachedExit, player.PlayerId, $"{player.Name} reached the exit."));
+                events.Add(new PlayerReachedExit(player.PlayerId, $"{player.Name} reached the exit."));
             }
             else if (!onExit)
             {
