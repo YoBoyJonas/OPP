@@ -20,6 +20,7 @@ does and why. Configurable decisions name their setting.
 | D10 | Defeat ends the session in a terminal `Defeat` phase; clients return to the menu. | Lose-game diagram: "Return to main menu", "Show you lose message". | — |
 | D11 | **Levels start automatically**: when both players have chosen characters, and after each completed level. "Start level" is a server event (`LevelStarted`); the loading screen is client-side. A generation failure is retried with new seeds (`Generation:MaxAttempts`), then reported as an error. | Start-level diagram: "Player presses start level". Requirements: "Įveikus lygį automatiškai užkraunamas kitas". | — |
 | D12 | `LevelDefinition.TimeLimitSeconds` is kept but not enforced. | In the class diagram, no requirement. | — |
+| D14 | Health items restore lives **up to the character's maximum** (as the first prototype did). | Requirements say only "+1 gyvybė". An uncapped counter would make the character choice (PLR-1) meaningless after a few potions. | — |
 | D13 | The zombie section is duplicated under "Žemėlapio ir objektų generavimas"; the duplicate is ignored. The collision section's "PRI-2 + PRI-3" refers to the zombie rules (brief ZMB-2, ZMB-3). | Requirements text. | — |
 
 ## Content model
@@ -32,6 +33,11 @@ does and why. Configurable decisions name their setting.
 | C4 | Level tables (`ObstacleTable`, `ZombieTable`, `ConsumableTable`) reference content by id with a spawn weight, instead of embedding copies. | `ContentCatalog.Validate()` already checks these tables by id. Embedded copies would duplicate content and drift. |
 | C5 | `PowerCombo.RequiredPowers` becomes a list of powers. | One `PowerType` value can't express "Jump + Sprint". |
 | C6 | **The team's characters are kept**: warrior (5 lives, 3.5 tiles/s), scout (3, 6.0), swimmer (4, 4.5). | PLR-1 check: ≥ 3 characters ✔. Lives differ (5/3/4) ✔. Base speed differs ✔. The jump parameter was missing from `Characters.cs`; `content/characters.json` gives each character a distinct `BaseJumpForce` (Phase 2), which completes PLR-1. |
+
+| C7 | `content/obstacles.json` holds one generic `wall`, `water` and `pit`. Themed variants (e.g. Dungeon's murky water, Crypt's poison water) are **classes** made by the Abstract Factory in Phase 4, not extra JSON rows. | If the level tables named themed obstacles directly, nothing would be left for the factory to decide, and mixing families would only be caught by validation. |
+| C8 | Optional content values fall back to config: `PowerGrant.DurationSeconds` (null → `Game:PowerDurationSeconds`) and `LevelDefinition.RoomSize` (null → `Game:GridWidth`/`GridHeight`). The shipped content leaves both unset, so the config settings from the brief work as the brief describes. | One source of truth per number, and content can still override per item or level. |
+| C9 | **Jump parameter** (`BaseJumpForce × JumpForceMultiplier`) is the speed multiplier while crossing a pit with Jump active. | The requirements name a jump parameter but give it no meaning on a top-down grid. As a pit speed it has a visible effect and works with Jump Boots and JumpDash. |
+| C10 | Added `Obstacle.MoveSpeedMultiplier` (water 0.6) and `ZombieDefinition.MovementStrategy`. | Water must slow swimmers (FastSwim removes the penalty), and each zombie type needs a default Strategy (ZMB-1). |
 
 ## Project and protocol
 
