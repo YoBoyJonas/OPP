@@ -462,7 +462,7 @@ public class GameSession
             {
                 slot.Stats[e.Type] = slot.Stats.GetValueOrDefault(e.Type) + 1;
             }
-            Send(ClientMethods.GameEvent, new GameEventMessage(Id, NextSeq(), _tick, e.Type, e.PlayerId, e.Message, e.Data));
+            Send(ClientMethods.GameEvent, new GameEventMessage(Id, NextSeq(), _tick, e.Type, e.PlayerId, e.Message, new Dictionary<string, string>(e.Data)));
         }
         _events.Clear();
     }

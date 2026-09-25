@@ -1,3 +1,6 @@
+using System.Runtime.Serialization;
+using CastleEscape.Contracts.Realtime;
+
 namespace CastleEscape.Contracts.Sessions;
 
 /// <summary>Body of <c>POST /api/sessions</c>.</summary>
@@ -32,7 +35,13 @@ public sealed record SessionSummary(Guid SessionId, string JoinCode, SessionPhas
 /// <param name="Name">Display name.</param>
 /// <param name="CharacterId">Chosen character, or null while choosing.</param>
 /// <param name="Connected">Whether the player has a live hub connection.</param>
-public sealed record SessionPlayerDto(Guid PlayerId, int Slot, string Name, string? CharacterId, bool Connected);
+[DataContract(Namespace = Xml.Namespace)]
+public sealed record SessionPlayerDto(
+    [property: DataMember] Guid PlayerId,
+    [property: DataMember] int Slot,
+    [property: DataMember] string Name,
+    [property: DataMember] string? CharacterId,
+    [property: DataMember] bool Connected);
 
 /// <summary>Lobby view of a session.</summary>
 /// <param name="SessionId">Session id.</param>
@@ -41,13 +50,14 @@ public sealed record SessionPlayerDto(Guid PlayerId, int Slot, string Name, stri
 /// <param name="LevelIndex">Current level (1-10), or 0 before the first level.</param>
 /// <param name="MaxLevel">Number of levels in the run.</param>
 /// <param name="Players">Joined players in slot order.</param>
+[DataContract(Namespace = Xml.Namespace)]
 public sealed record SessionDto(
-    Guid SessionId,
-    string JoinCode,
-    SessionPhase Phase,
-    int LevelIndex,
-    int MaxLevel,
-    IReadOnlyList<SessionPlayerDto> Players);
+    [property: DataMember] Guid SessionId,
+    [property: DataMember] string JoinCode,
+    [property: DataMember] SessionPhase Phase,
+    [property: DataMember] int LevelIndex,
+    [property: DataMember] int MaxLevel,
+    [property: DataMember] SessionPlayerDto[] Players);
 
 /// <summary>Body of <c>POST /api/sessions/{id}/input</c>: the direction key now held.</summary>
 /// <param name="Direction">Up/Down/Left/Right on key down; None on key up.</param>

@@ -27,5 +27,5 @@ public sealed record PowerSummary(
     PowerType Power,
     bool IsSuperPower,
     double? DurationSeconds,
-    IReadOnlyList<string> GrantedByItems,
-    IReadOnlyList<PowerType> RequiredPowers);
+    string[] GrantedByItems,
+    PowerType[] RequiredPowers);

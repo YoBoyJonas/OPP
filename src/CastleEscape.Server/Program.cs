@@ -2,7 +2,7 @@ using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Generation;
 using CastleEscape.Game.Sessions;
-using CastleEscape.Server;
+using CastleEscape.Game.Messaging;
 using CastleEscape.Server.Endpoints;
 using CastleEscape.Server.Hubs;
 using CastleEscape.Server.OpenApi;

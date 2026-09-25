@@ -30,7 +30,7 @@ public class LobbyTests(WebApplicationFactory<Program> factory) : IClassFixture<
         Assert.All(session.Players, p => Assert.Equal("scout", p.CharacterId));
 
         var state = await http.GetFromJsonAsync<TickStateMessage>($"/api/sessions/{sessionId}/state", Api.Json, Ct);
-        Assert.Equal(2, state!.Players.Count);
+        Assert.Equal(2, state!.Players.Length);
         var layout = await http.GetFromJsonAsync<LevelLayoutResponse>($"/api/sessions/{sessionId}/level", Api.Json, Ct);
         Assert.Equal((24, 16), (layout!.Width, layout.Height));
         var hud = await http.GetFromJsonAsync<HudResponse>($"/api/sessions/{sessionId}/hud", Api.Json, Ct);
@@ -165,5 +165,32 @@ public class TwoPlayerRunTests(TutorialFactory factory) : IClassFixture<Tutorial
         Assert.Contains(ana.Events, e => e.Type == GameEventTypes.DoorOpened);
         Assert.Contains(ben.Events, e => e.Type == GameEventTypes.LevelCompleted);
         Assert.Empty(ana.Errors);
+    }
+}
+
+public class StateFormatTests(TutorialFactory factory) : IClassFixture<TutorialFactory>
+{
+    [Fact]
+    public async Task State_AsXml_ViaQueryAndAcceptHeader()
+    {
+        var http = factory.CreateClient();
+        var (sessionId, _, _) = await Api.StartTwoPlayerGame(http);
+        await Api.Eventually(async () => (await http.GetAsync($"/api/sessions/{sessionId}/state", Api.Ct)).IsSuccessStatusCode ? "ok" : null,
+            TimeSpan.FromSeconds(5));
+
+        var byQuery = await http.GetAsync($"/api/sessions/{sessionId}/state?format=xml", Api.Ct);
+        var request = new HttpRequestMessage(HttpMethod.Get, $"/api/sessions/{sessionId}/state");
+        request.Headers.Add("Accept", "application/xml");
+        var byHeader = await http.SendAsync(request, Api.Ct);
+
+        foreach (var response in new[] { byQuery, byHeader })
+        {
+            Assert.Equal("application/xml", response.Content.Headers.ContentType?.MediaType);
+            var xml = System.Xml.Linq.XDocument.Parse(await response.Content.ReadAsStringAsync(Api.Ct));
+            Assert.Equal("TickStateMessage", xml.Root!.Name.LocalName);
+        }
+
+        var bad = await http.GetAsync($"/api/sessions/{sessionId}/state?format=yaml", Api.Ct);
+        Assert.Equal(HttpStatusCode.BadRequest, bad.StatusCode);
     }
 }

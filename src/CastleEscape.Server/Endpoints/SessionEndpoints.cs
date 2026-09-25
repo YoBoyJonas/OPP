@@ -72,7 +72,7 @@ public static class SessionEndpoints
 
     private static Ok<List<SessionSummary>> List(SessionRegistry registry) =>
         TypedResults.Ok(registry.All
-            .Select(s => new SessionSummary(s.Id, s.JoinCode, s.Phase, s.Snapshot.Session.Players.Count))
+            .Select(s => new SessionSummary(s.Id, s.JoinCode, s.Phase, s.Snapshot.Session.Players.Length))
             .ToList());
 
     private static Ok<SessionDto> Get(Guid sessionId, SessionRegistry registry) =>

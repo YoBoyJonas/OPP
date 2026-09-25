@@ -31,6 +31,12 @@ public static class PatternEndpoints
             "Starts `threads` threads through a Barrier; all read ContentCatalog.Instance at once. Reports distinct "
             + "instances (1) and creations (1). With `naive=true` the same race against a lock-free holder makes several.");
 
+        app.MapDemo("adapter",
+            (string format = "xml") => Run("adapter", ("format", format)),
+            "Adapter: JSON / XML serializers",
+            "Serializes a real tick state through IMessageSerializer (`format=json|xml`), round-trips it, and counts "
+            + "the members of the 3-member target against the adaptees JsonSerializer and DataContractSerializer.");
+
         return app;
     }
 

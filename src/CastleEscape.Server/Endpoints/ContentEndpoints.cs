@@ -83,11 +83,11 @@ public static class ContentEndpoints
                 g.Key,
                 IsSuperPower: false,
                 g.First().Grant!.DurationSeconds ?? options.Value.PowerDurationSeconds,
-                g.Select(c => c.Id).ToList(),
+                g.Select(c => c.Id).ToArray(),
                 []));
 
         var superPowers = catalog.Combos.Select(combo => new PowerSummary(
-            combo.Granted, IsSuperPower: true, DurationSeconds: null, [], combo.RequiredPowers));
+            combo.Granted, IsSuperPower: true, DurationSeconds: null, [], combo.RequiredPowers.ToArray()));
 
         return basePowers.Concat(superPowers).ToList();
     }

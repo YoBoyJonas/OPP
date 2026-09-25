@@ -15,15 +15,15 @@ public static class SnapshotMapper
     public static SessionDto ToSessionDto(Guid sessionId, string joinCode, SessionPhase phase, int levelIndex, int maxLevel,
         IEnumerable<PlayerSlot> slots) =>
         new(sessionId, joinCode, phase, levelIndex, maxLevel,
-            slots.Select(s => new SessionPlayerDto(s.PlayerId, s.Slot, s.Name, s.CharacterId, s.Connected)).ToList());
+            slots.Select(s => new SessionPlayerDto(s.PlayerId, s.Slot, s.Name, s.CharacterId, s.Connected)).ToArray());
 
     public static TickStateMessage ToTickState(Guid sessionId, long seq, long tick, SessionPhase phase, LevelState level,
         IEnumerable<PlayerSlot> slots) =>
         new(sessionId, seq, tick, phase, level.Index, level.Door is { IsOpen: true },
-            slots.Where(s => s.Entity is not null).Select(s => ToPlayerState(s, s.Entity!)).ToList(),
-            level.Zombies.Select(ToZombieState).ToList(),
-            level.Items.Select(ToItemState).ToList(),
-            level.Levers.Select(l => new LeverStateDto(l.Id, l.Tile.X, l.Tile.Y, l.IsActive)).ToList());
+            slots.Where(s => s.Entity is not null).Select(s => ToPlayerState(s, s.Entity!)).ToArray(),
+            level.Zombies.Select(ToZombieState).ToArray(),
+            level.Items.Select(ToItemState).ToArray(),
+            level.Levers.Select(l => new LeverStateDto(l.Id, l.Tile.X, l.Tile.Y, l.IsActive)).ToArray());
 
     public static LevelStartedMessage ToLevelStarted(Guid sessionId, long seq, long tick, LevelState level, TickStateMessage state) =>
         new(sessionId, seq, tick, level.Index, level.Theme, level.Grid.Width, level.Grid.Height, ToRows(level), state);
@@ -43,11 +43,11 @@ public static class SnapshotMapper
             {
                 var p = s.Entity!;
                 return new HudPlayerDto(p.PlayerId, s.Slot, p.Name, p.Character.Id, p.Lives, p.MaxLives, p.Score,
-                    ToPowers(p), p.Combos.Select(c => c.Granted).ToList(), new Dictionary<string, int>(s.Stats));
-            }).ToList());
+                    ToPowers(p), p.Combos.Select(c => c.Granted).ToArray(), new Dictionary<string, int>(s.Stats));
+            }).ToArray());
 
     /// <summary>The level as legend rows: terrain, with entity characters at their starting positions.</summary>
-    public static IReadOnlyList<string> ToRows(LevelState level)
+    public static string[] ToRows(LevelState level)
     {
         var grid = level.Grid;
         var chars = new char[grid.Height][];
@@ -70,7 +70,7 @@ public static class SnapshotMapper
             Mark(level.StartTiles[1], MapLegend.Player2Start);
         }
 
-        return chars.Select(r => new string(r)).ToList();
+        return chars.Select(r => new string(r)).ToArray();
     }
 
     private static char ItemChar(ItemEntity item) => item.Kind switch
@@ -90,11 +90,11 @@ public static class SnapshotMapper
         var (x, y) = p.RenderPosition;
         return new PlayerStateDto(p.PlayerId, slot.Slot, p.Name, p.Character.Id, p.Tile.X, p.Tile.Y,
             Math.Round(x, 3), Math.Round(y, 3), p.Facing, p.IsMoving, p.Lives, p.MaxLives, p.Score,
-            ToPowers(p), p.Combos.Select(c => c.Granted).ToList());
+            ToPowers(p), p.Combos.Select(c => c.Granted).ToArray());
     }
 
-    private static List<ActivePowerDto> ToPowers(PlayerEntity p) =>
-        p.Powers.OrderBy(a => a.Power).Select(a => new ActivePowerDto(a.Power, Math.Round(a.RemainingSeconds, 2), a.Level)).ToList();
+    private static ActivePowerDto[] ToPowers(PlayerEntity p) =>
+        p.Powers.OrderBy(a => a.Power).Select(a => new ActivePowerDto(a.Power, Math.Round(a.RemainingSeconds, 2), a.Level)).ToArray();
 
     private static ZombieStateDto ToZombieState(ZombieEntity z)
     {

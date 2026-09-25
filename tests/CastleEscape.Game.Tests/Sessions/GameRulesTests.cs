@@ -125,7 +125,7 @@ public class GameRulesTests
             new GameOptions { PowerDurationSeconds = 1, LevelTransitionSeconds = 0 });
 
         game.Hold(game.P1, Direction.Right);
-        game.RunUntil(() => game.Player(game.P1).Powers.Count == 1);
+        game.RunUntil(() => game.Player(game.P1).Powers.Length == 1);
         game.RunSeconds(1.2);
 
         Assert.Empty(game.Player(game.P1).Powers);
@@ -153,7 +153,7 @@ public class GameRulesTests
         var game = TestGame.Start(["##########", $"#1{first}{second}....2#", "##########"]);
 
         game.Hold(game.P1, Direction.Right);
-        game.RunUntil(() => game.Player(game.P1).Combos.Count > 0);
+        game.RunUntil(() => game.Player(game.P1).Combos.Length > 0);
 
         Assert.Equal([combo], game.Player(game.P1).Combos);
         Assert.Single(game.EventsOf(GameEventTypes.ComboActivated));

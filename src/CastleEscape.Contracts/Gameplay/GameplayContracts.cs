@@ -16,8 +16,8 @@ public sealed record LevelLayoutResponse(
     int Seed,
     int Width,
     int Height,
-    IReadOnlyList<string> Rows,
-    IReadOnlyDictionary<string, string> Legend);
+    string[] Rows,
+    Dictionary<string, string> Legend);
 
 /// <summary>The "View game state" table (view-game-state activity diagram).</summary>
 /// <param name="SessionId">Session id.</param>
@@ -42,7 +42,7 @@ public sealed record HudResponse(
     int LeversTotal,
     bool DoorOpen,
     int ItemsRemaining,
-    IReadOnlyList<HudPlayerDto> Players);
+    HudPlayerDto[] Players);
 
 /// <summary>A player's row in the HUD table.</summary>
 public sealed record HudPlayerDto(
@@ -53,6 +53,6 @@ public sealed record HudPlayerDto(
     int Lives,
     int MaxLives,
     int Score,
-    IReadOnlyList<Realtime.ActivePowerDto> Powers,
-    IReadOnlyList<PowerType> Combos,
-    IReadOnlyDictionary<string, int> Stats);
+    Realtime.ActivePowerDto[] Powers,
+    PowerType[] Combos,
+    Dictionary<string, int> Stats);

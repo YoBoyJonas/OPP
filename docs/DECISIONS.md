@@ -56,6 +56,7 @@ does and why. Configurable decisions name their setting.
 | P8 | Tests use xUnit v3 with plain `Assert`. | Brief §10. No licensed assertion libraries. |
 | P10 | **Threading**: each session has one lock. Only `Tick` changes the world. Hub/REST input is queued (sequence-numbered) and applied at the start of the next tick. Lobby calls (join, pick character, leave) take the lock briefly, because they must answer synchronously. REST reads use the immutable snapshot published after each tick and never take the lock. | Brief §4. The lobby exception keeps create/join responses immediate without a second queue. |
 | P11 | `Generation:PresetLevel` (e.g. `tutorial`) makes every level a preset map. Used by integration tests, demos and the playground. | Deterministic multiplayer runs without changing code. |
+| P12 | Wire DTOs in `CastleEscape.Contracts` use arrays and `Dictionary<,>` (not `IReadOnlyList`/`IReadOnlyDictionary`). Realtime and session messages carry `[DataContract]`/`[DataMember]`. | `DataContractSerializer` (XML adaptee, NET-2) can't construct positional records without them, and can't serialize interface-typed collections whose runtime type is compiler-generated. The JSON is unchanged. |
 | P9 | Changes to Jonas's server code stay minimal until the rewrite list in `IMPLEMENTATION_PLAN.md` is confirmed. Phase 1 changed only namespaces and the hub path. | The team hasn't confirmed the rewrite scope yet (open question 3). |
 
 ## Course context notes

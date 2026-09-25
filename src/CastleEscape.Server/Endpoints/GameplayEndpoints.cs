@@ -2,6 +2,7 @@ using CastleEscape.Contracts;
 using CastleEscape.Contracts.Gameplay;
 using CastleEscape.Contracts.Realtime;
 using CastleEscape.Contracts.Sessions;
+using CastleEscape.Game.Messaging;
 using CastleEscape.Game.Sessions;
 using CastleEscape.Server.OpenApi;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -38,7 +39,10 @@ public static class GameplayEndpoints
         group.MapGet("/state", GetState)
             .WithName("GetGameState")
             .WithSummary("Latest game state")
-            .WithDescription("The latest per-tick state: players, zombies, items, levers, door.")
+            .WithDescription("The latest per-tick state: players, zombies, items, levers, door. "
+                             + "JSON by default; `?format=xml` or `Accept: application/xml` for XML (NET-2, Adapter pattern).")
+            .Produces<TickStateMessage>(StatusCodes.Status200OK, "application/json", "application/xml")
+            .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status409Conflict);
 
@@ -77,8 +81,21 @@ public static class GameplayEndpoints
         return TypedResults.Accepted((string?)null);
     }
 
-    private static Ok<TickStateMessage> GetState(Guid sessionId, SessionRegistry registry) =>
-        TypedResults.Ok(registry.Get(sessionId).Snapshot.State ?? throw NoLevel());
+    /// <summary>JSON or XML through the Adapter (IMessageSerializer): <c>?format=</c> wins over the Accept header.</summary>
+    private static IResult GetState(Guid sessionId, string? format, HttpRequest request, SessionRegistry registry)
+    {
+        var state = registry.Get(sessionId).Snapshot.State ?? throw NoLevel();
+        IMessageSerializer serializer;
+        try
+        {
+            serializer = MessageSerializers.Choose(format, request.Headers.Accept);
+        }
+        catch (ArgumentException ex)
+        {
+            throw new GameException(GameErrorCode.InvalidRequest, ex.Message);
+        }
+        return Results.Text(serializer.Serialize(state), serializer.ContentType, System.Text.Encoding.UTF8);
+    }
 
     private static Ok<LevelLayoutResponse> GetLevel(Guid sessionId, SessionRegistry registry) =>
         TypedResults.Ok(registry.Get(sessionId).Snapshot.Layout ?? throw NoLevel());
