@@ -111,12 +111,13 @@ app.MapContentEndpoints();
 app.MapLevelEndpoints();
 app.MapSessionEndpoints();
 app.MapGameplayEndpoints();
+app.MapRealtimeEndpoints();
 app.MapPatternEndpoints();
 if (app.Services.GetRequiredService<IOptions<DevToolsOptions>>().Value.Enabled)
 {
     app.MapDevEndpoints();
 }
-app.MapHub<GameHub>("/hubs/game");
+app.MapHub<GameHub>(RealtimeEndpoints.HubPath);
 
 app.Run();
 
