@@ -147,6 +147,14 @@ var sends = game.Tick(tickSeconds)                                              
     .ToList();
 ```
 
+## Requirement: "at least 2 client classes, at least 3 subsystem classes"
+
+- **Clients (5):** `GameHub`, `SessionEndpoints`, `GameplayEndpoints`, `GameLoopService` (server) and `FacadeDemo` (console).
+- **Subsystems (4, plus what they own):** `SessionRegistry`, `GameSession` (with `CommandProcessor`, `GameWorld`,
+  `GameEventPublisher`), `GameLoopScheduler`, `ContentCatalog`.
+
+`FacadeRequirementTests` (server) counts the server classes that depend on `GameFacade`.
+
 ## Demonstration
 
 `FacadeDemo` builds the subsystems once, the way `Program.cs` does, and then plays a complete

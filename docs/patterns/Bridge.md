@@ -129,6 +129,12 @@ var channels = realtime.EnabledChannels.Distinct().Select(c => c switch
 return ClientNotifiers.For(channels, new Dictionary<string, int> { ["Polling"] = realtime.PollingStateEveryNthTick });
 ```
 
+## Requirement: "at least 2 abstractions and 2 implementations; how it differs from Strategy and Adapter"
+
+- **Abstractions:** `ClientNotifier`, refined into `StateNotifier` and `EventNotifier`.
+- **Implementations:** `SignalRClientChannel` and `PollingBufferChannel`, plus the demo's `CountingChannel`.
+- **Differences:** see the last two rows of the table at the end of this page.
+
 ## Demonstration
 
 The demo runs a real session for 40 ticks over two channels. One is the polling buffer, the other a
