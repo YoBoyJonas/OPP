@@ -191,6 +191,28 @@ public class GameSession
     public void RequestRestart(Guid playerId) =>
         _commands.Enqueue(new RestartLevelCommand(_commands.NextSequence(), playerId));
 
+    /// <summary>Dev tools: every zombie of the current level chases with <paramref name="kind"/>, from the next tick (undoable).</summary>
+    public void SetZombieStrategy(MovementStrategyKind kind) =>
+        _commands.Enqueue(new SetZombieStrategyCommand(_commands.NextSequence(), kind));
+
+    /// <summary>Dev tools: completes the current level now, as if both players had reached the exit.</summary>
+    public void SkipLevel()
+    {
+        lock (_gate)
+        {
+            if (Phase != SessionPhase.Playing)
+            {
+                throw new GameException(GameErrorCode.WrongPhase, $"Only a level being played can be skipped, not in phase {Phase}.");
+            }
+            var index = _world.Level!.Index;
+            Emit(new LevelCompleted(null, $"Level {index} skipped (dev tools).", index));
+            _transitionLeft = _options.LevelTransitionSeconds;
+            SetPhase(SessionPhase.LevelComplete);
+            FlushEvents();
+            _snapshot = BuildSnapshot();
+        }
+    }
+
     /// <summary>Dev tools: gives a base power without an item, from the next tick.</summary>
     public void GivePower(Guid playerId, PowerType power, double? durationSeconds = null)
     {

@@ -59,6 +59,10 @@ builder.Services.AddSingleton(sp =>
     return scheduler;
 });
 builder.Services.AddSingleton<GameFacade>();
+builder.Services.AddSingleton(sp => new DevActions(
+    sp.GetRequiredService<SessionRegistry>(),
+    sp.GetRequiredService<ContentCatalog>(),
+    sp.GetRequiredService<IOptions<PatternOptions>>().Value));
 
 // Bridge: notifiers (what to send) over channels (how), both picked from Realtime settings.
 builder.Services.AddSingleton(sp => new PollingBufferChannel(sp.GetRequiredService<IOptions<RealtimeOptions>>().Value.PollingBufferSize));
@@ -103,6 +107,10 @@ app.MapContentEndpoints();
 app.MapSessionEndpoints();
 app.MapGameplayEndpoints();
 app.MapPatternEndpoints();
+if (app.Services.GetRequiredService<IOptions<DevToolsOptions>>().Value.Enabled)
+{
+    app.MapDevEndpoints();
+}
 app.MapHub<GameHub>("/hubs/game");
 
 app.Run();

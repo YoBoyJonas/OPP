@@ -149,3 +149,37 @@ public sealed class GivePowerCommand(long sequence, Guid playerId, PowerGrant gr
         player.Powers.RefreshCombos(combos);
     }
 }
+
+/// <summary>Dev tools: every zombie in the level switches to one chase strategy (Strategy pattern). Undo restores each zombie's own.</summary>
+[DesignPattern("Command", "ConcreteCommand")]
+public sealed class SetZombieStrategyCommand(long sequence, MovementStrategyKind kind) : IGameCommand
+{
+    private readonly Dictionary<string, AI.IZombieMovementStrategy> _previous = [];
+
+    public Guid? PlayerId => null;
+    public long Sequence => sequence;
+    public string Name => $"SetZombieStrategy {kind}";
+
+    public bool Execute(GameWorld world)
+    {
+        if (world.Level is null)
+        {
+            return false;
+        }
+        _previous.Clear();
+        foreach (var zombie in world.Level.Zombies)
+        {
+            _previous[zombie.Id] = zombie.Strategy;
+            zombie.Strategy = AI.ZombieStrategies.For(kind);
+        }
+        return true;
+    }
+
+    public void Undo(GameWorld world)
+    {
+        foreach (var zombie in world.Level!.Zombies.Where(z => _previous.ContainsKey(z.Id)))
+        {
+            zombie.Strategy = _previous[zombie.Id];
+        }
+    }
+}
