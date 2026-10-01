@@ -3,6 +3,17 @@ using CastleEscape.Contracts.Sessions;
 
 namespace CastleEscape.Contracts.Realtime;
 
+/// <summary>What every server-to-client message has: its session, its order and the tick it was made in.</summary>
+public interface IServerMessage
+{
+    Guid SessionId { get; }
+
+    /// <summary>Monotonic per session; polling clients ask for messages after the last one they saw.</summary>
+    long Seq { get; }
+
+    long Tick { get; }
+}
+
 // Every message the server sends carries SessionId, Seq (monotonic per session) and Tick.
 // [DataContract]/[DataMember] and concrete collection types (arrays, Dictionary) make the messages
 // serializable to XML as well as JSON (NET-2; see the Adapter pattern: XmlMessageSerializerAdapter).
@@ -13,7 +24,7 @@ public sealed record SessionUpdatedMessage(
     [property: DataMember] Guid SessionId,
     [property: DataMember] long Seq,
     [property: DataMember] long Tick,
-    [property: DataMember] SessionDto Session);
+    [property: DataMember] SessionDto Session) : IServerMessage;
 
 /// <summary>Sent once per level start and restart: the static layout plus the initial dynamic state.</summary>
 /// <param name="SessionId">Session id.</param>
@@ -35,7 +46,7 @@ public sealed record LevelStartedMessage(
     [property: DataMember] int Width,
     [property: DataMember] int Height,
     [property: DataMember] string[] Rows,
-    [property: DataMember] TickStateMessage State);
+    [property: DataMember] TickStateMessage State) : IServerMessage;
 
 /// <summary>Dynamic state, sent every tick while playing.</summary>
 /// <param name="SessionId">Session id.</param>
@@ -59,7 +70,7 @@ public sealed record TickStateMessage(
     [property: DataMember] PlayerStateDto[] Players,
     [property: DataMember] ZombieStateDto[] Zombies,
     [property: DataMember] ItemStateDto[] Items,
-    [property: DataMember] LeverStateDto[] Levers);
+    [property: DataMember] LeverStateDto[] Levers) : IServerMessage;
 
 /// <summary>A player in the tick state. <c>X</c>/<c>Y</c> are interpolated for smooth rendering.</summary>
 [DataContract(Namespace = Xml.Namespace)]
@@ -135,7 +146,7 @@ public sealed record GameEventMessage(
     [property: DataMember] string Type,
     [property: DataMember] Guid? PlayerId,
     [property: DataMember] string Message,
-    [property: DataMember] Dictionary<string, string> Data);
+    [property: DataMember] Dictionary<string, string> Data) : IServerMessage;
 
 /// <summary>Something went wrong for this client or session.</summary>
 [DataContract(Namespace = Xml.Namespace)]
@@ -144,7 +155,7 @@ public sealed record ErrorMessage(
     [property: DataMember] long Seq,
     [property: DataMember] long Tick,
     [property: DataMember] GameErrorCode Code,
-    [property: DataMember] string Message);
+    [property: DataMember] string Message) : IServerMessage;
 
 /// <summary>Reply to <c>Ping()</c>.</summary>
 [DataContract(Namespace = Xml.Namespace)]
@@ -152,7 +163,7 @@ public sealed record PongMessage(
     [property: DataMember] Guid SessionId,
     [property: DataMember] long Seq,
     [property: DataMember] long Tick,
-    [property: DataMember] DateTimeOffset ServerTimeUtc);
+    [property: DataMember] DateTimeOffset ServerTimeUtc) : IServerMessage;
 
 /// <summary>Names used in <see cref="GameEventMessage.Type"/>.</summary>
 public static class GameEventTypes
@@ -184,3 +195,16 @@ public static class Xml
     /// <summary>Namespace of every Castle Escape XML element.</summary>
     public const string Namespace = "urn:castle-escape";
 }
+
+/// <summary>Messages read from the polling channel (<c>GET /api/sessions/{id}/messages</c>).</summary>
+/// <param name="SessionId">Session id.</param>
+/// <param name="ContentType">Format of every <c>Body</c>: application/json or application/xml.</param>
+/// <param name="LatestSeq">Highest sequence number returned (pass it as <c>afterSeq</c> next time); the request's <c>afterSeq</c> if none.</param>
+/// <param name="Messages">The buffered messages after <c>afterSeq</c>, oldest first.</param>
+public sealed record PolledMessagesResponse(Guid SessionId, string ContentType, long LatestSeq, PolledMessageDto[] Messages);
+
+/// <summary>One buffered message: the client method it stands for and its serialized payload.</summary>
+/// <param name="Seq">Message sequence number.</param>
+/// <param name="Method">Client method name, as in SignalR (e.g. StateUpdated).</param>
+/// <param name="Body">The payload, serialized in the requested format.</param>
+public sealed record PolledMessageDto(long Seq, string Method, string Body);

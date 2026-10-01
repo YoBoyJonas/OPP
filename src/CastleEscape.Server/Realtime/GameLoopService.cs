@@ -1,9 +1,7 @@
 using System.Diagnostics;
-using CastleEscape.Contracts.Realtime;
 using CastleEscape.Game.Configuration;
+using CastleEscape.Game.Messaging;
 using CastleEscape.Game.Sessions;
-using CastleEscape.Server.Hubs;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 
 namespace CastleEscape.Server.Realtime;
@@ -53,12 +51,13 @@ public sealed class GameLoopStats
 }
 
 /// <summary>
-/// Ticks every active session at <c>Game:TickRate</c> Hz and pushes their messages to the SignalR group.
+/// Ticks every active session at <c>Game:TickRate</c> Hz and hands their messages to the client notifiers
+/// (Bridge: one state and one event notifier per enabled channel, <c>Realtime:EnabledChannels</c>).
 /// A session whose tick throws is logged and aborted; the others keep running.
 /// </summary>
 public sealed class GameLoopService(
     SessionRegistry registry,
-    IHubContext<GameHub, IGameClient> hub,
+    IReadOnlyList<ClientNotifier> notifiers,
     IOptions<GameOptions> options,
     GameLoopStats stats,
     ILogger<GameLoopService> logger) : BackgroundService
@@ -91,7 +90,7 @@ public sealed class GameLoopService(
 
                 foreach (var message in session.DrainOutbox())
                 {
-                    sends.Add(Send(session.Id, message));
+                    sends.AddRange(ClientNotifiers.Dispatch(notifiers, session.Id, message));
                 }
             }
 
@@ -105,19 +104,5 @@ public sealed class GameLoopService(
             }
             stats.Record(watch.Elapsed);
         }
-    }
-
-    private Task Send(Guid sessionId, OutgoingMessage message)
-    {
-        var group = hub.Clients.Group(GameHub.GroupName(sessionId));
-        return message.Payload switch
-        {
-            SessionUpdatedMessage m => group.SessionUpdated(m),
-            LevelStartedMessage m => group.LevelStarted(m),
-            TickStateMessage m => group.StateUpdated(m),
-            GameEventMessage m => group.GameEvent(m),
-            ErrorMessage m => group.Error(m),
-            _ => Task.CompletedTask,
-        };
     }
 }

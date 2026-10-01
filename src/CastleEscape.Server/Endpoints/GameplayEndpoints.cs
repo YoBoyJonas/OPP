@@ -2,10 +2,12 @@ using CastleEscape.Contracts;
 using CastleEscape.Contracts.Gameplay;
 using CastleEscape.Contracts.Realtime;
 using CastleEscape.Contracts.Sessions;
+using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Messaging;
 using CastleEscape.Game.Sessions;
 using CastleEscape.Server.OpenApi;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Options;
 
 namespace CastleEscape.Server.Endpoints;
 
@@ -46,6 +48,17 @@ public static class GameplayEndpoints
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status409Conflict);
 
+        group.MapGet("/messages", GetMessages)
+            .WithTags(ApiTags.Realtime)
+            .WithName("PollMessages")
+            .WithSummary("Read buffered messages (polling channel)")
+            .WithDescription("The same messages SignalR pushes, kept in a per-session buffer for clients without a hub "
+                             + "connection (Bridge pattern: the polling channel). Pass the last `seq` you saw as `afterSeq`. "
+                             + "Each `body` is serialized as `format=json|xml`. StateUpdated is buffered every "
+                             + "`Realtime:PollingStateEveryNthTick` ticks; events are never skipped.")
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
         group.MapGet("/level", GetLevel)
             .WithName("GetLevelLayout")
             .WithSummary("Static layout of the current level")
@@ -85,16 +98,37 @@ public static class GameplayEndpoints
     private static IResult GetState(Guid sessionId, string? format, HttpRequest request, SessionRegistry registry)
     {
         var state = registry.Get(sessionId).Snapshot.State ?? throw NoLevel();
-        IMessageSerializer serializer;
+        var serializer = ChooseSerializer(format, request);
+        return Results.Text(serializer.Serialize(state), serializer.ContentType, System.Text.Encoding.UTF8);
+    }
+
+    private static Ok<PolledMessagesResponse> GetMessages(Guid sessionId, long? afterSeq, string? format, HttpRequest request,
+        SessionRegistry registry, PollingBufferChannel polling, IOptions<RealtimeOptions> realtime)
+    {
+        registry.Get(sessionId);
+        if (!realtime.Value.EnabledChannels.Contains(RealtimeChannel.Polling))
+        {
+            throw new GameException(GameErrorCode.InvalidRequest, "The polling channel is disabled (Realtime:EnabledChannels).");
+        }
+        var serializer = ChooseSerializer(format, request);
+        var after = afterSeq ?? 0;
+        var messages = polling.Read(sessionId, after)
+            .Select(m => new PolledMessageDto(m.Seq, m.Method, serializer.Serialize(m.Message)))
+            .ToArray();
+        return TypedResults.Ok(new PolledMessagesResponse(sessionId, serializer.ContentType,
+            messages.Length > 0 ? messages[^1].Seq : after, messages));
+    }
+
+    private static IMessageSerializer ChooseSerializer(string? format, HttpRequest request)
+    {
         try
         {
-            serializer = MessageSerializers.Choose(format, request.Headers.Accept);
+            return MessageSerializers.Choose(format, request.Headers.Accept);
         }
         catch (ArgumentException ex)
         {
             throw new GameException(GameErrorCode.InvalidRequest, ex.Message);
         }
-        return Results.Text(serializer.Serialize(state), serializer.ContentType, System.Text.Encoding.UTF8);
     }
 
     private static Ok<LevelLayoutResponse> GetLevel(Guid sessionId, SessionRegistry registry) =>

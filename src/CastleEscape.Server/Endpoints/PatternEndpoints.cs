@@ -90,6 +90,14 @@ public static class PatternEndpoints
             + "each observer did (client messages, HUD statistics, event log, sound cues), then detaches the Recorder and "
             + "shows it no longer receives events.");
 
+        app.MapDemo("bridge",
+            (int ticks = 40, int pollingEvery = 5, string format = "xml") =>
+                Run("bridge", ("ticks", ticks), ("pollingEvery", pollingEvery), ("format", format)),
+            "Bridge: notifiers over channels",
+            "Runs a real session for `ticks` ticks and dispatches its messages through a StateNotifier and an EventNotifier "
+            + "on each of two channels: the polling buffer (states every `pollingEvery` ticks) and a counting channel "
+            + "written for the demo. Shows what each pair sent and one polled message in `format`.");
+
         return app;
     }
 

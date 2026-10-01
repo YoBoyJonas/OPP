@@ -46,6 +46,20 @@ builder.Services.AddSingleton(sp => new SessionRegistry(
     sp.GetRequiredService<IOptions<GameOptions>>().Value,
     sp.GetRequiredService<IOptions<PatternOptions>>().Value));
 builder.Services.AddSingleton<GameLoopStats>();
+
+// Bridge: notifiers (what to send) over channels (how), both picked from Realtime settings.
+builder.Services.AddSingleton(sp => new PollingBufferChannel(sp.GetRequiredService<IOptions<RealtimeOptions>>().Value.PollingBufferSize));
+builder.Services.AddSingleton<SignalRClientChannel>();
+builder.Services.AddSingleton<IReadOnlyList<ClientNotifier>>(sp =>
+{
+    var realtime = sp.GetRequiredService<IOptions<RealtimeOptions>>().Value;
+    var channels = realtime.EnabledChannels.Distinct().Select(c => c switch
+    {
+        RealtimeChannel.SignalR => (IClientChannel)sp.GetRequiredService<SignalRClientChannel>(),
+        _ => sp.GetRequiredService<PollingBufferChannel>(),
+    });
+    return ClientNotifiers.For(channels, new Dictionary<string, int> { ["Polling"] = realtime.PollingStateEveryNthTick });
+});
 builder.Services.AddHostedService<GameLoopService>();
 
 // Azure Linux/container hosting sets PORT; Azure App Service and local dev don't.

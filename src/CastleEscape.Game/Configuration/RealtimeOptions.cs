@@ -24,4 +24,11 @@ public sealed class RealtimeOptions
     /// <summary>How many recent messages the polling channel keeps per session.</summary>
     [Range(1, 10_000)]
     public int PollingBufferSize { get; set; } = 200;
+
+    /// <summary>
+    /// The polling channel gets every Nth tick's StateUpdated (events always). At 20 Hz a buffer of 200
+    /// would otherwise hold only 10 seconds of messages, and polling clients don't need 20 states a second.
+    /// </summary>
+    [Range(1, 100)]
+    public int PollingStateEveryNthTick { get; set; } = 5;
 }

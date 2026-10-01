@@ -194,3 +194,30 @@ public class StateFormatTests(TutorialFactory factory) : IClassFixture<TutorialF
         Assert.Equal(HttpStatusCode.BadRequest, bad.StatusCode);
     }
 }
+
+public class PollingChannelTests(TutorialFactory factory) : IClassFixture<TutorialFactory>
+{
+    [Fact]
+    public async Task Messages_ArePolledInOrder_AfterTheGivenSeq()
+    {
+        var http = factory.CreateClient();
+        var (sessionId, _, _) = await Api.StartTwoPlayerGame(http);
+
+        var first = await Api.Eventually(async () =>
+        {
+            var page = await http.GetFromJsonAsync<PolledMessagesResponse>($"/api/sessions/{sessionId}/messages", Api.Json, Api.Ct);
+            return page!.Messages.Any(m => m.Method == ClientMethods.StateUpdated) ? page : null;
+        }, TimeSpan.FromSeconds(5));
+
+        Assert.Equal("application/json", first.ContentType);
+        Assert.Contains(first.Messages, m => m.Method == ClientMethods.LevelStarted);
+        Assert.Equal(first.Messages.Select(m => m.Seq).Order(), first.Messages.Select(m => m.Seq));
+        Assert.Equal(first.Messages[^1].Seq, first.LatestSeq);
+
+        var next = await http.GetFromJsonAsync<PolledMessagesResponse>(
+            $"/api/sessions/{sessionId}/messages?afterSeq={first.LatestSeq}&format=xml", Api.Json, Api.Ct);
+        Assert.All(next!.Messages, m => Assert.True(m.Seq > first.LatestSeq));
+        Assert.Equal("application/xml", next.ContentType);
+        Assert.All(next.Messages, m => Assert.StartsWith("<?xml", m.Body));
+    }
+}
