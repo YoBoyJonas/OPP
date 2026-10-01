@@ -41,6 +41,16 @@ public sealed class GameLoopStats
         }
     }
 
+    public long FailedSends { get; private set; }
+
+    public void RecordSendFailure()
+    {
+        lock (_gate)
+        {
+            FailedSends++;
+        }
+    }
+
     public void RecordFailure()
     {
         lock (_gate)
@@ -51,16 +61,15 @@ public sealed class GameLoopStats
 }
 
 /// <summary>
-/// Ticks every active session at <c>Game:TickRate</c> Hz and hands their messages to the client notifiers
-/// (Bridge: one state and one event notifier per enabled channel, <c>Realtime:EnabledChannels</c>).
-/// A session whose tick throws is logged and aborted; the others keep running.
+/// The server's clock: every 1/<c>Game:TickRate</c> s it asks the <see cref="GameFacade"/> to advance all sessions,
+/// then hands their messages to the client notifiers (Bridge: one state and one event notifier per enabled
+/// channel, <c>Realtime:EnabledChannels</c>).
 /// </summary>
 public sealed class GameLoopService(
-    SessionRegistry registry,
+    GameFacade game,
     IReadOnlyList<ClientNotifier> notifiers,
     IOptions<GameOptions> options,
-    GameLoopStats stats,
-    ILogger<GameLoopService> logger) : BackgroundService
+    GameLoopStats stats) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -70,37 +79,16 @@ public sealed class GameLoopService(
         while (await timer.WaitForNextTickAsync(stoppingToken))
         {
             var watch = Stopwatch.StartNew();
-            var sends = new List<Task>();
-
-            foreach (var session in registry.All)
-            {
-                if (!session.IsFinished)
-                {
-                    try
-                    {
-                        session.Tick(tickSeconds);
-                    }
-                    catch (Exception ex)
-                    {
-                        stats.RecordFailure();
-                        logger.LogError(ex, "Tick failed for session {SessionId}; aborting it", session.Id);
-                        session.Fail("The server hit an error in this session and stopped it.");
-                    }
-                }
-
-                foreach (var message in session.DrainOutbox())
-                {
-                    sends.AddRange(ClientNotifiers.Dispatch(notifiers, session.Id, message));
-                }
-            }
-
+            var sends = game.Tick(tickSeconds)
+                .SelectMany(m => ClientNotifiers.Dispatch(notifiers, m.SessionId, m.Message))
+                .ToList();
             try
             {
                 await Task.WhenAll(sends);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                logger.LogWarning(ex, "Sending messages to clients failed");
+                stats.RecordSendFailure();
             }
             stats.Record(watch.Elapsed);
         }

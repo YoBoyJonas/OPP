@@ -98,6 +98,13 @@ public static class PatternEndpoints
             + "on each of two channels: the polling buffer (states every `pollingEvery` ticks) and a counting channel "
             + "written for the demo. Shows what each pair sent and one polled message in `format`.");
 
+        app.MapDemo("facade",
+            () => Run("facade"),
+            "Facade: a whole game through GameFacade",
+            "Builds the subsystems once (registry, loop scheduler, content), then plays a full one-level game using only "
+            + "GameFacade: create, join, pick characters, walk both players onto the levers, through the door and onto the "
+            + "exits, to Victory. The same facade serves the hub and the REST endpoints.");
+
         return app;
     }
 

@@ -91,6 +91,7 @@ public static class PatternDemoCatalog
         new CommandDemo(),
         new ObserverDemo(),
         new BridgeDemo(),
+        new FacadeDemo(),
     ];
 
     public static IPatternDemo? Find(string key) => All.FirstOrDefault(d => d.Key == key);

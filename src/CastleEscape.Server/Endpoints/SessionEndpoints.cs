@@ -57,38 +57,25 @@ public static class SessionEndpoints
         return app;
     }
 
-    private static Created<CreateSessionResponse> Create(CreateSessionRequest request, SessionRegistry registry)
+    private static Created<CreateSessionResponse> Create(CreateSessionRequest request, GameFacade game)
     {
-        var (session, player) = registry.Create(request.PlayerName);
-        return TypedResults.Created($"/api/sessions/{session.Id}",
-            new CreateSessionResponse(session.Id, session.JoinCode, player.PlayerId, player.Token));
+        var created = game.CreateSession(request.PlayerName);
+        return TypedResults.Created($"/api/sessions/{created.SessionId}", created);
     }
 
-    private static Ok<JoinSessionResponse> Join(JoinSessionRequest request, SessionRegistry registry)
+    private static Ok<JoinSessionResponse> Join(JoinSessionRequest request, GameFacade game) =>
+        TypedResults.Ok(game.JoinSession(request.JoinCode, request.PlayerName));
+
+    private static Ok<IReadOnlyList<SessionSummary>> List(GameFacade game) => TypedResults.Ok(game.ListSessions());
+
+    private static Ok<SessionDto> Get(Guid sessionId, GameFacade game) => TypedResults.Ok(game.GetSession(sessionId));
+
+    private static Ok<SessionDto> SelectCharacter(Guid sessionId, SelectCharacterRequest request, HttpContext http, GameFacade game) =>
+        TypedResults.Ok(game.SelectCharacter(sessionId, http.PlayerToken(), request.CharacterId));
+
+    private static NoContent Leave(Guid sessionId, HttpContext http, GameFacade game)
     {
-        var (session, player) = registry.Join(request.JoinCode, request.PlayerName);
-        return TypedResults.Ok(new JoinSessionResponse(session.Id, player.PlayerId, player.Token));
-    }
-
-    private static Ok<List<SessionSummary>> List(SessionRegistry registry) =>
-        TypedResults.Ok(registry.All
-            .Select(s => new SessionSummary(s.Id, s.JoinCode, s.Phase, s.Snapshot.Session.Players.Length))
-            .ToList());
-
-    private static Ok<SessionDto> Get(Guid sessionId, SessionRegistry registry) =>
-        TypedResults.Ok(registry.Get(sessionId).Snapshot.Session);
-
-    private static Ok<SessionDto> SelectCharacter(Guid sessionId, SelectCharacterRequest request, HttpContext http, SessionRegistry registry)
-    {
-        var (session, player) = registry.Authenticate(sessionId, http.PlayerToken());
-        session.SelectCharacter(player.PlayerId, request.CharacterId);
-        return TypedResults.Ok(session.Snapshot.Session);
-    }
-
-    private static NoContent Leave(Guid sessionId, HttpContext http, SessionRegistry registry)
-    {
-        var (session, player) = registry.Authenticate(sessionId, http.PlayerToken());
-        session.Leave(player.PlayerId);
+        game.LeaveSession(sessionId, http.PlayerToken());
         return TypedResults.NoContent();
     }
 

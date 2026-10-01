@@ -114,7 +114,7 @@ notifier observer; Facade last because it wraps the final subsystems.
 ## Progress (2026-09-25)
 
 Done on `backend/p1` (not pushed): Phases 0–3 (tag `p1-prototype-before-patterns`), pattern
-infrastructure (`bbc8925`), **Singleton** (`81ca652`), **Adapter** (`77e9002`), **Factory Method** (`544c148`), **Abstract Factory** (`e276766`), **Builder** (`b0afb98`), **Prototype** (`2059687`), **Strategy** (`92afbfd`), **Decorator** (`a57acf3`), **Command** (`1ae596d`), **Observer** (`dacceba`), **Bridge**.
+infrastructure (`bbc8925`), **Singleton** (`81ca652`), **Adapter** (`77e9002`), **Factory Method** (`544c148`), **Abstract Factory** (`e276766`), **Builder** (`b0afb98`), **Prototype** (`2059687`), **Strategy** (`92afbfd`), **Decorator** (`a57acf3`), **Command** (`1ae596d`), **Observer** (`dacceba`), **Bridge** (`41c061b`), **Facade**. All 12 patterns are done.
 
 Conventions every pattern commit follows:
 - `[DesignPattern("<Name>", "<Role>")]` on each participant, plus a one-line XML doc summary.

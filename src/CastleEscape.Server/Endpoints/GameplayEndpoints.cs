@@ -76,36 +76,30 @@ public static class GameplayEndpoints
         return app;
     }
 
-    private static Accepted SubmitInput(Guid sessionId, DirectionRequest request, HttpContext http, SessionRegistry registry)
+    private static Accepted SubmitInput(Guid sessionId, DirectionRequest request, HttpContext http, GameFacade game)
     {
-        var (session, player) = registry.Authenticate(sessionId, http.PlayerToken());
-        session.SubmitDirection(player.PlayerId, request.Direction);
+        game.SubmitDirection(sessionId, http.PlayerToken(), request.Direction);
         return TypedResults.Accepted((string?)null);
     }
 
-    private static Accepted Restart(Guid sessionId, HttpContext http, SessionRegistry registry)
+    private static Accepted Restart(Guid sessionId, HttpContext http, GameFacade game)
     {
-        var (session, player) = registry.Authenticate(sessionId, http.PlayerToken());
-        if (session.Phase != SessionPhase.Playing)
-        {
-            throw new GameException(GameErrorCode.WrongPhase, $"A level can only be restarted while playing (now {session.Phase}).");
-        }
-        session.RequestRestart(player.PlayerId);
+        game.RequestRestart(sessionId, http.PlayerToken());
         return TypedResults.Accepted((string?)null);
     }
 
     /// <summary>JSON or XML through the Adapter (IMessageSerializer): <c>?format=</c> wins over the Accept header.</summary>
-    private static IResult GetState(Guid sessionId, string? format, HttpRequest request, SessionRegistry registry)
+    private static IResult GetState(Guid sessionId, string? format, HttpRequest request, GameFacade game)
     {
-        var state = registry.Get(sessionId).Snapshot.State ?? throw NoLevel();
+        var state = game.GetState(sessionId);
         var serializer = ChooseSerializer(format, request);
         return Results.Text(serializer.Serialize(state), serializer.ContentType, System.Text.Encoding.UTF8);
     }
 
     private static Ok<PolledMessagesResponse> GetMessages(Guid sessionId, long? afterSeq, string? format, HttpRequest request,
-        SessionRegistry registry, PollingBufferChannel polling, IOptions<RealtimeOptions> realtime)
+        GameFacade game, PollingBufferChannel polling, IOptions<RealtimeOptions> realtime)
     {
-        registry.Get(sessionId);
+        game.GetSession(sessionId); // 404 for an unknown session
         if (!realtime.Value.EnabledChannels.Contains(RealtimeChannel.Polling))
         {
             throw new GameException(GameErrorCode.InvalidRequest, "The polling channel is disabled (Realtime:EnabledChannels).");
@@ -131,12 +125,7 @@ public static class GameplayEndpoints
         }
     }
 
-    private static Ok<LevelLayoutResponse> GetLevel(Guid sessionId, SessionRegistry registry) =>
-        TypedResults.Ok(registry.Get(sessionId).Snapshot.Layout ?? throw NoLevel());
+    private static Ok<LevelLayoutResponse> GetLevel(Guid sessionId, GameFacade game) => TypedResults.Ok(game.GetLevelLayout(sessionId));
 
-    private static Ok<HudResponse> GetHud(Guid sessionId, SessionRegistry registry) =>
-        TypedResults.Ok(registry.Get(sessionId).Snapshot.Hud);
-
-    private static GameException NoLevel() =>
-        new(GameErrorCode.NoLevelLoaded, "No level has been loaded yet; both players must join and pick a character.");
+    private static Ok<HudResponse> GetHud(Guid sessionId, GameFacade game) => TypedResults.Ok(game.GetHud(sessionId));
 }

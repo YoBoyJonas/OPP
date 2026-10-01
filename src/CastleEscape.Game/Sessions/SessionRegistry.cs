@@ -3,10 +3,12 @@ using CastleEscape.Contracts;
 using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Generation;
+using CastleEscape.Game.Patterns;
 
 namespace CastleEscape.Game.Sessions;
 
 /// <summary>All sessions on this server, found by id or join code (join-session activity diagram).</summary>
+[DesignPattern("Facade", "Subsystem")]
 public class SessionRegistry(ContentCatalog catalog, ILevelProvider levels, GameOptions options, PatternOptions? patterns = null)
 {
     private const string CodeAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O, 1/I

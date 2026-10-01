@@ -6,12 +6,13 @@ namespace CastleEscape.Server.Hubs;
 
 /// <summary>
 /// Real-time channel at <c>/hubs/game?sessionId=…&amp;playerToken=…</c>. Clients only send input (NET-1);
-/// the server pushes lobby updates, level layouts, per-tick state and events.
+/// the server pushes lobby updates, level layouts, per-tick state and events. Every call goes through
+/// the <see cref="GameFacade"/>.
 /// </summary>
-public class GameHub(SessionRegistry registry) : Hub<IGameClient>
+public class GameHub(GameFacade game) : Hub<IGameClient>
 {
     private const string SessionKey = "sessionId";
-    private const string PlayerKey = "playerId";
+    private const string TokenKey = "playerToken";
 
     public static string GroupName(Guid sessionId) => $"session:{sessionId}";
 
@@ -21,11 +22,10 @@ public class GameHub(SessionRegistry registry) : Hub<IGameClient>
         Guid.TryParse(query?["sessionId"], out var sessionId);
         var token = query?["playerToken"].ToString();
 
-        GameSession session;
-        PlayerSlot player;
+        ConnectResult connection;
         try
         {
-            (session, player) = registry.Authenticate(sessionId, token);
+            connection = game.Connect(sessionId, token, Context.ConnectionId);
         }
         catch (GameException ex)
         {
@@ -34,20 +34,17 @@ public class GameHub(SessionRegistry registry) : Hub<IGameClient>
             return;
         }
 
-        Context.Items[SessionKey] = session.Id;
-        Context.Items[PlayerKey] = player.PlayerId;
-        await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(session.Id));
-        session.SetConnection(player.PlayerId, Context.ConnectionId);
+        Context.Items[SessionKey] = connection.SessionId;
+        Context.Items[TokenKey] = token;
+        await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(connection.SessionId));
 
         // Catch up a new or reconnecting client with the current lobby, layout and state.
-        var snapshot = session.Snapshot;
-        var tick = snapshot.Hud.Tick;
-        await Clients.Caller.SessionUpdated(new SessionUpdatedMessage(session.Id, snapshot.State?.Seq ?? 0, tick, snapshot.Session));
-        if (snapshot.LevelStarted is { } levelStarted)
+        await Clients.Caller.SessionUpdated(connection.Session);
+        if (connection.LevelStarted is { } levelStarted)
         {
             await Clients.Caller.LevelStarted(levelStarted);
         }
-        if (snapshot.State is { } state)
+        if (connection.State is { } state)
         {
             await Clients.Caller.StateUpdated(state);
         }
@@ -57,9 +54,9 @@ public class GameHub(SessionRegistry registry) : Hub<IGameClient>
 
     public override Task OnDisconnectedAsync(Exception? exception)
     {
-        if (TryGetPlayer(out var session, out var playerId))
+        if (TryGetPlayer(out var sessionId, out var token))
         {
-            session.Disconnect(playerId, Context.ConnectionId);
+            game.Disconnect(sessionId, token, Context.ConnectionId);
         }
         return base.OnDisconnectedAsync(exception);
     }
@@ -67,46 +64,38 @@ public class GameHub(SessionRegistry registry) : Hub<IGameClient>
     /// <summary>The direction key now held: Up/Down/Left/Right on key down, None on key up.</summary>
     public void SetDirection(Contracts.Direction direction)
     {
-        var (session, playerId) = RequirePlayer();
-        session.SubmitDirection(playerId, direction);
+        var (sessionId, token) = RequirePlayer();
+        game.SubmitDirection(sessionId, token, direction);
     }
 
     /// <summary>Restart the current level (D8). Ask for confirmation on the client first.</summary>
     public void RequestRestart()
     {
-        var (session, playerId) = RequirePlayer();
-        session.RequestRestart(playerId);
+        var (sessionId, token) = RequirePlayer();
+        game.RequestRestart(sessionId, token);
     }
 
     /// <summary>Round-trip check; answered with <c>Pong</c>.</summary>
     public Task Ping()
     {
-        var (session, _) = RequirePlayer();
-        var snapshot = session.Snapshot;
-        return Clients.Caller.Pong(new PongMessage(session.Id, snapshot.State?.Seq ?? 0, snapshot.Hud.Tick, DateTimeOffset.UtcNow));
+        var (sessionId, token) = RequirePlayer();
+        return Clients.Caller.Pong(game.Ping(sessionId, token));
     }
 
-    private (GameSession Session, Guid PlayerId) RequirePlayer() =>
-        TryGetPlayer(out var session, out var playerId)
-            ? (session, playerId)
+    private (Guid SessionId, string Token) RequirePlayer() =>
+        TryGetPlayer(out var sessionId, out var token)
+            ? (sessionId, token)
             : throw new HubException("Not joined to a session.");
 
-    private bool TryGetPlayer(out GameSession session, out Guid playerId)
+    private bool TryGetPlayer(out Guid sessionId, out string token)
     {
-        session = null!;
-        playerId = Guid.Empty;
-        if (Context.Items.TryGetValue(SessionKey, out var s) && Context.Items.TryGetValue(PlayerKey, out var p))
+        sessionId = Guid.Empty;
+        token = "";
+        if (Context.Items.TryGetValue(SessionKey, out var s) && Context.Items.TryGetValue(TokenKey, out var t) && s is Guid id && t is string tk)
         {
-            try
-            {
-                session = registry.Get((Guid)s!);
-                playerId = (Guid)p!;
-                return true;
-            }
-            catch (GameException)
-            {
-                return false;
-            }
+            sessionId = id;
+            token = tk;
+            return true;
         }
         return false;
     }

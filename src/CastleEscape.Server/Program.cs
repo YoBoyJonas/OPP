@@ -46,6 +46,19 @@ builder.Services.AddSingleton(sp => new SessionRegistry(
     sp.GetRequiredService<IOptions<GameOptions>>().Value,
     sp.GetRequiredService<IOptions<PatternOptions>>().Value));
 builder.Services.AddSingleton<GameLoopStats>();
+builder.Services.AddSingleton(sp =>
+{
+    var scheduler = new GameLoopScheduler(sp.GetRequiredService<SessionRegistry>());
+    var stats = sp.GetRequiredService<GameLoopStats>();
+    var logger = sp.GetRequiredService<ILogger<GameLoopScheduler>>();
+    scheduler.SessionFailed += (session, ex) =>
+    {
+        stats.RecordFailure();
+        logger.LogError(ex, "Tick failed for session {SessionId}; stopping it", session.Id);
+    };
+    return scheduler;
+});
+builder.Services.AddSingleton<GameFacade>();
 
 // Bridge: notifiers (what to send) over channels (how), both picked from Realtime settings.
 builder.Services.AddSingleton(sp => new PollingBufferChannel(sp.GetRequiredService<IOptions<RealtimeOptions>>().Value.PollingBufferSize));
