@@ -92,6 +92,18 @@ public class GameRulesTests
     }
 
     [Fact]
+    public void Movement_AQuickTapStillMovesOneTile()
+    {
+        var game = TestGame.Start(["#########", "#1.....2#", "#########"]);
+
+        game.Hold(game.P1, Direction.Right);   // pressed and released within one tick
+        game.Hold(game.P1, Direction.None);
+        game.RunSeconds(1);
+
+        Assert.Equal(new GridPos(2, 1), game.TileOf(game.P1));
+    }
+
+    [Fact]
     public void Movement_PlayersMoveIndependently_Mov3()
     {
         var game = TestGame.Start(["#######", "#1...2#", "#.....#", "#######"]);

@@ -12,6 +12,7 @@ namespace CastleEscape.Game.Commands;
 public sealed class SetDirectionCommand(long sequence, Guid playerId, Direction direction) : IGameCommand
 {
     private Direction _previous;
+    private Direction _previousTap;
     private long _previousSequence;
 
     public Guid? PlayerId => playerId;
@@ -26,9 +27,14 @@ public sealed class SetDirectionCommand(long sequence, Guid playerId, Direction 
             return false;
         }
         _previous = player.HeldDirection;
+        _previousTap = player.TappedDirection;
         _previousSequence = player.DirectionSequence;
         player.HeldDirection = direction;
         player.DirectionSequence = sequence;
+        if (direction != Direction.None)
+        {
+            player.TappedDirection = direction;
+        }
         return true;
     }
 
@@ -36,6 +42,7 @@ public sealed class SetDirectionCommand(long sequence, Guid playerId, Direction 
     {
         var player = world.FindPlayer(playerId)!;
         player.HeldDirection = _previous;
+        player.TappedDirection = _previousTap;
         player.DirectionSequence = _previousSequence;
     }
 }

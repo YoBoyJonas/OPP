@@ -60,16 +60,19 @@ public static class PlayerMovement
     private static StartStepCommand? TryStartStep(PlayerEntity player, LevelState level, IReadOnlyCollection<GridPos> claimed,
         GameWorld world, CommandProcessor commands, long tick)
     {
-        if (player.HeldDirection == Direction.None)
+        // A held key wins; otherwise a key tapped since the last step still gets one try.
+        var direction = player.HeldDirection != Direction.None ? player.HeldDirection : player.TappedDirection;
+        player.TappedDirection = Direction.None;
+        if (direction == Direction.None)
         {
             return null;
         }
-        var target = player.Tile.Step(player.HeldDirection);
+        var target = player.Tile.Step(direction);
         if (!MovementRules.CanPlayerEnter(player, target, level, claimed)) // COL-1: rejected, stays put
         {
             return null;
         }
-        var step = new StartStepCommand(player.DirectionSequence, player.PlayerId, player.HeldDirection);
+        var step = new StartStepCommand(player.DirectionSequence, player.PlayerId, direction);
         return commands.Execute(step, world, tick) ? step : null;
     }
 }

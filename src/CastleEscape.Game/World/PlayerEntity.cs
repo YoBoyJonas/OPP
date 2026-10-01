@@ -22,6 +22,12 @@ public class PlayerEntity(Guid playerId, string name, CharacterDefinition charac
     /// <summary>The direction key currently held by the client (MOV-3: each player independently).</summary>
     public Direction HeldDirection { get; set; }
 
+    /// <summary>
+    /// The last direction pressed, kept until one step has been tried with it. A key tapped and released
+    /// within one tick still moves the player one tile.
+    /// </summary>
+    public Direction TappedDirection { get; set; }
+
     /// <summary>Sequence of the input that set <see cref="HeldDirection"/>; the later of two conflicting steps loses (D7).</summary>
     public long DirectionSequence { get; set; }
 
@@ -45,6 +51,7 @@ public class PlayerEntity(Guid playerId, string name, CharacterDefinition charac
     {
         StartTile = start;
         HeldDirection = Direction.None;
+        TappedDirection = Direction.None;
         TeleportTo(start);
     }
 
