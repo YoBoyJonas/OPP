@@ -116,6 +116,8 @@ app.MapPatternEndpoints();
 if (app.Services.GetRequiredService<IOptions<DevToolsOptions>>().Value.Enabled)
 {
     app.MapDevEndpoints();
+    app.UseStaticFiles(); // wwwroot holds only the playground, a dev tool
+    app.MapGet("/playground", () => Results.Redirect("/playground/index.html")).ExcludeFromDescription();
 }
 app.MapHub<GameHub>(RealtimeEndpoints.HubPath);
 
