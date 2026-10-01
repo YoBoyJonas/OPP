@@ -221,3 +221,38 @@ public class PollingChannelTests(TutorialFactory factory) : IClassFixture<Tutori
         Assert.All(next.Messages, m => Assert.StartsWith("<?xml", m.Body));
     }
 }
+
+public class SessionDiagnosticsTests(TutorialFactory factory) : IClassFixture<TutorialFactory>
+{
+    [Fact]
+    public async Task CommandsAndEvents_AreListed()
+    {
+        var http = factory.CreateClient();
+        var (sessionId, p1, _) = await Api.StartTwoPlayerGame(http);
+        await Api.Eventually(async () => (await http.GetAsync($"/api/sessions/{sessionId}/state", Api.Ct)).IsSuccessStatusCode ? "ok" : null,
+            TimeSpan.FromSeconds(5));
+
+        var input = new HttpRequestMessage(HttpMethod.Post, $"/api/sessions/{sessionId}/input")
+        {
+            Content = JsonContent.Create(new DirectionRequest(Direction.Down), options: Api.Json),
+        };
+        input.Headers.Add("X-Player-Token", p1.Token);
+        (await http.SendAsync(input, Api.Ct)).EnsureSuccessStatusCode();
+
+        var commands = await Api.Eventually(async () =>
+        {
+            var list = await http.GetFromJsonAsync<CastleEscape.Contracts.Diagnostics.CommandRecordDto[]>(
+                $"/api/diagnostics/sessions/{sessionId}/commands", Api.Json, Api.Ct);
+            return list!.Any(c => c.Name == "SetDirection Down") ? list : null;
+        }, TimeSpan.FromSeconds(5));
+        Assert.Contains(commands, c => c.PlayerId == p1.Id);
+
+        var events = await http.GetFromJsonAsync<CastleEscape.Contracts.Diagnostics.EventLogEntryDto[]>(
+            $"/api/diagnostics/sessions/{sessionId}/events", Api.Json, Api.Ct);
+        Assert.Contains(events!, e => e.Type == GameEventTypes.LevelStarted && e.Data["level"] == "1");
+
+        var later = await http.GetFromJsonAsync<CastleEscape.Contracts.Diagnostics.EventLogEntryDto[]>(
+            $"/api/diagnostics/sessions/{sessionId}/events?afterTick={events!.Max(e => e.Tick)}", Api.Json, Api.Ct);
+        Assert.All(later!, e => Assert.True(e.Tick > events.Max(x => x.Tick)));
+    }
+}

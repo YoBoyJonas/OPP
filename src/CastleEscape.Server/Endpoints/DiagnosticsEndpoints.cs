@@ -27,6 +27,22 @@ public static class DiagnosticsEndpoints
             .WithSummary("Game loop timings")
             .WithDescription("Tick rate, session counts, and the average and slowest time to tick all sessions once.");
 
+        var sessions = app.MapGroup("/api/diagnostics/sessions/{sessionId:guid}").WithTags(ApiTags.Diagnostics);
+
+        sessions.MapGet("/commands", (Guid sessionId, GameFacade game) => game.GetCommandHistory(sessionId))
+            .WithName("GetCommandHistory")
+            .WithSummary("Command history of a session")
+            .WithDescription("The last 100 commands (inputs, steps, restarts, given powers), oldest first, with the tick each ran "
+                             + "in and whether it was undone (Command pattern). An undone StartStep is a D7 tile conflict.")
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        sessions.MapGet("/events", (Guid sessionId, long? afterTick, GameFacade game) => game.GetEventLog(sessionId, afterTick ?? -1))
+            .WithName("GetEventLog")
+            .WithSummary("Event log of a session")
+            .WithDescription("The last 200 game events, oldest first, as recorded by the EventLogObserver (Observer pattern). "
+                             + "Pass `afterTick` to get only newer ones.")
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
         return app;
     }
 
