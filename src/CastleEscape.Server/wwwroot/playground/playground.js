@@ -129,11 +129,11 @@ function bindKeys(connection) {
   });
   window.addEventListener("keyup", (e) => {
     const direction = keys[e.key];
-    if (!direction) return;
+    if (!direction || !held.includes(direction)) return;
     held.splice(held.indexOf(direction), 1);
     send();
   });
-  window.addEventListener("blur", () => { held.length = 0; send(); });
+  window.addEventListener("blur", () => { if (held.length) { held.length = 0; send(); } }); // release keys held when the tab loses focus
 }
 
 function bindDevButtons(connection) {
