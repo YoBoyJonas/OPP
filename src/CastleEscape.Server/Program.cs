@@ -59,6 +59,10 @@ builder.Services.AddSingleton(sp =>
     return scheduler;
 });
 builder.Services.AddSingleton<GameFacade>();
+builder.Services.AddSingleton(sp => new LevelPreviewer(
+    sp.GetRequiredService<ContentCatalog>(),
+    sp.GetRequiredService<IOptions<GameOptions>>().Value,
+    sp.GetRequiredService<IOptions<GenerationOptions>>().Value));
 builder.Services.AddSingleton(sp => new DevActions(
     sp.GetRequiredService<SessionRegistry>(),
     sp.GetRequiredService<ContentCatalog>(),
@@ -104,6 +108,7 @@ app.MapGet("/", () => Results.Redirect("/scalar")).ExcludeFromDescription();
 
 app.MapDiagnosticsEndpoints();
 app.MapContentEndpoints();
+app.MapLevelEndpoints();
 app.MapSessionEndpoints();
 app.MapGameplayEndpoints();
 app.MapPatternEndpoints();

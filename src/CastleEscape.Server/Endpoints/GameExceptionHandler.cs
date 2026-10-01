@@ -18,6 +18,7 @@ public sealed class GameExceptionHandler(IProblemDetailsService problems) : IExc
             or GameErrorCode.NoLevelLoaded => StatusCodes.Status409Conflict,
         GameErrorCode.InvalidPlayerToken => StatusCodes.Status401Unauthorized,
         GameErrorCode.UnknownCharacter or GameErrorCode.InvalidRequest => StatusCodes.Status400BadRequest,
+        GameErrorCode.LevelGenerationFailed => StatusCodes.Status422UnprocessableEntity,
         _ => StatusCodes.Status500InternalServerError,
     };
 
