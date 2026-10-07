@@ -12,6 +12,7 @@ namespace CastleEscape.Game.Content;
 /// and shared (read-only) by every session, generator and endpoint.
 /// </summary>
 [DesignPattern("Singleton", "Singleton")]
+[DesignPattern("Facade", "Subsystem")]
 public sealed class ContentCatalog
 {
     private static readonly PowerType[] BasePowers = [PowerType.Jump, PowerType.Sprint, PowerType.Swim];

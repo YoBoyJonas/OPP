@@ -6,6 +6,7 @@ using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Events;
 using CastleEscape.Game.Generation;
+using CastleEscape.Game.Patterns;
 using CastleEscape.Game.Powers;
 using CastleEscape.Game.World;
 
@@ -16,6 +17,7 @@ namespace CastleEscape.Game.Sessions;
 /// which only <see cref="Tick"/> changes. Player inputs become commands, queued from any thread and
 /// run at the start of the next tick. After every tick an immutable <see cref="Snapshot"/> is published for readers.
 /// </summary>
+[DesignPattern("Facade", "Subsystem")]
 public class GameSession
 {
     private readonly object _gate = new();

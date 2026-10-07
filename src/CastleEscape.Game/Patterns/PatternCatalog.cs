@@ -53,7 +53,7 @@ public static class PatternCatalog
         new("facade", "Facade", "Structural", D,
             "The hub, REST endpoints and the console demo would each have to orchestrate registry, generation, loop and commands themselves.",
             "At least 2 client classes and at least 3 subsystem classes.",
-            "GameFacade is used by GameHub, SessionEndpoints, GameplayEndpoints and the console demo, over SessionRegistry, LevelDirector, CommandProcessor, GameLoopScheduler and ContentCatalog."),
+            "GameFacade is used by GameHub, SessionEndpoints, GameplayEndpoints, GameLoopService and the console demo, over four subsystems: SessionRegistry, GameLoopScheduler, GameSession and ContentCatalog. Level generation and the command queue sit behind GameSession."),
         new("command", "Command", "Behavioral", D,
             "Inputs arrive asynchronously and must be applied at a fixed point in the tick; some must be reverted (conflicts, restart mistakes, debugging).",
             "Commands must support undo().",
