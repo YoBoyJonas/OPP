@@ -78,6 +78,7 @@ The tag `p1-prototype-before-patterns` marks the working game before any pattern
 
 | Document | For |
 |---|---|
+| [CODE_WALKTHROUGH](docs/CODE_WALKTHROUGH.md) | **start here to read the code**: reading order, what each object means, one request traced end to end |
 | [ARCHITECTURE](docs/ARCHITECTURE.md) | projects, the tick loop, threading, where each pattern sits |
 | [FRONTEND_INTEGRATION](docs/FRONTEND_INTEGRATION.md) | building a client: lobby calls, hub connection, messages, input, rendering |
 | [USE_CASE_MAPPING](docs/USE_CASE_MAPPING.md) | each use case and requirement → code, endpoint and test |
