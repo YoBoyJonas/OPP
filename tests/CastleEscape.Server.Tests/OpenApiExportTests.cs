@@ -36,6 +36,22 @@ public class OpenApiExportTests(WebApplicationFactory<Program> factory) : IClass
 
         Assert.True(File.Exists(path), "docs/openapi.json is missing. Run: UPDATE_OPENAPI=1 dotnet test --filter OpenApiExport");
         var saved = (await File.ReadAllTextAsync(path, Api.Ct)).ReplaceLineEndings("\n");
-        Assert.True(saved == normalized, "docs/openapi.json is out of date. Run: UPDATE_OPENAPI=1 dotnet test --filter OpenApiExport");
+        Assert.True(saved == normalized, "docs/openapi.json is out of date. Run: UPDATE_OPENAPI=1 dotnet test --filter OpenApiExport" + FirstDifference(saved, normalized));
+    }
+
+    private static string FirstDifference(string saved, string live)
+    {
+        var a = saved.Split('\n');
+        var b = live.Split('\n');
+        for (var i = 0; i < Math.Max(a.Length, b.Length); i++)
+        {
+            var x = i < a.Length ? a[i] : "<end>";
+            var y = i < b.Length ? b[i] : "<end>";
+            if (x != y)
+            {
+                return $"\nFirst difference at line {i + 1}:\n  saved: {x}\n  live:  {y}";
+            }
+        }
+        return "";
     }
 }
