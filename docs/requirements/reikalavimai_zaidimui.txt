@@ -1,0 +1,46 @@
+Žaidimo struktūra ir lygiai
+Žaidimą sudaro fiksuota 10 lygių (kambarių) seka. Įveikus lygį automatiškai užkraunamas kitas, o po 10-to skelbiama pergalė
+Lygis vaizduojamas kaip 2D tinklelis iš viršaus. Laukas ≥ 20×15 langelių.
+Abu žaidėjai pradeda lygį sugeneruotose starto langeliuose. Abiejų žaidėjų starto pozicijos yra neblokuojamos kliūties ir tarp dviejų žaidėjų nesutampa.
+Lygio užbaigimo sąlyga
+Durys atsidaro tik abiem žaidėjams vienu metu nulenkus po svirtį. Kiekviename lygyje ≥ 2 svirtys; durys atviros tik kol abi svirtys aktyvios tuo pačiu kadru.
+Lygis įveikiamas abiem žaidėjams pasiekus išėjimą. Perėjimas įvyksta tik kai abu žaidėjai stovi ant išėjimo langelių.
+Pergalė paskelbiama įveikus 10-tą lygį. Rodomas pergalės ekranas, žaidimas baigiamas 
+Žaidėjų savybės ir gyvybės.
+Prieš žaidimą žaidėjas renkasi vieną iš ≥ 3 personažų. Personažai skiriasi: gyvybės taškai (pvz. 3/4/5) ir bazinis judėjimo greitis / šuolio parametras.
+Žaidėjas turi gyvybių skaitiklį. Sąlytis su zombiu → −1 gyvybė; skaitiklis rodomas HUD.
+Netekus visų gyvybių žaidėjas žūsta. Bet kuriam žaidėjui pasiekus 0 gyvybių žaidimas baigiamas pralaimėjimu.
+Judėjimo logika
+Judėjimas realiu laiku, sulygiuotas su tinkleliu. Personažas juda pastoviu greičiu (langelių/s), negali įeiti į sieną ar užimtą kliūties langelį.
+Kliūtis įveikiama tik turint atitinkamą galią. Vanduo pereinamas tik su Swim; bedugnė – tik su Jump; be galios langelis nepereinamas.
+Abu žaidėjai juda nepriklausomai vienu metu. Vieno žaidėjo įvestis neblokuoja kito judėjimo.
+Galių ir daiktų sistema
+Daiktai yra 3 rūšių. Power (laikina galia), Reward (taškai), Health (+1 gyvybė).
+Bazinės galios: Jump, Sprint, Swim – laikinos. Galia galioja fiksuotą laiką (pvz. 10 s, parametras), po to dingsta.
+Dvi skirtingos vienu metu turimos bazinės galios sukuria super galią. Jump+Sprint → JumpDash; Sprint+Swim → FastSwim.
+Dvi ar daugiau vienodų galių sumuojasi. Pakartotinai surinkta ta pati galia pratęsia trukmę / didina poveikį.
+Reward daiktas didina taškus, Health – gyvybes. Surinkus atnaujinamas atitinkamas skaitiklis; daiktas iš lauko pašalinamas.
+Priešų (zombių) savybės
+Zombiai persekioja artimiausią žaidėją. Kiekvieną kadrą zombis renkasi kelią link mažiausio atstumo žaidėjo.
+Zombis daro kontaktinę žalą. Sąlytis su žaidėju → žaidėjui −1 gyvybė.
+Po sąlyčio zombis grįžta į pradinę poziciją. Po smūgio zombis iškart perkeliamas į savo starto langelį.
+Zombių skaičius auga su lygiais. Lygio N zombių kiekis ≥ ankstesnio lygio (parametras).
+
+Žemėlapio ir objektų generavimas
+Zombiai persekioja artimiausią žaidėją. Kiekvieną kadrą zombis renkasi kelią link mažiausio atstumo žaidėjo.
+Zombis daro kontaktinę žalą. Sąlytis su žaidėju → žaidėjui −1 gyvybė.
+Po sąlyčio zombis grįžta į pradinę poziciją. Po smūgio zombis iškart perkeliamas į savo starto langelį.
+Zombių skaičius auga su lygiais. Lygio N zombių kiekis ≥ ankstesnio lygio (parametras).
+Žemėlapio ir objektų generavimas
+Kambario išdėstymas generuojamas kiekvienam lygiui. Sienos, vanduo ir bedugnė sudaro pereinamą lauką (egzistuoja bent vienas kelias start→exit).
+Daiktai ir zombiai išdėstomi generuojant lygį. Nė vienas daiktas / zombis / svirtis neatsiranda sienos ar starto langelyje.
+Kiekviename lygyje yra būtini objektai. ≥ 2 svirtys, 1 išėjimas, ≥ 1 kliūtis reikalaujanti galios.
+Susidūrimų (collision) logika
+Žaidėjas–siena / kliūtis. Judesys atmetamas, jei tikslinis langelis neįveikiamas.
+Žaidėjas–daiktas. Užėjus ant langelio pritaikomas daikto efektas, daiktas pašalinamas.
+Žaidėjas–zombis. Taikoma PRI-2 + PRI-3 (žala + zombio grįžimas).
+Žaidėjas–svirtis / durys. Ant svirties langelio svirtis aktyvi; per atviras duris praeinama.
+Tinklo (klientas–serveris) reikalavimai
+Pasaulį simuliuoja serveris. Klientai siunčia tik įvestį; būsena (žaidėjai, zombiai, daiktai) skaičiuojama serveryje.
+Klientai atvaizduoja serverio būseną. Abu klientai rodo tą pačią būseną; duomenys perduodami JSON/XML.
+Abu žaidėjai jungiasi į vieną sesiją. Sesija prasideda prisijungus 2 žaidėjams.

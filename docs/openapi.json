@@ -1,0 +1,4821 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "Castle Escape API",
+    "description": "Authoritative game server for Castle Escape (KTU T120B516). Lobby and inspection over REST, real-time play over the SignalR hub at /hubs/game. Endpoints that act as a player need the X-Player-Token header returned by create/join.",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/diagnostics/loop": {
+      "get": {
+        "tags": [
+          "Diagnostics"
+        ],
+        "summary": "Game loop timings",
+        "description": "Tick rate, session counts, and the average and slowest time to tick all sessions once.",
+        "operationId": "GetLoopDiagnostics",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoopDiagnosticsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/singleton/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Singleton: thread safety",
+        "description": "Starts \u0060threads\u0060 threads through a Barrier; all read ContentCatalog.Instance at once. Reports distinct instances (1) and creations (1). With \u0060naive=true\u0060 the same race against a lock-free holder makes several.",
+        "operationId": "DemoSingleton",
+        "parameters": [
+          {
+            "name": "threads",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 64
+            }
+          },
+          {
+            "name": "naive",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/adapter/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Adapter: JSON / XML serializers",
+        "description": "Serializes a real tick state through IMessageSerializer (\u0060format=json|xml\u0060), round-trips it, and counts the members of the 3-member target against the adaptees JsonSerializer and DataContractSerializer.",
+        "operationId": "DemoAdapter",
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "xml"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/factory-method/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Factory Method: item spawners",
+        "description": "Spawns items on the tutorial level through ItemSpawners.For(consumable) (\u0060kind=health|reward|power|all\u0060), applies each to a player, and lists the product family (HealthItem, RewardItem, PowerItem).",
+        "operationId": "DemoFactoryMethod",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "all"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/abstract-factory/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Abstract Factory: level themes",
+        "description": "Creates the product family of each theme factory (\u0060theme=dungeon|crypt|both\u0060): wall, water, pit and zombie with their gameplay values. Then generates a real level of that theme and checks every placed part comes from the same family.",
+        "operationId": "DemoAbstractFactory",
+        "parameters": [
+          {
+            "name": "theme",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "both"
+            }
+          },
+          {
+            "name": "seed",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 7
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/builder/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Builder: level construction",
+        "description": "LevelDirector builds level \u0060level\u0060 with ProceduralLevelBuilder (random, \u0060seed\u0060) and PresetLevelBuilder (the \u0060preset\u0060 map: tutorial or arena), using the same step order. Returns both results as map rows.",
+        "operationId": "DemoBuilder",
+        "parameters": [
+          {
+            "name": "level",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "seed",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 7
+            }
+          },
+          {
+            "name": "preset",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "tutorial"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/prototype/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Prototype: deep vs shallow level copies",
+        "description": "Clones the tutorial level (\u0060mode=Deep|Shallow|both\u0060) and reports, for the level and its parts, the memory address and identity hash in the original and the clone. Then plays on the clone and restarts from the pristine level: deep restores it, shallow does not. The game itself uses \u0060Patterns:PrototypeCloneMode\u0060.",
+        "operationId": "DemoPrototype",
+        "parameters": [
+          {
+            "name": "mode",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "both"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/strategy/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Strategy: zombie chase algorithms",
+        "description": "Puts the same zombie behind a wall and swaps its strategy (\u0060strategy=Greedy|Bfs|AStar|Predictive|all\u0060), running up to \u0060steps\u0060 steps with each. Greedy gets stuck, BFS and A* go around, Predictive aims where the player is heading. Also compares BFS and A* search cost.",
+        "operationId": "DemoStrategy",
+        "parameters": [
+          {
+            "name": "strategy",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "all"
+            }
+          },
+          {
+            "name": "steps",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 12
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/decorator/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Decorator: power stacking",
+        "description": "Gives a character (\u0060character=warrior|scout|swimmer\u0060) \u0060sprints\u0060 Sprint pickups, then Jump and Swim. After each pickup it prints the decorator chain, its depth and the floor/water/pit speeds. The combos JumpDash and FastSwim are added as decorators too. Then all timers expire and the chain unwinds.",
+        "operationId": "DemoDecorator",
+        "parameters": [
+          {
+            "name": "character",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "scout"
+            }
+          },
+          {
+            "name": "sprints",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 2
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/command/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Command: inputs with undo",
+        "description": "Plays a scripted two-player session. Both players step into the same tile, and the later StartStep command is undone (D7). One player collects a coin, the other restarts the level, and UndoLastCommand() (\u0060undoRestart\u0060) puts the pre-restart level, score and positions back. Returns the command history.",
+        "operationId": "DemoCommand",
+        "parameters": [
+          {
+            "name": "undoRestart",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/observer/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Observer: game events",
+        "description": "Plays a scripted session with an extra Recorder observer attached: a coin pickup and a zombie hit. Shows what each observer did (client messages, HUD statistics, event log, sound cues), then detaches the Recorder and shows it no longer receives events.",
+        "operationId": "DemoObserver",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/bridge/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Bridge: notifiers over channels",
+        "description": "Runs a real session for \u0060ticks\u0060 ticks and dispatches its messages through a StateNotifier and an EventNotifier on each of two channels: the polling buffer (states every \u0060pollingEvery\u0060 ticks) and a counting channel written for the demo. Shows what each pair sent and one polled message in \u0060format\u0060.",
+        "operationId": "DemoBridge",
+        "parameters": [
+          {
+            "name": "ticks",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 40
+            }
+          },
+          {
+            "name": "pollingEvery",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 5
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "xml"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/facade/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Facade: a whole game through GameFacade",
+        "description": "Builds the subsystems once (registry, loop scheduler, content), then plays a full one-level game using only GameFacade: create, join, pick characters, walk both players onto the levers, through the door and onto the exits, to Victory. The same facade serves the hub and the REST endpoints.",
+        "operationId": "DemoFacade",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Diagnostics"
+        ],
+        "summary": "Server health",
+        "description": "Liveness check. Returns 200 with version and uptime while the server is running.",
+        "operationId": "GetHealth",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/diagnostics/sessions/{sessionId}/commands": {
+      "get": {
+        "tags": [
+          "Diagnostics"
+        ],
+        "summary": "Command history of a session",
+        "description": "The last 100 commands (inputs, steps, restarts, given powers), oldest first, with the tick each ran in and whether it was undone (Command pattern). An undone StartStep is a D7 tile conflict.",
+        "operationId": "GetCommandHistory",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CommandRecordDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/diagnostics/sessions/{sessionId}/events": {
+      "get": {
+        "tags": [
+          "Diagnostics"
+        ],
+        "summary": "Event log of a session",
+        "description": "The last 200 game events, oldest first, as recorded by the EventLogObserver (Observer pattern). Pass \u0060afterTick\u0060 to get only newer ones.",
+        "operationId": "GetEventLog",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "afterTick",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventLogEntryDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Content summary",
+        "description": "Counts of every content type and a hash that changes whenever a content file changes.",
+        "operationId": "GetContentSummary",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/characters": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Playable characters",
+        "description": "At least 3 characters that differ in lives, move speed and jump parameter (PLR-1).",
+        "operationId": "GetCharacters",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CharacterDefinition"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/consumables": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Item types",
+        "description": "Health (\u002Blives), Reward (\u002Bscore) and Power (temporary power) items (ITM-1). The \u0060type\u0060 field tells the kind; Power items carry a \u0060grant\u0060.",
+        "operationId": "GetConsumables",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Consumable"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/powers": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Base powers and super powers",
+        "description": "Jump, Sprint and Swim with their duration and the items that grant them; JumpDash and FastSwim with the base powers they need (PWR-1, PWR-2).",
+        "operationId": "GetPowers",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PowerSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/combos": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Super-power combos",
+        "description": "Two different active base powers create a super power (PWR-2).",
+        "operationId": "GetCombos",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PowerCombo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/obstacles": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Obstacle types",
+        "description": "Wall (never passable), Water (needs Swim), Pit (needs Jump) (MOV-2).",
+        "operationId": "GetObstacles",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Obstacle"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/zombies": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Zombie types",
+        "description": "Speed, contact damage and the default movement strategy of each zombie type.",
+        "operationId": "GetZombies",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ZombieDefinition"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/levels": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Level definitions",
+        "description": "The fixed sequence of 10 levels: theme, obstacle/zombie/item counts and spawn tables.",
+        "operationId": "GetLevelDefinitions",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LevelDefinition"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/levels/{index}": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "One level definition",
+        "description": "The level at a 1-based position in the sequence.",
+        "operationId": "GetLevelDefinition",
+        "parameters": [
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LevelDefinition"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/levels/presets": {
+      "get": {
+        "tags": [
+          "Levels"
+        ],
+        "summary": "Preset map names",
+        "description": "Hand-made maps in content/presets. Use one with \u0060preset=\u0060 on the preview, or for every level with \u0060Generation:PresetLevel\u0060.",
+        "operationId": "GetPresetNames",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/levels/{index}/preview": {
+      "get": {
+        "tags": [
+          "Levels"
+        ],
+        "summary": "Build and show a level",
+        "description": "Builds level \u0060index\u0060 (1-10) with the Builder pattern: the procedural builder for \u0060seed\u0060 (validated and retried like in a game), or the preset builder for \u0060preset\u0060. Returns the map rows, the themed obstacles and zombies (Abstract Factory, Strategy) and the validation report. Same seed, same level.",
+        "operationId": "PreviewLevel",
+        "parameters": [
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "seed",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "preset",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LevelPreviewResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Create a session",
+        "description": "Creates a two-player session with you as player 1. Share the joinCode with player 2. Keep the playerToken: send it as X-Player-Token and as the hub\u0027s playerToken.",
+        "operationId": "CreateSession",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSessionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "List sessions",
+        "description": "Every session on this server with its phase and player count.",
+        "operationId": "ListSessions",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SessionSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/join": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Join a session by code",
+        "description": "Joins as player 2. The session then waits for both players to pick a character.",
+        "operationId": "JoinSession",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JoinSessionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/{sessionId}": {
+      "get": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Get a session",
+        "description": "Phase, players, chosen characters and current level.",
+        "operationId": "GetSession",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/{sessionId}/players/me/character": {
+      "put": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Pick your character",
+        "description": "PLR-1. Allowed until the game starts. When both players have picked, the first level loads.",
+        "operationId": "SelectCharacter",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectCharacterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "PlayerToken": []
+          }
+        ]
+      }
+    },
+    "/api/sessions/{sessionId}/players/me": {
+      "delete": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Leave the session",
+        "description": "Ends the session for both players (phase Aborted); the other player is notified.",
+        "operationId": "LeaveSession",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "PlayerToken": []
+          }
+        ]
+      }
+    },
+    "/api/sessions/{sessionId}/input": {
+      "post": {
+        "tags": [
+          "Gameplay"
+        ],
+        "summary": "Set the held direction",
+        "description": "Same as the hub\u0027s SetDirection. Send a direction on key down and None on key up. Applied at the start of the next tick.",
+        "operationId": "SubmitDirection",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "PlayerToken": []
+          }
+        ]
+      }
+    },
+    "/api/sessions/{sessionId}/restart": {
+      "post": {
+        "tags": [
+          "Gameplay"
+        ],
+        "summary": "Restart the current level",
+        "description": "D8: the level returns to its generated layout; both players\u0027 lives and score return to the level start.",
+        "operationId": "RestartLevel",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "PlayerToken": []
+          }
+        ]
+      }
+    },
+    "/api/sessions/{sessionId}/state": {
+      "get": {
+        "tags": [
+          "Gameplay"
+        ],
+        "summary": "Latest game state",
+        "description": "The latest per-tick state: players, zombies, items, levers, door. JSON by default; \u0060?format=xml\u0060 or \u0060Accept: application/xml\u0060 for XML (NET-2, Adapter pattern).",
+        "operationId": "GetGameState",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TickStateMessage"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/TickStateMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/{sessionId}/messages": {
+      "get": {
+        "tags": [
+          "Realtime"
+        ],
+        "summary": "Read buffered messages (polling channel)",
+        "description": "The same messages SignalR pushes, kept in a per-session buffer for clients without a hub connection (Bridge pattern: the polling channel). Pass the last \u0060seq\u0060 you saw as \u0060afterSeq\u0060. Each \u0060body\u0060 is serialized as \u0060format=json|xml\u0060. StateUpdated is buffered every \u0060Realtime:PollingStateEveryNthTick\u0060 ticks; events are never skipped.",
+        "operationId": "PollMessages",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "afterSeq",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int64"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolledMessagesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/{sessionId}/level": {
+      "get": {
+        "tags": [
+          "Gameplay"
+        ],
+        "summary": "Static layout of the current level",
+        "description": "Rows of map legend characters, plus the legend itself.",
+        "operationId": "GetLevelLayout",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LevelLayoutResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/{sessionId}/hud": {
+      "get": {
+        "tags": [
+          "Gameplay"
+        ],
+        "summary": "View game state (HUD table)",
+        "description": "Per player: lives, score, active powers with time left, combos, statistics. Plus level, levers and door status.",
+        "operationId": "GetHud",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HudResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/realtime/protocol": {
+      "get": {
+        "tags": [
+          "Realtime"
+        ],
+        "summary": "SignalR hub protocol",
+        "description": "Hub URL and query parameters, every server-to-client and client-to-server method with its payload and when it happens, every event type and error code, and the ordering rules.",
+        "operationId": "GetRealtimeProtocol",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeProtocolResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/realtime/examples": {
+      "get": {
+        "tags": [
+          "Realtime"
+        ],
+        "summary": "Example payload of every server message",
+        "description": "Captured from a short real session on a small map, keyed by client method name. This is exactly the JSON SignalR sends.",
+        "operationId": "GetRealtimeExamples",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns": {
+      "get": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "All P1 patterns",
+        "description": "Name, owner, the problem solved, the course requirement and how it is met, and the participants found in the code by the [DesignPattern] attribute.",
+        "operationId": "ListPatterns",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PatternDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/{pattern}": {
+      "get": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "One pattern",
+        "description": "Details and participants (type, role, source file) of one pattern, by key, e.g. \u0060decorator\u0060.",
+        "operationId": "GetPattern",
+        "parameters": [
+          {
+            "name": "pattern",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dev/quickstart": {
+      "post": {
+        "tags": [
+          "Dev"
+        ],
+        "summary": "Two players, characters picked, level 1 starting",
+        "description": "Skips the lobby: creates a session with Ana and Ben, picks their characters and returns both player tokens and hub URLs. Open each hub URL (or the playground) in its own tab.",
+        "operationId": "DevQuickstart",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DevQuickstartRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevQuickstartResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dev/patterns/prototype-clone-mode": {
+      "get": {
+        "tags": [
+          "Dev"
+        ],
+        "summary": "Current Prototype clone mode",
+        "operationId": "DevGetCloneMode",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloneModeDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Dev"
+        ],
+        "summary": "Switch deep/shallow level copies at runtime",
+        "description": "\u0060Deep\u0060 or \u0060Shallow\u0060 (Prototype pattern). Takes effect on the next level start or restart: with Shallow, collected items stay gone after a restart.",
+        "operationId": "DevSetCloneMode",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloneModeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloneModeDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dev/sessions/{sessionId}/undo": {
+      "post": {
+        "tags": [
+          "Dev"
+        ],
+        "summary": "Undo the last command",
+        "description": "Undoes the most recent command of the session, or of \u0060playerId\u0060 (Command pattern). Undoing a restart brings back the level as it was before it.",
+        "operationId": "DevUndoLastCommand",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "playerId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UndoResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dev/sessions/{sessionId}/zombies/strategy": {
+      "put": {
+        "tags": [
+          "Dev"
+        ],
+        "summary": "Switch every zombie\u0027s chase strategy",
+        "description": "Greedy, Bfs, AStar or Predictive, from the next tick (Strategy pattern). It is a command, so \u0060/undo\u0060 switches the zombies back. The tick state shows each zombie\u0027s \u0060strategy\u0060.",
+        "operationId": "DevSetZombieStrategy",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ZombieStrategyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dev/sessions/{sessionId}/players/{playerId}/powers": {
+      "post": {
+        "tags": [
+          "Dev"
+        ],
+        "summary": "Give a player a power",
+        "description": "Jump, Sprint or Swim, as if an item had been picked up: stacks and starts combos (Decorator pattern). Undoable.",
+        "operationId": "DevGivePower",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "playerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GivePowerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dev/sessions/{sessionId}/skip-level": {
+      "post": {
+        "tags": [
+          "Dev"
+        ],
+        "summary": "Complete the current level",
+        "description": "Ends the level as if both players had reached the exit; the next level loads after the usual pause.",
+        "operationId": "DevSkipLevel",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActivePowerDto": {
+        "required": [
+          "power",
+          "remainingSeconds",
+          "level"
+        ],
+        "type": "object",
+        "properties": {
+          "power": {
+            "description": "Jump, Sprint or Swim.",
+            "$ref": "#/components/schemas/PowerType"
+          },
+          "remainingSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "Time left.",
+            "format": "double"
+          },
+          "level": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Stack level: 1 for one pickup, \u002B1 for each repeat pickup (PWR-3).",
+            "format": "int32"
+          }
+        },
+        "description": "A power a player has right now."
+      },
+      "CharacterDefinition": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "maxHealth": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Lives at the start of the game.",
+            "format": "int32"
+          },
+          "baseMoveSpeed": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "Tiles per second on floor.",
+            "format": "double"
+          },
+          "baseJumpForce": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "Jump parameter: speed multiplier while crossing a pit with Jump active.",
+            "format": "double"
+          },
+          "baseModifiers": {
+            "$ref": "#/components/schemas/StatModifiers"
+          }
+        },
+        "description": "A playable character (PLR-1). Loaded from \u0060content/characters.json\u0060."
+      },
+      "CloneModeDto": {
+        "required": [
+          "mode"
+        ],
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string"
+          }
+        },
+        "description": "The Prototype pattern\u0027s clone mode used on level start and restart: \u0060Deep\u0060 or \u0060Shallow\u0060."
+      },
+      "CommandRecordDto": {
+        "required": [
+          "sequence",
+          "name",
+          "playerId",
+          "tick",
+          "undone"
+        ],
+        "type": "object",
+        "properties": {
+          "sequence": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Execution order key: the input sequence it came from.",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string",
+            "description": "e.g. \u0022SetDirection Right\u0022, \u0022StartStep Left\u0022, \u0022RestartLevel\u0022."
+          },
+          "playerId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The player it was for, if any.",
+            "format": "uuid"
+          },
+          "tick": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Tick it ran in.",
+            "format": "int64"
+          },
+          "undone": {
+            "type": "boolean",
+            "description": "Whether it has been undone (D7 conflict or an undo request)."
+          }
+        },
+        "description": "A command in a session\u0027s history (Command pattern)."
+      },
+      "Consumable": {
+        "required": [
+          "type"
+        ],
+        "type": "object",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/ConsumableHealth"
+          },
+          {
+            "$ref": "#/components/schemas/ConsumableReward"
+          },
+          {
+            "$ref": "#/components/schemas/ConsumablePower"
+          }
+        ],
+        "description": "An item that can lie on the map (ITM-1). The JSON field \u0060type\u0060 picks the subclass.",
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "Health": "#/components/schemas/ConsumableHealth",
+            "Reward": "#/components/schemas/ConsumableReward",
+            "Power": "#/components/schemas/ConsumablePower"
+          }
+        }
+      },
+      "ConsumableHealth": {
+        "properties": {
+          "type": {
+            "enum": [
+              "Health"
+            ],
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ConsumableKind"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "grant": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "The power a Power item grants; null for the other kinds.",
+                "$ref": "#/components/schemas/PowerGrant"
+              }
+            ]
+          },
+          "healthValue": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Lives restored by a Health item.",
+            "format": "int32"
+          },
+          "scoreValue": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Points added by a Reward item.",
+            "format": "int32"
+          },
+          "spawnWeight": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "Default weight when a level table does not give one.",
+            "format": "double"
+          },
+          "iconPath": {
+            "type": "string"
+          }
+        }
+      },
+      "ConsumableKind": {
+        "enum": [
+          "Health",
+          "Reward",
+          "Power"
+        ],
+        "description": "The three item kinds of ITM-1."
+      },
+      "ConsumablePower": {
+        "properties": {
+          "type": {
+            "enum": [
+              "Power"
+            ],
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ConsumableKind"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "grant": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "The power a Power item grants; null for the other kinds.",
+                "$ref": "#/components/schemas/PowerGrant"
+              }
+            ]
+          },
+          "healthValue": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Lives restored by a Health item.",
+            "format": "int32"
+          },
+          "scoreValue": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Points added by a Reward item.",
+            "format": "int32"
+          },
+          "spawnWeight": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "Default weight when a level table does not give one.",
+            "format": "double"
+          },
+          "iconPath": {
+            "type": "string"
+          }
+        }
+      },
+      "ConsumableReward": {
+        "properties": {
+          "type": {
+            "enum": [
+              "Reward"
+            ],
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ConsumableKind"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "grant": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "The power a Power item grants; null for the other kinds.",
+                "$ref": "#/components/schemas/PowerGrant"
+              }
+            ]
+          },
+          "healthValue": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Lives restored by a Health item.",
+            "format": "int32"
+          },
+          "scoreValue": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Points added by a Reward item.",
+            "format": "int32"
+          },
+          "spawnWeight": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "Default weight when a level table does not give one.",
+            "format": "double"
+          },
+          "iconPath": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentSummaryResponse": {
+        "required": [
+          "contentHash",
+          "characters",
+          "consumables",
+          "combos",
+          "obstacles",
+          "zombies",
+          "levels"
+        ],
+        "type": "object",
+        "properties": {
+          "contentHash": {
+            "type": "string",
+            "description": "SHA-256 of the whole catalog; changes whenever any content file changes."
+          },
+          "characters": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Number of playable characters.",
+            "format": "int32"
+          },
+          "consumables": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Number of item types (Health, Reward, Power).",
+            "format": "int32"
+          },
+          "combos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Number of super-power combos.",
+            "format": "int32"
+          },
+          "obstacles": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Number of obstacle types.",
+            "format": "int32"
+          },
+          "zombies": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Number of zombie types.",
+            "format": "int32"
+          },
+          "levels": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Number of levels in a run.",
+            "format": "int32"
+          }
+        },
+        "description": "What the server\u0027s content catalog holds, returned by \u0060GET /api/content\u0060."
+      },
+      "CreateSessionRequest": {
+        "required": [
+          "playerName"
+        ],
+        "type": "object",
+        "properties": {
+          "playerName": {
+            "type": "string",
+            "description": "Shown to the other player and in the HUD."
+          }
+        },
+        "description": "Body of \u0060POST /api/sessions\u0060."
+      },
+      "CreateSessionResponse": {
+        "required": [
+          "sessionId",
+          "joinCode",
+          "playerId",
+          "playerToken"
+        ],
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "description": "Id used in every other URL and in the hub connection.",
+            "format": "uuid"
+          },
+          "joinCode": {
+            "type": "string",
+            "description": "Short code the second player enters (join-session activity diagram)."
+          },
+          "playerId": {
+            "type": "string",
+            "description": "Your player id.",
+            "format": "uuid"
+          },
+          "playerToken": {
+            "type": "string",
+            "description": "Send as the X-Player-Token header and as the hub\u0027s playerToken query parameter."
+          }
+        },
+        "description": "Result of creating a session. Share \u0060JoinCode\u0060 with the second player; keep \u0060PlayerToken\u0060 secret."
+      },
+      "DevPlayerDto": {
+        "required": [
+          "playerId",
+          "slot",
+          "name",
+          "characterId",
+          "playerToken",
+          "hubUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "playerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slot": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          },
+          "characterId": {
+            "type": "string"
+          },
+          "playerToken": {
+            "type": "string"
+          },
+          "hubUrl": {
+            "type": "string"
+          }
+        },
+        "description": "A player created by the quickstart, with the token to act as them."
+      },
+      "DevQuickstartRequest": {
+        "type": "object",
+        "properties": {
+          "character1": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Player 1\u0027s character; default scout."
+          },
+          "character2": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Player 2\u0027s character; default warrior."
+          },
+          "seed": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "description": "Fixed seed for reproducible levels; random when null.",
+            "format": "int32"
+          }
+        },
+        "description": "Start a ready-to-play two-player session in one call (\u0060POST /api/dev/quickstart\u0060)."
+      },
+      "DevQuickstartResponse": {
+        "required": [
+          "sessionId",
+          "joinCode",
+          "players"
+        ],
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "joinCode": {
+            "type": "string"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DevPlayerDto"
+            }
+          }
+        },
+        "description": "The quickstarted session. Open the hub URL of each player in its own tab (or the playground)."
+      },
+      "Direction": {
+        "enum": [
+          "None",
+          "Up",
+          "Down",
+          "Left",
+          "Right"
+        ],
+        "description": "A grid direction. \u0060None\u0060 means \u0022not moving\u0022 (key released)."
+      },
+      "DirectionRequest": {
+        "required": [
+          "direction"
+        ],
+        "type": "object",
+        "properties": {
+          "direction": {
+            "description": "Up/Down/Left/Right on key down; None on key up.",
+            "$ref": "#/components/schemas/Direction"
+          }
+        },
+        "description": "Body of \u0060POST /api/sessions/{id}/input\u0060: the direction key now held."
+      },
+      "EventLogEntryDto": {
+        "required": [
+          "tick",
+          "at",
+          "type",
+          "playerId",
+          "message",
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "tick": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Tick it was published in.",
+            "format": "int64"
+          },
+          "at": {
+            "type": "string",
+            "description": "Server time it was published.",
+            "format": "date-time"
+          },
+          "type": {
+            "type": "string",
+            "description": "Event type, as in \u0060GameEventTypes\u0060."
+          },
+          "playerId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The player it concerns, if any.",
+            "format": "uuid"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable text."
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "The event\u0027s own fields."
+          }
+        },
+        "description": "A game event from a session\u0027s event log (Observer pattern: \u0060EventLogObserver\u0060)."
+      },
+      "GivePowerRequest": {
+        "required": [
+          "power"
+        ],
+        "type": "object",
+        "properties": {
+          "power": {
+            "description": "The power.",
+            "$ref": "#/components/schemas/PowerType"
+          },
+          "durationSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "description": "How long; default from the item or \u0060Game:PowerDurationSeconds\u0060.",
+            "format": "double"
+          }
+        },
+        "description": "Give a base power (Jump, Sprint, Swim) without an item."
+      },
+      "GridSize": {
+        "type": "object",
+        "properties": {
+          "width": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "height": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "HealthResponse": {
+        "required": [
+          "status",
+          "version",
+          "environment",
+          "startedAtUtc",
+          "uptimeSeconds"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Always \u0022Healthy\u0022 when the server answers."
+          },
+          "version": {
+            "type": "string",
+            "description": "Server assembly version."
+          },
+          "environment": {
+            "type": "string",
+            "description": "ASP.NET Core environment name (Development, Production)."
+          },
+          "startedAtUtc": {
+            "type": "string",
+            "description": "When the server process started.",
+            "format": "date-time"
+          },
+          "uptimeSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "Seconds since start.",
+            "format": "double"
+          }
+        },
+        "description": "Liveness information returned by \u0060GET /health\u0060."
+      },
+      "HudPlayerDto": {
+        "required": [
+          "playerId",
+          "slot",
+          "name",
+          "characterId",
+          "lives",
+          "maxLives",
+          "score",
+          "powers",
+          "combos",
+          "stats"
+        ],
+        "type": "object",
+        "properties": {
+          "playerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slot": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          },
+          "characterId": {
+            "type": "string"
+          },
+          "lives": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "maxLives": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "score": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "powers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActivePowerDto"
+            }
+          },
+          "combos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PowerType"
+            }
+          },
+          "stats": {
+            "type": "object",
+            "additionalProperties": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        },
+        "description": "A player\u0027s row in the HUD table."
+      },
+      "HudResponse": {
+        "required": [
+          "sessionId",
+          "phase",
+          "levelIndex",
+          "maxLevel",
+          "tick",
+          "levelElapsedSeconds",
+          "leversActive",
+          "leversTotal",
+          "doorOpen",
+          "itemsRemaining",
+          "players"
+        ],
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "description": "Session id.",
+            "format": "uuid"
+          },
+          "phase": {
+            "description": "Current phase.",
+            "$ref": "#/components/schemas/SessionPhase"
+          },
+          "levelIndex": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Current level.",
+            "format": "int32"
+          },
+          "maxLevel": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Levels in the run.",
+            "format": "int32"
+          },
+          "tick": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Server tick.",
+            "format": "int64"
+          },
+          "levelElapsedSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "Time spent on the current level.",
+            "format": "double"
+          },
+          "leversActive": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Levers active right now.",
+            "format": "int32"
+          },
+          "leversTotal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Levers in the level.",
+            "format": "int32"
+          },
+          "doorOpen": {
+            "type": "boolean",
+            "description": "Whether the exit door is open."
+          },
+          "itemsRemaining": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Items still on the map.",
+            "format": "int32"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HudPlayerDto"
+            },
+            "description": "One row per player."
+          }
+        },
+        "description": "The \u0022View game state\u0022 table (view-game-state activity diagram)."
+      },
+      "ItemKind": {
+        "enum": [
+          "Health",
+          "Reward",
+          "Power"
+        ],
+        "description": "What an item does when collected (ITM-1)."
+      },
+      "ItemStateDto": {
+        "required": [
+          "id",
+          "consumableId",
+          "kind",
+          "power",
+          "x",
+          "y"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "consumableId": {
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ItemKind"
+          },
+          "power": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PowerType"
+              }
+            ]
+          },
+          "x": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "y": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        },
+        "description": "An item on the map. \u0060Power\u0060 is set for Power items."
+      },
+      "JoinSessionRequest": {
+        "required": [
+          "joinCode",
+          "playerName"
+        ],
+        "type": "object",
+        "properties": {
+          "joinCode": {
+            "type": "string",
+            "description": "The code from the first player."
+          },
+          "playerName": {
+            "type": "string",
+            "description": "Shown to the other player and in the HUD."
+          }
+        },
+        "description": "Body of \u0060POST /api/sessions/join\u0060."
+      },
+      "JoinSessionResponse": {
+        "required": [
+          "sessionId",
+          "playerId",
+          "playerToken"
+        ],
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "playerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "playerToken": {
+            "type": "string"
+          }
+        },
+        "description": "Result of joining a session."
+      },
+      "LevelDefinition": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "index": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "1-based position in the level sequence.",
+            "format": "int32"
+          },
+          "theme": {
+            "$ref": "#/components/schemas/LevelTheme"
+          },
+          "roomSize": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Room size. Null means the \u0060Game:GridWidth\u0060 and \u0060Game:GridHeight\u0060 settings.",
+                "$ref": "#/components/schemas/GridSize"
+              }
+            ]
+          },
+          "obstacleCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "How many water/pit patches to place.",
+            "format": "int32"
+          },
+          "obstacleTable": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpawnTableEntry"
+            },
+            "description": "Which obstacles the patches use (by obstacle id, weighted)."
+          },
+          "zombieCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "zombieTable": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpawnTableEntry"
+            }
+          },
+          "pickupCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "How many items to place.",
+            "format": "int32"
+          },
+          "consumableTable": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpawnTableEntry"
+            }
+          },
+          "timeLimitSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "Kept from the class diagram; not enforced (no requirement).",
+            "format": "double"
+          }
+        },
+        "description": "Static settings for one of the 10 levels (the class diagram\u0027s \u0060Level\u0060). The generator\r\nturns it into a runtime \u0060LevelState\u0060."
+      },
+      "LevelLayoutResponse": {
+        "required": [
+          "sessionId",
+          "levelIndex",
+          "theme",
+          "seed",
+          "width",
+          "height",
+          "rows",
+          "legend",
+          "obstacles"
+        ],
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "description": "Session id.",
+            "format": "uuid"
+          },
+          "levelIndex": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "1-10.",
+            "format": "int32"
+          },
+          "theme": {
+            "description": "Dungeon or Crypt.",
+            "$ref": "#/components/schemas/LevelTheme"
+          },
+          "seed": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Generation seed (same seed, same layout).",
+            "format": "int32"
+          },
+          "width": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Width in tiles.",
+            "format": "int32"
+          },
+          "height": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Height in tiles.",
+            "format": "int32"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "One string per row, map legend characters."
+          },
+          "legend": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Meaning of every legend character."
+          },
+          "obstacles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LevelObstacleDto"
+            },
+            "description": "The themed obstacle variants this level uses (one family per theme)."
+          }
+        },
+        "description": "Static layout of the current level (\u0060GET /api/sessions/{id}/level\u0060)."
+      },
+      "LevelObstacleDto": {
+        "required": [
+          "legend",
+          "id",
+          "name",
+          "variant",
+          "requiredPower",
+          "moveSpeedMultiplier"
+        ],
+        "type": "object",
+        "properties": {
+          "legend": {
+            "type": "string",
+            "description": "Map legend character of its terrain."
+          },
+          "id": {
+            "type": "string",
+            "description": "Variant id, e.g. \u0060poison-water\u0060."
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name."
+          },
+          "variant": {
+            "type": "string",
+            "description": "Class name of the themed variant, e.g. \u0060PoisonWater\u0060."
+          },
+          "requiredPower": {
+            "description": "Power needed to enter it; \u0060None\u0060 for walls.",
+            "$ref": "#/components/schemas/PowerType"
+          },
+          "moveSpeedMultiplier": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "Speed factor while crossing it.",
+            "format": "double"
+          }
+        },
+        "description": "An obstacle variant used in a level, e.g. Crypt\u0027s poison water."
+      },
+      "LevelPreviewResponse": {
+        "required": [
+          "levelIndex",
+          "theme",
+          "builder",
+          "requestedSeed",
+          "seed",
+          "width",
+          "height",
+          "rows",
+          "obstacles",
+          "zombies",
+          "valid",
+          "validationErrors"
+        ],
+        "type": "object",
+        "properties": {
+          "levelIndex": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "1-10.",
+            "format": "int32"
+          },
+          "theme": {
+            "description": "Dungeon or Crypt (picks the Abstract Factory).",
+            "$ref": "#/components/schemas/LevelTheme"
+          },
+          "builder": {
+            "type": "string",
+            "description": "The concrete Builder used: ProceduralLevelBuilder or PresetLevelBuilder."
+          },
+          "requestedSeed": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The seed asked for.",
+            "format": "int32"
+          },
+          "seed": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The seed of the attempt that produced this level (a retry adds 7919 per attempt).",
+            "format": "int32"
+          },
+          "width": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Width in tiles.",
+            "format": "int32"
+          },
+          "height": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Height in tiles.",
+            "format": "int32"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Map legend rows."
+          },
+          "obstacles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LevelObstacleDto"
+            },
+            "description": "The themed obstacle variants used."
+          },
+          "zombies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PreviewZombieDto"
+            },
+            "description": "Zombie class and chase strategy per zombie."
+          },
+          "valid": {
+            "type": "boolean",
+            "description": "True when ValidationErrors is empty."
+          },
+          "validationErrors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Broken generation rules (GEN-1..3, LVL-3, D5); empty for a valid level."
+          }
+        },
+        "description": "A level built without a session, for previewing (\u0060GET /api/levels/{index}/preview\u0060)."
+      },
+      "LevelTheme": {
+        "enum": [
+          "Dungeon",
+          "Crypt"
+        ],
+        "description": "Visual and gameplay family of a level: levels 1-5 are Dungeon, 6-10 Crypt."
+      },
+      "LeverStateDto": {
+        "required": [
+          "id",
+          "x",
+          "y",
+          "isActive"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "x": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "y": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "LoopDiagnosticsResponse": {
+        "required": [
+          "tickRate",
+          "sessions",
+          "activeSessions",
+          "loopIterations",
+          "averageTickMilliseconds",
+          "maxTickMilliseconds",
+          "failedSessionTicks"
+        ],
+        "type": "object",
+        "properties": {
+          "tickRate": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Configured ticks per second.",
+            "format": "int32"
+          },
+          "sessions": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Sessions known to the server.",
+            "format": "int32"
+          },
+          "activeSessions": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Sessions still being ticked (not finished).",
+            "format": "int32"
+          },
+          "loopIterations": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Loop iterations since start.",
+            "format": "int64"
+          },
+          "averageTickMilliseconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "Average time to tick all sessions once, over the last 200 iterations.",
+            "format": "double"
+          },
+          "maxTickMilliseconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "Slowest iteration since start.",
+            "format": "double"
+          },
+          "failedSessionTicks": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Session ticks that threw and were isolated.",
+            "format": "int64"
+          }
+        },
+        "description": "Game loop timings (\u0060GET /api/diagnostics/loop\u0060)."
+      },
+      "MovementStrategyKind": {
+        "enum": [
+          "Greedy",
+          "Bfs",
+          "AStar",
+          "Predictive"
+        ],
+        "description": "How a zombie chooses its next step towards the nearest player."
+      },
+      "Obstacle": {
+        "required": [
+          "type"
+        ],
+        "type": "object",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/ObstacleWall"
+          },
+          {
+            "$ref": "#/components/schemas/ObstacleWater"
+          },
+          {
+            "$ref": "#/components/schemas/ObstaclePit"
+          }
+        ],
+        "description": "A terrain obstacle. The JSON field \u0060type\u0060 picks the subclass.",
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "Wall": "#/components/schemas/ObstacleWall",
+            "Water": "#/components/schemas/ObstacleWater",
+            "Pit": "#/components/schemas/ObstaclePit"
+          }
+        }
+      },
+      "ObstacleKind": {
+        "enum": [
+          "Wall",
+          "Pit",
+          "Water"
+        ]
+      },
+      "ObstaclePit": {
+        "properties": {
+          "type": {
+            "enum": [
+              "Pit"
+            ],
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ObstacleKind"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "traversalRequirements": {
+            "description": "The power needed to enter this tile. \u0060None\u0060 means no power allows it (walls).",
+            "$ref": "#/components/schemas/PowerType"
+          },
+          "blocksZombies": {
+            "type": "boolean"
+          },
+          "minSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Smallest and largest patch the generator places, in tiles.",
+            "format": "int32"
+          },
+          "maxSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "moveSpeedMultiplier": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "Speed multiplier while crossing this tile (e.g. water is slower).",
+            "format": "double"
+          }
+        }
+      },
+      "ObstacleWall": {
+        "properties": {
+          "type": {
+            "enum": [
+              "Wall"
+            ],
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ObstacleKind"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "traversalRequirements": {
+            "description": "The power needed to enter this tile. \u0060None\u0060 means no power allows it (walls).",
+            "$ref": "#/components/schemas/PowerType"
+          },
+          "blocksZombies": {
+            "type": "boolean"
+          },
+          "minSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Smallest and largest patch the generator places, in tiles.",
+            "format": "int32"
+          },
+          "maxSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "moveSpeedMultiplier": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "Speed multiplier while crossing this tile (e.g. water is slower).",
+            "format": "double"
+          }
+        }
+      },
+      "ObstacleWater": {
+        "properties": {
+          "type": {
+            "enum": [
+              "Water"
+            ],
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ObstacleKind"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "traversalRequirements": {
+            "description": "The power needed to enter this tile. \u0060None\u0060 means no power allows it (walls).",
+            "$ref": "#/components/schemas/PowerType"
+          },
+          "blocksZombies": {
+            "type": "boolean"
+          },
+          "minSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Smallest and largest patch the generator places, in tiles.",
+            "format": "int32"
+          },
+          "maxSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "moveSpeedMultiplier": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "Speed multiplier while crossing this tile (e.g. water is slower).",
+            "format": "double"
+          }
+        }
+      },
+      "PatternDemoResponse": {
+        "required": [
+          "pattern",
+          "summary",
+          "trace",
+          "evidence"
+        ],
+        "type": "object",
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "description": "Pattern name."
+          },
+          "summary": {
+            "type": "string",
+            "description": "One-line conclusion."
+          },
+          "trace": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "What happened, step by step (the same lines the console demo prints)."
+          },
+          "evidence": {
+            "type": "object",
+            "description": "Values that prove the requirement (identities, counts, addresses...)."
+          }
+        },
+        "description": "Result of running a pattern demo: a readable trace plus structured evidence."
+      },
+      "PatternDto": {
+        "required": [
+          "key",
+          "name",
+          "category",
+          "owner",
+          "problem",
+          "requirement",
+          "howMet",
+          "doc",
+          "demo",
+          "participants"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "URL key, e.g. \u0022abstract-factory\u0022."
+          },
+          "name": {
+            "type": "string",
+            "description": "Pattern name."
+          },
+          "category": {
+            "type": "string",
+            "description": "Creational, Structural or Behavioral."
+          },
+          "owner": {
+            "type": "string",
+            "description": "Student responsible for the pattern."
+          },
+          "problem": {
+            "type": "string",
+            "description": "The problem it solves in this game."
+          },
+          "requirement": {
+            "type": "string",
+            "description": "The course\u0027s pattern-specific requirement."
+          },
+          "howMet": {
+            "type": "string",
+            "description": "How the requirement is met here."
+          },
+          "doc": {
+            "type": "string",
+            "description": "Path to the pattern\u0027s document in the repository."
+          },
+          "demo": {
+            "type": "string",
+            "description": "Demo endpoint."
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PatternParticipantDto"
+            },
+            "description": "Classes marked with [DesignPattern] for this pattern."
+          }
+        },
+        "description": "One P1 design pattern as applied in this game."
+      },
+      "PatternParticipantDto": {
+        "required": [
+          "type",
+          "role",
+          "file"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Class or interface name."
+          },
+          "role": {
+            "type": "string",
+            "description": "Role in the pattern (e.g. ConcreteDecorator)."
+          },
+          "file": {
+            "type": "string",
+            "description": "Source file, relative to the repository."
+          }
+        },
+        "description": "A class that takes part in a pattern, found by reflection on \u0060[DesignPattern]\u0060."
+      },
+      "PlayerStateDto": {
+        "required": [
+          "playerId",
+          "slot",
+          "name",
+          "characterId",
+          "tileX",
+          "tileY",
+          "x",
+          "y",
+          "facing",
+          "isMoving",
+          "lives",
+          "maxLives",
+          "score",
+          "powers",
+          "combos"
+        ],
+        "type": "object",
+        "properties": {
+          "playerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slot": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          },
+          "characterId": {
+            "type": "string"
+          },
+          "tileX": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "tileY": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "x": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "y": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "facing": {
+            "$ref": "#/components/schemas/Direction"
+          },
+          "isMoving": {
+            "type": "boolean"
+          },
+          "lives": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "maxLives": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "score": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "powers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActivePowerDto"
+            }
+          },
+          "combos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PowerType"
+            }
+          }
+        },
+        "description": "A player in the tick state. \u0060X\u0060/\u0060Y\u0060 are interpolated for smooth rendering."
+      },
+      "PolledMessageDto": {
+        "required": [
+          "seq",
+          "method",
+          "body"
+        ],
+        "type": "object",
+        "properties": {
+          "seq": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Message sequence number.",
+            "format": "int64"
+          },
+          "method": {
+            "type": "string",
+            "description": "Client method name, as in SignalR (e.g. StateUpdated)."
+          },
+          "body": {
+            "type": "string",
+            "description": "The payload, serialized in the requested format."
+          }
+        },
+        "description": "One buffered message: the client method it stands for and its serialized payload."
+      },
+      "PolledMessagesResponse": {
+        "required": [
+          "sessionId",
+          "contentType",
+          "latestSeq",
+          "messages"
+        ],
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "description": "Session id.",
+            "format": "uuid"
+          },
+          "contentType": {
+            "type": "string",
+            "description": "Format of every \u0060Body\u0060: application/json or application/xml."
+          },
+          "latestSeq": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Highest sequence number returned (pass it as \u0060afterSeq\u0060 next time); the request\u0027s \u0060afterSeq\u0060 if none.",
+            "format": "int64"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolledMessageDto"
+            },
+            "description": "The buffered messages after \u0060afterSeq\u0060, oldest first."
+          }
+        },
+        "description": "Messages read from the polling channel (\u0060GET /api/sessions/{id}/messages\u0060)."
+      },
+      "PowerCombo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "requiredPowers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PowerType"
+            }
+          },
+          "granted": {
+            "$ref": "#/components/schemas/PowerType"
+          },
+          "modifiers": {
+            "$ref": "#/components/schemas/StatModifiers"
+          }
+        },
+        "description": "A super power that is active while all required base powers are active (PWR-2)."
+      },
+      "PowerGrant": {
+        "required": [
+          "type"
+        ],
+        "type": "object",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/PowerGrantJump"
+          },
+          {
+            "$ref": "#/components/schemas/PowerGrantSprint"
+          },
+          {
+            "$ref": "#/components/schemas/PowerGrantSwim"
+          }
+        ],
+        "description": "A temporary base power granted by a Power item (PWR-1). The JSON field \u0060type\u0060 picks the subclass.",
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "Jump": "#/components/schemas/PowerGrantJump",
+            "Sprint": "#/components/schemas/PowerGrantSprint",
+            "Swim": "#/components/schemas/PowerGrantSwim"
+          }
+        }
+      },
+      "PowerGrantJump": {
+        "properties": {
+          "type": {
+            "enum": [
+              "Jump"
+            ],
+            "type": "string"
+          },
+          "power": {
+            "$ref": "#/components/schemas/PowerType"
+          },
+          "durationSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "description": "How long the power lasts. Null means the \u0060Game:PowerDurationSeconds\u0060 setting.",
+            "format": "double"
+          },
+          "modifiers": {
+            "$ref": "#/components/schemas/StatModifiers"
+          }
+        }
+      },
+      "PowerGrantSprint": {
+        "properties": {
+          "type": {
+            "enum": [
+              "Sprint"
+            ],
+            "type": "string"
+          },
+          "power": {
+            "$ref": "#/components/schemas/PowerType"
+          },
+          "durationSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "description": "How long the power lasts. Null means the \u0060Game:PowerDurationSeconds\u0060 setting.",
+            "format": "double"
+          },
+          "modifiers": {
+            "$ref": "#/components/schemas/StatModifiers"
+          }
+        }
+      },
+      "PowerGrantSwim": {
+        "properties": {
+          "type": {
+            "enum": [
+              "Swim"
+            ],
+            "type": "string"
+          },
+          "power": {
+            "$ref": "#/components/schemas/PowerType"
+          },
+          "durationSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "description": "How long the power lasts. Null means the \u0060Game:PowerDurationSeconds\u0060 setting.",
+            "format": "double"
+          },
+          "modifiers": {
+            "$ref": "#/components/schemas/StatModifiers"
+          }
+        }
+      },
+      "PowerSummary": {
+        "required": [
+          "power",
+          "isSuperPower",
+          "durationSeconds",
+          "grantedByItems",
+          "requiredPowers"
+        ],
+        "type": "object",
+        "properties": {
+          "power": {
+            "description": "The power.",
+            "$ref": "#/components/schemas/PowerType"
+          },
+          "isSuperPower": {
+            "type": "boolean",
+            "description": "True for JumpDash and FastSwim, which come from combos."
+          },
+          "durationSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "description": "How long a pickup lasts (base powers only).",
+            "format": "double"
+          },
+          "grantedByItems": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Ids of items that grant this base power."
+          },
+          "requiredPowers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PowerType"
+            },
+            "description": "For a super power: the base powers that must be active together."
+          }
+        },
+        "description": "A base power or super power and how to get it."
+      },
+      "PowerType": {
+        "enum": [
+          "None",
+          "Jump",
+          "Sprint",
+          "Swim",
+          "JumpDash",
+          "FastSwim"
+        ],
+        "description": "Base powers (Jump, Sprint, Swim) come from items; super powers (JumpDash, FastSwim) appear\r\nwhile two different base powers are active. \u0060None\u0060 marks terrain no power can cross."
+      },
+      "PreviewZombieDto": {
+        "required": [
+          "id",
+          "typeId",
+          "variant",
+          "strategy",
+          "x",
+          "y"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "typeId": {
+            "type": "string"
+          },
+          "variant": {
+            "type": "string"
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/MovementStrategyKind"
+          },
+          "x": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "y": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        },
+        "description": "A zombie in a preview."
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "ProtocolMethodDto": {
+        "required": [
+          "name",
+          "payload",
+          "when"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "string"
+          },
+          "when": {
+            "type": "string"
+          }
+        },
+        "description": "One hub method. \u0060Payload\u0060 is the message type (server to client) or the argument list (client to server)."
+      },
+      "ProtocolParameterDto": {
+        "required": [
+          "name",
+          "description"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "RealtimeProtocolResponse": {
+        "required": [
+          "hubPath",
+          "queryParameters",
+          "serverToClient",
+          "clientToServer",
+          "eventTypes",
+          "errorCodes",
+          "rules"
+        ],
+        "type": "object",
+        "properties": {
+          "hubPath": {
+            "type": "string",
+            "description": "SignalR hub path, e.g. /hubs/game."
+          },
+          "queryParameters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProtocolParameterDto"
+            },
+            "description": "Query parameters the hub URL needs."
+          },
+          "serverToClient": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProtocolMethodDto"
+            },
+            "description": "Methods the server calls on the client."
+          },
+          "clientToServer": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProtocolMethodDto"
+            },
+            "description": "Methods the client calls on the hub."
+          },
+          "eventTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Every \u0060GameEvent.type\u0060 value."
+          },
+          "errorCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Every \u0060Error.code\u0060 value (also the \u0060code\u0060 of REST problem details)."
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Ordering, catch-up and polling rules clients rely on."
+          }
+        },
+        "description": "How to talk to the game in real time (\u0060GET /api/realtime/protocol\u0060)."
+      },
+      "SelectCharacterRequest": {
+        "required": [
+          "characterId"
+        ],
+        "type": "object",
+        "properties": {
+          "characterId": {
+            "type": "string",
+            "description": "One of the ids from \u0060GET /api/content/characters\u0060."
+          }
+        },
+        "description": "Body of \u0060PUT /api/sessions/{id}/players/me/character\u0060."
+      },
+      "SessionDto": {
+        "required": [
+          "sessionId",
+          "joinCode",
+          "phase",
+          "levelIndex",
+          "maxLevel",
+          "players"
+        ],
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "description": "Session id.",
+            "format": "uuid"
+          },
+          "joinCode": {
+            "type": "string",
+            "description": "Code for the second player."
+          },
+          "phase": {
+            "description": "Current lifecycle phase.",
+            "$ref": "#/components/schemas/SessionPhase"
+          },
+          "levelIndex": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Current level (1-10), or 0 before the first level.",
+            "format": "int32"
+          },
+          "maxLevel": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Number of levels in the run.",
+            "format": "int32"
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SessionPlayerDto"
+            },
+            "description": "Joined players in slot order."
+          }
+        },
+        "description": "Lobby view of a session."
+      },
+      "SessionPhase": {
+        "enum": [
+          "WaitingForPlayers",
+          "CharacterSelect",
+          "LoadingLevel",
+          "Playing",
+          "LevelComplete",
+          "Victory",
+          "Defeat",
+          "Aborted"
+        ],
+        "description": "Lifecycle of a two-player session."
+      },
+      "SessionPlayerDto": {
+        "required": [
+          "playerId",
+          "slot",
+          "name",
+          "characterId",
+          "connected"
+        ],
+        "type": "object",
+        "properties": {
+          "playerId": {
+            "type": "string",
+            "description": "Player id.",
+            "format": "uuid"
+          },
+          "slot": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "1 or 2; decides the start tile.",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name."
+          },
+          "characterId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Chosen character, or null while choosing."
+          },
+          "connected": {
+            "type": "boolean",
+            "description": "Whether the player has a live hub connection."
+          }
+        },
+        "description": "A player as seen in the lobby."
+      },
+      "SessionSummary": {
+        "required": [
+          "sessionId",
+          "joinCode",
+          "phase",
+          "playerCount"
+        ],
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "joinCode": {
+            "type": "string"
+          },
+          "phase": {
+            "$ref": "#/components/schemas/SessionPhase"
+          },
+          "playerCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        },
+        "description": "One row of \u0060GET /api/sessions\u0060."
+      },
+      "SpawnTableEntry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "weight": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        },
+        "description": "A reference to content by id with a relative spawn weight, used in level tables."
+      },
+      "StatModifiers": {
+        "type": "object",
+        "properties": {
+          "moveSpeedMultiplier": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "jumpForceMultiplier": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "swimSpeedMultiplier": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        },
+        "description": "Multipliers applied on top of a character\u0027s base stats. Immutable."
+      },
+      "TickStateMessage": {
+        "required": [
+          "sessionId",
+          "seq",
+          "tick",
+          "phase",
+          "levelIndex",
+          "doorOpen",
+          "players",
+          "zombies",
+          "items",
+          "levers"
+        ],
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "description": "Session id.",
+            "format": "uuid"
+          },
+          "seq": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Message sequence number.",
+            "format": "int64"
+          },
+          "tick": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Server tick.",
+            "format": "int64"
+          },
+          "phase": {
+            "description": "Current phase.",
+            "$ref": "#/components/schemas/SessionPhase"
+          },
+          "levelIndex": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Current level.",
+            "format": "int32"
+          },
+          "doorOpen": {
+            "type": "boolean",
+            "description": "Whether the exit door is open."
+          },
+          "players": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlayerStateDto"
+            },
+            "description": "Both players."
+          },
+          "zombies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieStateDto"
+            },
+            "description": "All zombies."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemStateDto"
+            },
+            "description": "Items still on the map."
+          },
+          "levers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LeverStateDto"
+            },
+            "description": "All levers."
+          }
+        },
+        "description": "Dynamic state, sent every tick while playing."
+      },
+      "UndoResponse": {
+        "required": [
+          "undone"
+        ],
+        "type": "object",
+        "properties": {
+          "undone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "Result of an undo request: the command undone, or null if there was nothing to undo."
+      },
+      "ZombieDefinition": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "speed": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "Tiles per second.",
+            "format": "double"
+          },
+          "contactDamage": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Lives taken on contact (ZMB-2).",
+            "format": "int32"
+          },
+          "attackCooldownSeconds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "size": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "movementStrategy": {
+            "description": "Default way this type chases the nearest player (ZMB-1).",
+            "$ref": "#/components/schemas/MovementStrategyKind"
+          }
+        },
+        "description": "A zombie type. Types differ by data and movement strategy, not by subclass."
+      },
+      "ZombieStateDto": {
+        "required": [
+          "id",
+          "typeId",
+          "tileX",
+          "tileY",
+          "x",
+          "y",
+          "facing",
+          "strategy"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "typeId": {
+            "type": "string"
+          },
+          "tileX": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "tileY": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "x": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "y": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "facing": {
+            "$ref": "#/components/schemas/Direction"
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/MovementStrategyKind"
+          }
+        },
+        "description": "A zombie in the tick state. \u0060Strategy\u0060 is how it chases right now (it can be swapped at runtime)."
+      },
+      "ZombieStrategyRequest": {
+        "required": [
+          "strategy"
+        ],
+        "type": "object",
+        "properties": {
+          "strategy": {
+            "$ref": "#/components/schemas/MovementStrategyKind"
+          }
+        },
+        "description": "Switch every zombie of the current level to one chase strategy."
+      }
+    },
+    "securitySchemes": {
+      "PlayerToken": {
+        "type": "apiKey",
+        "description": "The playerToken returned by POST /api/sessions or POST /api/sessions/join.",
+        "name": "X-Player-Token",
+        "in": "header"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Sessions",
+      "description": "Create, join and leave a two-player session; pick a character."
+    },
+    {
+      "name": "Gameplay",
+      "description": "REST mirror of the hub: send input, restart, read state, HUD and level layout."
+    },
+    {
+      "name": "Realtime",
+      "description": "SignalR protocol description and example payloads for every hub message."
+    },
+    {
+      "name": "Content",
+      "description": "Static game content: characters, items, powers, combos, obstacles, zombies, levels."
+    },
+    {
+      "name": "Levels",
+      "description": "Preview generated or preset levels with their validation report."
+    },
+    {
+      "name": "Patterns",
+      "description": "The P1 design patterns: participants, requirements and runnable demos."
+    },
+    {
+      "name": "Diagnostics",
+      "description": "Health, game loop timings, command history and event log."
+    },
+    {
+      "name": "Dev",
+      "description": "Developer shortcuts. Available only when DevTools:Enabled is true."
+    }
+  ],
+  "x-tagGroups": [
+    {
+      "name": "Lobby",
+      "tags": [
+        "Sessions"
+      ]
+    },
+    {
+      "name": "Gameplay",
+      "tags": [
+        "Gameplay",
+        "Realtime"
+      ]
+    },
+    {
+      "name": "Content",
+      "tags": [
+        "Content",
+        "Levels"
+      ]
+    },
+    {
+      "name": "Course",
+      "tags": [
+        "Patterns"
+      ]
+    },
+    {
+      "name": "Ops",
+      "tags": [
+        "Diagnostics",
+        "Dev"
+      ]
+    }
+  ]
+}

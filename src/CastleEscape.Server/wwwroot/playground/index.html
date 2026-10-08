@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Castle Escape Playground</title>
+  <link rel="stylesheet" href="playground.css">
+</head>
+<body>
+<header>
+  <h1>Castle Escape <span class="muted">playground</span></h1>
+  <p class="muted">A developer tool, not the game client: it talks to the server exactly like a frontend would
+    (REST lobby, SignalR <code>/hubs/game</code>) and adds dev shortcuts. Served only when <code>DevTools:Enabled</code>.</p>
+</header>
+
+<main>
+  <section id="lobby" class="panel">
+    <h2>Start</h2>
+    <div class="row">
+      <button id="quickstart">Quickstart: Ana + Ben</button>
+      <label>Ana <select id="char1"></select></label>
+      <label>Ben <select id="char2"></select></label>
+      <label>Seed <input id="seed" type="number" placeholder="random" size="8"></label>
+    </div>
+    <div id="links" class="row"></div>
+    <details>
+      <summary>Manual lobby (create / join with a code)</summary>
+      <div class="row">
+        <input id="name" placeholder="Your name" value="Player">
+        <button id="create">Create session</button>
+        <input id="code" placeholder="Join code" size="8">
+        <button id="join">Join</button>
+        <select id="char"></select>
+        <button id="pick">Pick character</button>
+      </div>
+    </details>
+  </section>
+
+  <section id="game" class="panel hidden">
+    <div class="game-layout">
+      <div>
+        <canvas id="board" width="768" height="512"></canvas>
+        <p class="muted">Arrow keys or WASD to move. Click the board first if keys don't respond.</p>
+      </div>
+      <div class="side">
+        <h2 id="title">Connecting…</h2>
+        <div id="hud"></div>
+        <h3>Dev</h3>
+        <div class="row">
+          <button id="restart">Restart level</button>
+          <button id="undo">Undo last command</button>
+          <button id="skip">Skip level</button>
+        </div>
+        <div class="row">
+          <label>Zombies <select id="strategy">
+            <option>Greedy</option><option>Bfs</option><option>AStar</option><option>Predictive</option>
+          </select></label>
+          <button id="setStrategy">Apply</button>
+        </div>
+        <div class="row">
+          <label>Give me <select id="power"><option>Jump</option><option>Sprint</option><option>Swim</option></select></label>
+          <button id="givePower">Give</button>
+        </div>
+        <div class="row">
+          <label>Prototype clone <select id="cloneMode"><option>Deep</option><option>Shallow</option></select></label>
+          <button id="setClone">Apply</button>
+        </div>
+        <h3>Events</h3>
+        <ol id="events" reversed></ol>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@8.0.7/dist/browser/signalr.min.js"
+        integrity="sha384-mU1xC5yC2LldSW74Rj1Ax8wPiLw/28V5eh51uKJMlBbRVsOtUYd4xyzNsgIAJARB" crossorigin="anonymous"></script>
+<script src="playground.js"></script>
+</body>
+</html>

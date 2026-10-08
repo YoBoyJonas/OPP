@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Console Main() that runs the pattern demos (course requirement). -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CastleEscape.Game\CastleEscape.Game.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,3 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- DTOs, enums and protocol messages shared by the server and its clients. No dependencies. -->
+</Project>

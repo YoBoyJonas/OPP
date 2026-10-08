@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Domain, game rules and design patterns. Must not reference ASP.NET Core. -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\CastleEscape.Contracts\CastleEscape.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Tests may build throw-away catalogs (ContentCatalog.FromData) to check validation rules. -->
+    <InternalsVisibleTo Include="CastleEscape.Game.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Content JSON and preset maps live in /content at the repo root; copied to every referencing output. -->
+    <None Include="..\..\content\**\*" Link="content\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

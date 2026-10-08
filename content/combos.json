@@ -1,0 +1,16 @@
+[
+  {
+    "id": "jump-dash",
+    "name": "Jump Dash",
+    "requiredPowers": [ "Jump", "Sprint" ],
+    "granted": "JumpDash",
+    "modifiers": { "moveSpeedMultiplier": 1.25, "jumpForceMultiplier": 1.5 }
+  },
+  {
+    "id": "fast-swim",
+    "name": "Fast Swim",
+    "requiredPowers": [ "Sprint", "Swim" ],
+    "granted": "FastSwim",
+    "modifiers": { "swimSpeedMultiplier": 1.6 }
+  }
+]
