@@ -3115,7 +3115,7 @@
             "format": "double"
           }
         },
-        "description": "Static settings for one of the 10 levels (the class diagram\u0027s \u0060Level\u0060). The generator\r\nturns it into a runtime \u0060LevelState\u0060."
+        "description": "Static settings for one of the 10 levels (the class diagram\u0027s \u0060Level\u0060). The generator\nturns it into a runtime \u0060LevelState\u0060."
       },
       "LevelLayoutResponse": {
         "required": [
@@ -4141,7 +4141,7 @@
           "JumpDash",
           "FastSwim"
         ],
-        "description": "Base powers (Jump, Sprint, Swim) come from items; super powers (JumpDash, FastSwim) appear\r\nwhile two different base powers are active. \u0060None\u0060 marks terrain no power can cross."
+        "description": "Base powers (Jump, Sprint, Swim) come from items; super powers (JumpDash, FastSwim) appear\nwhile two different base powers are active. \u0060None\u0060 marks terrain no power can cross."
       },
       "PreviewZombieDto": {
         "required": [

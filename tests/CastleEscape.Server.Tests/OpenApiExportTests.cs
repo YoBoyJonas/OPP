@@ -27,6 +27,7 @@ public class OpenApiExportTests(WebApplicationFactory<Program> factory) : IClass
         var document = JsonNode.Parse(live)!.AsObject();
         document.Remove("servers"); // the test host's address, not part of the contract
         var normalized = document.ToJsonString(new JsonSerializerOptions { WriteIndented = true }).ReplaceLineEndings("\n") + "\n";
+        normalized = normalized.Replace("\\r\\n", "\\n"); // doc-comment newlines inside JSON strings differ between CRLF (Windows) and LF (CI) checkouts
 
         var path = RepoFile(Path.Combine("docs", "openapi.json"));
         if (Environment.GetEnvironmentVariable("UPDATE_OPENAPI") == "1")
@@ -35,7 +36,7 @@ public class OpenApiExportTests(WebApplicationFactory<Program> factory) : IClass
         }
 
         Assert.True(File.Exists(path), "docs/openapi.json is missing. Run: UPDATE_OPENAPI=1 dotnet test --filter OpenApiExport");
-        var saved = (await File.ReadAllTextAsync(path, Api.Ct)).ReplaceLineEndings("\n");
+        var saved = (await File.ReadAllTextAsync(path, Api.Ct)).ReplaceLineEndings("\n").Replace("\\r\\n", "\\n");
         Assert.True(saved == normalized, "docs/openapi.json is out of date. Run: UPDATE_OPENAPI=1 dotnet test --filter OpenApiExport" + FirstDifference(saved, normalized));
     }
 
