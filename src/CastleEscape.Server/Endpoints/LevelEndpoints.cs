@@ -1,5 +1,6 @@
 using CastleEscape.Contracts.Content;
-using CastleEscape.Game.Generation;
+using CastleEscape.Application.Generation;
+using CastleEscape.Domain.Generation;
 using CastleEscape.Server.OpenApi;
 using Microsoft.AspNetCore.Http.HttpResults;
 

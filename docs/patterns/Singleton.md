@@ -1,7 +1,7 @@
 # Singleton — `ContentCatalog`
 
-**Owner:** Student C · **Category:** Creational · **Code:** `src/CastleEscape.Game/Content/ContentCatalog.cs`
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- singleton --threads 64` · `POST /api/patterns/singleton/demo?threads=64&naive=true`
+**Owner:** Student C · **Category:** Creational · **Code:** `src/CastleEscape.Infrastructure/Content/ContentCatalog.cs`
+**Demo:** `dotnet run --project tools/CastleEscape.PatternDemos -- singleton --threads 64`
 
 ## Problem in this game
 
@@ -100,7 +100,7 @@ double-checked locking to get wrong.
 
 The same race against `NaiveCatalogHolder` (no lock, 20 ms constructor) typically shows **N
 distinct instances and N constructor calls**. That is the bug the pattern avoids.
-Tests: `tests/CastleEscape.Game.Tests/Patterns/SingletonTests.cs`.
+Tests: `tests/CastleEscape.Core.Tests/Patterns/SingletonTests.cs`.
 
 ## Likely live-change requests
 

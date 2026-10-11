@@ -1,5 +1,6 @@
 using CastleEscape.Contracts.Sessions;
-using CastleEscape.Game.Sessions;
+using CastleEscape.Application.Sessions;
+using CastleEscape.Domain.Sessions;
 using CastleEscape.Server.OpenApi;
 using Microsoft.AspNetCore.Http.HttpResults;
 

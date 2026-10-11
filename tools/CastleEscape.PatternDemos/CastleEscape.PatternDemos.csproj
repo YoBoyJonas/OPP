@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/CastleEscape.Domain/CastleEscape.Domain.csproj" />
+    <ProjectReference Include="../../src/CastleEscape.Application/CastleEscape.Application.csproj" />
+    <ProjectReference Include="../../src/CastleEscape.Infrastructure/CastleEscape.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

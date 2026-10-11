@@ -1,7 +1,9 @@
 using CastleEscape.Contracts;
 using CastleEscape.Contracts.Realtime;
-using CastleEscape.Game.Content;
-using CastleEscape.Game.Messaging;
+using CastleEscape.Domain.Content;
+using CastleEscape.Infrastructure.Content;
+using CastleEscape.Application.Messaging;
+using CastleEscape.Infrastructure.Serialization;
 using CastleEscape.Server.OpenApi;
 
 namespace CastleEscape.Server.Endpoints;
@@ -24,7 +26,7 @@ public static class RealtimeEndpoints
             .WithDescription("Hub URL and query parameters, every server-to-client and client-to-server method with its payload "
                              + "and when it happens, every event type and error code, and the ordering rules.");
 
-        group.MapGet("/examples", (ContentCatalog catalog) => TypedResults.Ok(
+        group.MapGet("/examples", (IContentCatalog catalog) => TypedResults.Ok(
                 RealtimeExamples.Capture(catalog).ToDictionary(kv => kv.Key, kv => (object)kv.Value)))
             .WithName("GetRealtimeExamples")
             .WithSummary("Example payload of every server message")

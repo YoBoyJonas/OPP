@@ -1,7 +1,7 @@
 # Bridge — notifiers over delivery channels
 
-**Owner:** Student C · **Category:** Structural · **Code:** `src/CastleEscape.Game/Messaging/` (`ClientNotifiers.cs`, `ClientChannels.cs`), `src/CastleEscape.Server/Realtime/SignalRClientChannel.cs`
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- bridge --ticks 40 --pollingEvery 5 --format json` · `POST /api/patterns/bridge/demo?ticks=40&pollingEvery=5&format=xml`
+**Owner:** Student C · **Category:** Structural · **Code:** `src/CastleEscape.Application/Messaging/` (`ClientNotifiers.cs`, `ClientChannels.cs`), `src/CastleEscape.Infrastructure/Messaging/PollingBufferChannel.cs`, `src/CastleEscape.Server/Realtime/SignalRClientChannel.cs`
+**Demo:** `dotnet run --project tools/CastleEscape.PatternDemos -- bridge --ticks 40 --pollingEvery 5 --format json`
 **Used by:** `GameLoopService` (every outgoing message of every session), `GET /api/sessions/{id}/messages?afterSeq=&format=` (polling clients).
 **Switch:** `Realtime:EnabledChannels = [SignalR, Polling]`, `Realtime:PollingStateEveryNthTick`, `Realtime:PollingBufferSize`.
 

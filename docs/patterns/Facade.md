@@ -1,7 +1,7 @@
 # Facade — one entry point to the game
 
-**Owner:** Student D · **Category:** Structural · **Code:** `src/CastleEscape.Game/Sessions/GameFacade.cs`, `Sessions/GameLoopScheduler.cs`
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- facade` · `POST /api/patterns/facade/demo`
+**Owner:** Student D · **Category:** Structural · **Code:** `src/CastleEscape.Application/Sessions/GameFacade.cs`, `Sessions/GameLoopScheduler.cs`
+**Demo:** `dotnet run --project tools/CastleEscape.PatternDemos -- facade`
 **Used by:** `GameHub` (all hub methods), `SessionEndpoints` and `GameplayEndpoints` (all lobby and gameplay REST), `GameLoopService` (`Tick`), and `FacadeDemo`, which plays a whole game in-process.
 
 ## Problem in this game

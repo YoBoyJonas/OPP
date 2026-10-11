@@ -1,6 +1,7 @@
 using CastleEscape.Contracts.Realtime;
-using CastleEscape.Game.Messaging;
-using CastleEscape.Game.Patterns;
+using CastleEscape.Application.Messaging;
+using CastleEscape.Infrastructure.Serialization;
+using CastleEscape.Domain.Patterns;
 using CastleEscape.Server.Hubs;
 using Microsoft.AspNetCore.SignalR;
 

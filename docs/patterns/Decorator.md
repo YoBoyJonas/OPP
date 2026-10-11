@@ -1,7 +1,7 @@
 # Decorator — power stacking
 
-**Owner:** Student B · **Category:** Structural · **Code:** `src/CastleEscape.Game/Powers/` (`Abilities.cs`, `PowerManager.cs`)
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- decorator --character swimmer --sprints 3` · `POST /api/patterns/decorator/demo?character=scout&sprints=2`
+**Owner:** Student B · **Category:** Structural · **Code:** `src/CastleEscape.Domain/Powers/` (`Abilities.cs`, `PowerManager.cs`)
+**Demo:** `dotnet run --project tools/CastleEscape.PatternDemos -- decorator --character swimmer --sprints 3`
 **Used by:** `MovementRules.CanPlayerEnter` (`player.Abilities.CanEnter`), `GameSession.MovePlayers` (`player.Abilities.SpeedOn`).
 
 ## Problem in this game

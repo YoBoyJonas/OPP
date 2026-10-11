@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 using CastleEscape.Contracts;
 using CastleEscape.Contracts.Realtime;
 using CastleEscape.Contracts.Sessions;
-using CastleEscape.Game.World;
+using CastleEscape.Domain.World;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -128,7 +128,7 @@ public sealed class PlayerClient : IAsyncDisposable
                 return;
             }
 
-            var from = me.IsMoving ? tile.Step(me.Facing) : tile;
+            var from = me.IsMoving ? tile.Step((CastleEscape.Domain.Direction)me.Facing) : tile;
             var path = PathFinder.ShortestPath(grid, from, target, p =>
                 !(p.X == other.TileX && p.Y == other.TileY) && rows[p.Y][p.X] switch
                 {
@@ -136,7 +136,7 @@ public sealed class PlayerClient : IAsyncDisposable
                     'D' => state.DoorOpen,
                     _ => true,
                 });
-            var direction = path is { Count: > 0 } ? from.DirectionTo(path[0]) : Direction.None;
+            var direction = path is { Count: > 0 } ? (Direction)from.DirectionTo(path[0]) : Direction.None;
             if (direction != last)
             {
                 await _connection.InvokeAsync(HubMethods.SetDirection, direction, Api.Ct);

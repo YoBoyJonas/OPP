@@ -1,5 +1,6 @@
 using CastleEscape.Contracts;
-using CastleEscape.Game.Sessions;
+using CastleEscape.Application.Sessions;
+using CastleEscape.Domain.Sessions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 

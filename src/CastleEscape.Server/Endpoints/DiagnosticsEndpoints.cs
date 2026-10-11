@@ -1,7 +1,9 @@
 using System.Reflection;
 using CastleEscape.Contracts.Diagnostics;
-using CastleEscape.Game.Configuration;
-using CastleEscape.Game.Sessions;
+using CastleEscape.Application.Configuration;
+using CastleEscape.Domain.Configuration;
+using CastleEscape.Application.Sessions;
+using CastleEscape.Domain.Sessions;
 using CastleEscape.Server.OpenApi;
 using CastleEscape.Server.Realtime;
 using Microsoft.Extensions.Options;

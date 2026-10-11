@@ -171,3 +171,7 @@ The first prototype (commit `6e1eed7`) used a different hub path and method name
 | `GameStateUpdate(GameStateSnapshot)` every tick | `LevelStarted` once per level, then `StateUpdated` every tick; plus `GameEvent`, `SessionUpdated`, `Error` |
 | `OpponentLeft` | `SessionUpdated` with phase `Aborted`, plus a `PlayerLeft` `GameEvent` |
 | Continuous `x`/`y` only | `tileX/tileY` plus interpolated `x/y` |
+
+## Backend project boundaries
+
+The runtime is organized into Domain, Application, Infrastructure, Contracts and Server libraries. This does not change the gameplay URLs or SignalR method names. The normal server no longer exposes `/api/patterns/*` or `/api/dev/patterns/prototype-clone-mode`; course demonstrations run separately in the console. Content responses now use explicit DTOs while retaining their JSON fields. See [ARCHITECTURE](ARCHITECTURE.md).

@@ -1,9 +1,9 @@
 # Prototype — level restart copies
 
-**Owner:** Student A · **Category:** Creational · **Code:** `src/CastleEscape.Game/World/LevelState.cs` (`Clone`, `DeepClone`, `ShallowClone`), `World/ILevelPrototype.cs`, `Entity.CloneEntity`, `Grid.Copy`
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- prototype --mode Shallow` · `POST /api/patterns/prototype/demo?mode=Deep|Shallow|both`
+**Owner:** Student A · **Category:** Creational · **Code:** `src/CastleEscape.Domain/World/LevelState.cs` (`Clone`, `DeepClone`, `ShallowClone`), `World/ILevelPrototype.cs`, `Entity.CloneEntity`, `Grid.Copy`
+**Demo:** `dotnet run --project tools/CastleEscape.PatternDemos -- prototype --mode Shallow`
 **Used by:** `GameSession.LoadLevel` (play on a clone) and `GameSession.RestartLevel` (D8: restart = a new clone).
-**Switch:** `Patterns:PrototypeCloneMode = Deep | Shallow` in appsettings. The session reads it on every restart.
+**Switch:** pass `--mode Deep`, `--mode Shallow` or `--mode both` to the console demo. Normal server sessions always use Deep.
 
 ## Problem in this game
 
@@ -161,15 +161,13 @@ Addresses are read with `Unsafe.As<object, nint>` (the reference itself, as a nu
 `GC.TryStartNoGCRegion` block. The GC can move objects, so addresses are only compared within one
 pause (`ObjectAddress`).
 
-**Switching at the defence:** set `Patterns:PrototypeCloneMode` to `Shallow` in
-`appsettings.Development.json`, run the game, pick up an item and restart. The item does not come
-back. `PrototypeTests.SessionRestart_UsesTheConfiguredCloneMode` proves both modes in a real session.
+**Switching at the defence:** run the console demo with `--mode Shallow`, then `--mode Deep`. The game host has no clone-mode switch.
 
 ## Likely live-change requests
 
 | Request | Where to edit |
 |---|---|
-| "Switch to shallow copying" | `Patterns:PrototypeCloneMode` (no code), or `?mode=Shallow` on the demo. |
+| "Switch to shallow copying" | Console demo `--mode Shallow` (no code change). |
 | "Make the shallow copy work for restart" | It can't without copying the lists and entities, and then it is the deep copy. A middle mode, e.g. copying the lists but sharing entities, shows the next bug (levers stay on). |
 | "Add a new mutable part to the level (e.g. traps)" | Add it to `DeepClone` (and it needs a `CloneEntity`). `PrototypeTests.DeepClone_CopiesEveryMutablePart…` is the place to add its check. |
 | "Use ICloneable" | `ICloneable.Clone()` returns `object` and doesn't say deep or shallow; `ILevelPrototype<T>.Clone(CloneMode)` is typed and explicit. |

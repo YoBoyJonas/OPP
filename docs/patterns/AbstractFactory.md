@@ -1,7 +1,7 @@
 # Abstract Factory — level themes
 
-**Owner:** Student A · **Category:** Creational · **Code:** `src/CastleEscape.Game/Generation/Themes/`
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- abstract-factory --theme crypt` · `POST /api/patterns/abstract-factory/demo?theme=dungeon|crypt|both&seed=7`
+**Owner:** Student A · **Category:** Creational · **Code:** `src/CastleEscape.Domain/Generation/Themes/`
+**Demo:** `dotnet run --project tools/CastleEscape.PatternDemos -- abstract-factory --theme crypt`
 **Used by:** `ProceduralLevelBuilder` and `PresetLevelBuilder` (one factory per level); `GET /api/sessions/{id}/level` lists the variants used (`obstacles`).
 
 ## Problem in this game

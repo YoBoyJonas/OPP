@@ -95,7 +95,7 @@ Missing at audit time. Added on 2026-09-25 from the team's exports (commit `810c
 | `Models/CellType` | `Game/World/TerrainKind` (+ `Floor, Wall, Water, Pit, Door, Exit`) | rename/extend |
 | `Models/*State` | `Game/World` entities (`PlayerEntity`, `ZombieEntity`, `ItemEntity`, `Lever`, `ExitDoor`) | replace |
 | `Models/GameStateSnapshot`, `JoinResult`, `PlayerInputMessage` | `Contracts` records (`TickStateMessage`, `JoinSessionResponse`, …) | replace |
-| `CastleEscapeClient/Models/*` | `src/CastleEscape.Game/Content/*` | `git mv` + fix: `Character`→`CharacterDefinition`, `Zombie`→`ZombieDefinition`, `Level`→`LevelDefinition` (names the diagram's catalog uses); add `Reward`, `ScoreValue`, `Theme`, `MovementStrategy`; JSON polymorphism for `Consumable`/`Obstacle`/`PowerGrant` subclasses; level tables become `{id, weight}` references (the existing `Validate()` already checks them by id) |
+| `CastleEscapeClient/Models/*` | `src/CastleEscape.Domain/Content/*` | `git mv` + fix: `Character`→`CharacterDefinition`, `Zombie`→`ZombieDefinition`, `Level`→`LevelDefinition` (names the diagram's catalog uses); add `Reward`, `ScoreValue`, `Theme`, `MovementStrategy`; JSON polymorphism for `Consumable`/`Obstacle`/`PowerGrant` subclasses; level tables become `{id, weight}` references (the existing `Validate()` already checks them by id) |
 | `ContentCatalog.Validate/ValidateOrThrow/ComputeContentHash` | same | keep, extend, becomes the Singleton |
 | `PowerCombo.RequiredPowers : PowerType` | `IReadOnlyList<PowerType>` | a single enum value can't express "Jump+Sprint" |
 | `CastleEscapeClient/Program.cs` | — | see open question Q2 |

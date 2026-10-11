@@ -1,10 +1,14 @@
+using CastleEscape.Infrastructure.Messaging;
 using CastleEscape.Contracts;
 using CastleEscape.Contracts.Gameplay;
 using CastleEscape.Contracts.Realtime;
 using CastleEscape.Contracts.Sessions;
-using CastleEscape.Game.Configuration;
-using CastleEscape.Game.Messaging;
-using CastleEscape.Game.Sessions;
+using CastleEscape.Application.Configuration;
+using CastleEscape.Domain.Configuration;
+using CastleEscape.Application.Messaging;
+using CastleEscape.Infrastructure.Serialization;
+using CastleEscape.Application.Sessions;
+using CastleEscape.Domain.Sessions;
 using CastleEscape.Server.OpenApi;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Options;

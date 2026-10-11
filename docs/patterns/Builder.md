@@ -1,7 +1,7 @@
 # Builder — level construction
 
-**Owner:** Student A · **Category:** Creational · **Code:** `src/CastleEscape.Game/Generation/` (`ILevelBuilder`, `LevelDirector`, `ProceduralLevelBuilder`, `PresetLevelBuilder`)
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- builder --level 7 --seed 3 --preset arena` · `POST /api/patterns/builder/demo?level=1&seed=7&preset=tutorial`
+**Owner:** Student A · **Category:** Creational · **Code:** `src/CastleEscape.Domain/Generation/` (`ILevelBuilder`, `LevelDirector`, `ProceduralLevelBuilder`, `PresetLevelBuilder`)
+**Demo:** `dotnet run --project tools/CastleEscape.PatternDemos -- builder --level 7 --seed 3 --preset arena`
 **Used by:** `LevelProvider` (every level a session plays), `DemoWorld`, the test maps (`TestGame.RowsLevelProvider`).
 
 ## Problem in this game

@@ -28,474 +28,6 @@
         }
       }
     },
-    "/api/patterns/singleton/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Singleton: thread safety",
-        "description": "Starts \u0060threads\u0060 threads through a Barrier; all read ContentCatalog.Instance at once. Reports distinct instances (1) and creations (1). With \u0060naive=true\u0060 the same race against a lock-free holder makes several.",
-        "operationId": "DemoSingleton",
-        "parameters": [
-          {
-            "name": "threads",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 64
-            }
-          },
-          {
-            "name": "naive",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": true
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/adapter/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Adapter: JSON / XML serializers",
-        "description": "Serializes a real tick state through IMessageSerializer (\u0060format=json|xml\u0060), round-trips it, and counts the members of the 3-member target against the adaptees JsonSerializer and DataContractSerializer.",
-        "operationId": "DemoAdapter",
-        "parameters": [
-          {
-            "name": "format",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": "xml"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/factory-method/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Factory Method: item spawners",
-        "description": "Spawns items on the tutorial level through ItemSpawners.For(consumable) (\u0060kind=health|reward|power|all\u0060), applies each to a player, and lists the product family (HealthItem, RewardItem, PowerItem).",
-        "operationId": "DemoFactoryMethod",
-        "parameters": [
-          {
-            "name": "kind",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": "all"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/abstract-factory/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Abstract Factory: level themes",
-        "description": "Creates the product family of each theme factory (\u0060theme=dungeon|crypt|both\u0060): wall, water, pit and zombie with their gameplay values. Then generates a real level of that theme and checks every placed part comes from the same family.",
-        "operationId": "DemoAbstractFactory",
-        "parameters": [
-          {
-            "name": "theme",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": "both"
-            }
-          },
-          {
-            "name": "seed",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 7
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/builder/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Builder: level construction",
-        "description": "LevelDirector builds level \u0060level\u0060 with ProceduralLevelBuilder (random, \u0060seed\u0060) and PresetLevelBuilder (the \u0060preset\u0060 map: tutorial or arena), using the same step order. Returns both results as map rows.",
-        "operationId": "DemoBuilder",
-        "parameters": [
-          {
-            "name": "level",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 1
-            }
-          },
-          {
-            "name": "seed",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 7
-            }
-          },
-          {
-            "name": "preset",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": "tutorial"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/prototype/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Prototype: deep vs shallow level copies",
-        "description": "Clones the tutorial level (\u0060mode=Deep|Shallow|both\u0060) and reports, for the level and its parts, the memory address and identity hash in the original and the clone. Then plays on the clone and restarts from the pristine level: deep restores it, shallow does not. The game itself uses \u0060Patterns:PrototypeCloneMode\u0060.",
-        "operationId": "DemoPrototype",
-        "parameters": [
-          {
-            "name": "mode",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": "both"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/strategy/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Strategy: zombie chase algorithms",
-        "description": "Puts the same zombie behind a wall and swaps its strategy (\u0060strategy=Greedy|Bfs|AStar|Predictive|all\u0060), running up to \u0060steps\u0060 steps with each. Greedy gets stuck, BFS and A* go around, Predictive aims where the player is heading. Also compares BFS and A* search cost.",
-        "operationId": "DemoStrategy",
-        "parameters": [
-          {
-            "name": "strategy",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": "all"
-            }
-          },
-          {
-            "name": "steps",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 12
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/decorator/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Decorator: power stacking",
-        "description": "Gives a character (\u0060character=warrior|scout|swimmer\u0060) \u0060sprints\u0060 Sprint pickups, then Jump and Swim. After each pickup it prints the decorator chain, its depth and the floor/water/pit speeds. The combos JumpDash and FastSwim are added as decorators too. Then all timers expire and the chain unwinds.",
-        "operationId": "DemoDecorator",
-        "parameters": [
-          {
-            "name": "character",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": "scout"
-            }
-          },
-          {
-            "name": "sprints",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 2
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/command/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Command: inputs with undo",
-        "description": "Plays a scripted two-player session. Both players step into the same tile, and the later StartStep command is undone (D7). One player collects a coin, the other restarts the level, and UndoLastCommand() (\u0060undoRestart\u0060) puts the pre-restart level, score and positions back. Returns the command history.",
-        "operationId": "DemoCommand",
-        "parameters": [
-          {
-            "name": "undoRestart",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": true
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/observer/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Observer: game events",
-        "description": "Plays a scripted session with an extra Recorder observer attached: a coin pickup and a zombie hit. Shows what each observer did (client messages, HUD statistics, event log, sound cues), then detaches the Recorder and shows it no longer receives events.",
-        "operationId": "DemoObserver",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/bridge/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Bridge: notifiers over channels",
-        "description": "Runs a real session for \u0060ticks\u0060 ticks and dispatches its messages through a StateNotifier and an EventNotifier on each of two channels: the polling buffer (states every \u0060pollingEvery\u0060 ticks) and a counting channel written for the demo. Shows what each pair sent and one polled message in \u0060format\u0060.",
-        "operationId": "DemoBridge",
-        "parameters": [
-          {
-            "name": "ticks",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 40
-            }
-          },
-          {
-            "name": "pollingEvery",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 5
-            }
-          },
-          {
-            "name": "format",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": "xml"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/facade/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Facade: a whole game through GameFacade",
-        "description": "Builds the subsystems once (registry, loop scheduler, content), then plays a full one-level game using only GameFacade: create, join, pick characters, walk both players onto the levers, through the door and onto the exits, to Victory. The same facade serves the hub and the REST endpoints.",
-        "operationId": "DemoFacade",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/health": {
       "get": {
         "tags": [
@@ -660,7 +192,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CharacterDefinition"
+                    "$ref": "#/components/schemas/CharacterDto"
                   }
                 }
               }
@@ -685,7 +217,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Consumable"
+                    "$ref": "#/components/schemas/ConsumableDto"
                   }
                 }
               }
@@ -735,7 +267,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/PowerCombo"
+                    "$ref": "#/components/schemas/PowerComboDto"
                   }
                 }
               }
@@ -760,7 +292,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Obstacle"
+                    "$ref": "#/components/schemas/ObstacleDto"
                   }
                 }
               }
@@ -785,7 +317,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ZombieDefinition"
+                    "$ref": "#/components/schemas/ZombieDefinitionDto"
                   }
                 }
               }
@@ -810,7 +342,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/LevelDefinition"
+                    "$ref": "#/components/schemas/LevelDefinitionDto"
                   }
                 }
               }
@@ -845,7 +377,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LevelDefinition"
+                  "$ref": "#/components/schemas/LevelDefinitionDto"
                 }
               }
             }
@@ -1639,73 +1171,6 @@
         }
       }
     },
-    "/api/patterns": {
-      "get": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "All P1 patterns",
-        "description": "Name, owner, the problem solved, the course requirement and how it is met, and the participants found in the code by the [DesignPattern] attribute.",
-        "operationId": "ListPatterns",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PatternDto"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/{pattern}": {
-      "get": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "One pattern",
-        "description": "Details and participants (type, role, source file) of one pattern, by key, e.g. \u0060decorator\u0060.",
-        "operationId": "GetPattern",
-        "parameters": [
-          {
-            "name": "pattern",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDto"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/dev/quickstart": {
       "post": {
         "tags": [
@@ -1737,67 +1202,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DevQuickstartResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/dev/patterns/prototype-clone-mode": {
-      "get": {
-        "tags": [
-          "Dev"
-        ],
-        "summary": "Current Prototype clone mode",
-        "operationId": "DevGetCloneMode",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CloneModeDto"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "Dev"
-        ],
-        "summary": "Switch deep/shallow level copies at runtime",
-        "description": "\u0060Deep\u0060 or \u0060Shallow\u0060 (Prototype pattern). Takes effect on the next level start or restart: with Shallow, collected items stay gone after a restart.",
-        "operationId": "DevSetCloneMode",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CloneModeDto"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CloneModeDto"
                 }
               }
             }
@@ -2069,7 +1473,15 @@
         },
         "description": "A power a player has right now."
       },
-      "CharacterDefinition": {
+      "CharacterDto": {
+        "required": [
+          "id",
+          "name",
+          "maxHealth",
+          "baseMoveSpeed",
+          "baseJumpForce",
+          "baseModifiers"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -2084,7 +1496,6 @@
               "integer",
               "string"
             ],
-            "description": "Lives at the start of the game.",
             "format": "int32"
           },
           "baseMoveSpeed": {
@@ -2093,7 +1504,6 @@
               "number",
               "string"
             ],
-            "description": "Tiles per second on floor.",
             "format": "double"
           },
           "baseJumpForce": {
@@ -2102,26 +1512,12 @@
               "number",
               "string"
             ],
-            "description": "Jump parameter: speed multiplier while crossing a pit with Jump active.",
             "format": "double"
           },
           "baseModifiers": {
-            "$ref": "#/components/schemas/StatModifiers"
+            "$ref": "#/components/schemas/StatModifiersDto"
           }
-        },
-        "description": "A playable character (PLR-1). Loaded from \u0060content/characters.json\u0060."
-      },
-      "CloneModeDto": {
-        "required": [
-          "mode"
-        ],
-        "type": "object",
-        "properties": {
-          "mode": {
-            "type": "string"
-          }
-        },
-        "description": "The Prototype pattern\u0027s clone mode used on level start and restart: \u0060Deep\u0060 or \u0060Shallow\u0060."
+        }
       },
       "CommandRecordDto": {
         "required": [
@@ -2170,47 +1566,30 @@
         },
         "description": "A command in a session\u0027s history (Command pattern)."
       },
-      "Consumable": {
+      "ConsumableDto": {
         "required": [
-          "type"
+          "type",
+          "id",
+          "name",
+          "kind",
+          "grant",
+          "healthValue",
+          "scoreValue",
+          "spawnWeight",
+          "iconPath"
         ],
         "type": "object",
-        "anyOf": [
-          {
-            "$ref": "#/components/schemas/ConsumableHealth"
-          },
-          {
-            "$ref": "#/components/schemas/ConsumableReward"
-          },
-          {
-            "$ref": "#/components/schemas/ConsumablePower"
-          }
-        ],
-        "description": "An item that can lie on the map (ITM-1). The JSON field \u0060type\u0060 picks the subclass.",
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "Health": "#/components/schemas/ConsumableHealth",
-            "Reward": "#/components/schemas/ConsumableReward",
-            "Power": "#/components/schemas/ConsumablePower"
-          }
-        }
-      },
-      "ConsumableHealth": {
         "properties": {
           "type": {
-            "enum": [
-              "Health"
-            ],
             "type": "string"
-          },
-          "kind": {
-            "$ref": "#/components/schemas/ConsumableKind"
           },
           "id": {
             "type": "string"
           },
           "name": {
+            "type": "string"
+          },
+          "kind": {
             "type": "string"
           },
           "grant": {
@@ -2219,8 +1598,7 @@
                 "type": "null"
               },
               {
-                "description": "The power a Power item grants; null for the other kinds.",
-                "$ref": "#/components/schemas/PowerGrant"
+                "$ref": "#/components/schemas/PowerGrantDto"
               }
             ]
           },
@@ -2230,7 +1608,6 @@
               "integer",
               "string"
             ],
-            "description": "Lives restored by a Health item.",
             "format": "int32"
           },
           "scoreValue": {
@@ -2239,7 +1616,6 @@
               "integer",
               "string"
             ],
-            "description": "Points added by a Reward item.",
             "format": "int32"
           },
           "spawnWeight": {
@@ -2248,135 +1624,6 @@
               "number",
               "string"
             ],
-            "description": "Default weight when a level table does not give one.",
-            "format": "double"
-          },
-          "iconPath": {
-            "type": "string"
-          }
-        }
-      },
-      "ConsumableKind": {
-        "enum": [
-          "Health",
-          "Reward",
-          "Power"
-        ],
-        "description": "The three item kinds of ITM-1."
-      },
-      "ConsumablePower": {
-        "properties": {
-          "type": {
-            "enum": [
-              "Power"
-            ],
-            "type": "string"
-          },
-          "kind": {
-            "$ref": "#/components/schemas/ConsumableKind"
-          },
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "grant": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "description": "The power a Power item grants; null for the other kinds.",
-                "$ref": "#/components/schemas/PowerGrant"
-              }
-            ]
-          },
-          "healthValue": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "Lives restored by a Health item.",
-            "format": "int32"
-          },
-          "scoreValue": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "Points added by a Reward item.",
-            "format": "int32"
-          },
-          "spawnWeight": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
-            "type": [
-              "number",
-              "string"
-            ],
-            "description": "Default weight when a level table does not give one.",
-            "format": "double"
-          },
-          "iconPath": {
-            "type": "string"
-          }
-        }
-      },
-      "ConsumableReward": {
-        "properties": {
-          "type": {
-            "enum": [
-              "Reward"
-            ],
-            "type": "string"
-          },
-          "kind": {
-            "$ref": "#/components/schemas/ConsumableKind"
-          },
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "grant": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "description": "The power a Power item grants; null for the other kinds.",
-                "$ref": "#/components/schemas/PowerGrant"
-              }
-            ]
-          },
-          "healthValue": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "Lives restored by a Health item.",
-            "format": "int32"
-          },
-          "scoreValue": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "Points added by a Reward item.",
-            "format": "int32"
-          },
-          "spawnWeight": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
-            "type": [
-              "number",
-              "string"
-            ],
-            "description": "Default weight when a level table does not give one.",
             "format": "double"
           },
           "iconPath": {
@@ -2689,7 +1936,11 @@
         },
         "description": "Give a base power (Jump, Sprint, Swim) without an item."
       },
-      "GridSize": {
+      "GridSizeDto": {
+        "required": [
+          "width",
+          "height"
+        ],
         "type": "object",
         "properties": {
           "width": {
@@ -3031,7 +2282,20 @@
         },
         "description": "Result of joining a session."
       },
-      "LevelDefinition": {
+      "LevelDefinitionDto": {
+        "required": [
+          "id",
+          "index",
+          "theme",
+          "roomSize",
+          "obstacleCount",
+          "obstacleTable",
+          "zombieCount",
+          "zombieTable",
+          "pickupCount",
+          "consumableTable",
+          "timeLimitSeconds"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -3043,7 +2307,6 @@
               "integer",
               "string"
             ],
-            "description": "1-based position in the level sequence.",
             "format": "int32"
           },
           "theme": {
@@ -3055,8 +2318,7 @@
                 "type": "null"
               },
               {
-                "description": "Room size. Null means the \u0060Game:GridWidth\u0060 and \u0060Game:GridHeight\u0060 settings.",
-                "$ref": "#/components/schemas/GridSize"
+                "$ref": "#/components/schemas/GridSizeDto"
               }
             ]
           },
@@ -3066,15 +2328,13 @@
               "integer",
               "string"
             ],
-            "description": "How many water/pit patches to place.",
             "format": "int32"
           },
           "obstacleTable": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/SpawnTableEntry"
-            },
-            "description": "Which obstacles the patches use (by obstacle id, weighted)."
+              "$ref": "#/components/schemas/SpawnTableEntryDto"
+            }
           },
           "zombieCount": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
@@ -3087,7 +2347,7 @@
           "zombieTable": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/SpawnTableEntry"
+              "$ref": "#/components/schemas/SpawnTableEntryDto"
             }
           },
           "pickupCount": {
@@ -3096,13 +2356,12 @@
               "integer",
               "string"
             ],
-            "description": "How many items to place.",
             "format": "int32"
           },
           "consumableTable": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/SpawnTableEntry"
+              "$ref": "#/components/schemas/SpawnTableEntryDto"
             }
           },
           "timeLimitSeconds": {
@@ -3111,11 +2370,9 @@
               "number",
               "string"
             ],
-            "description": "Kept from the class diagram; not enforced (no requirement).",
             "format": "double"
           }
-        },
-        "description": "Static settings for one of the 10 levels (the class diagram\u0027s \u0060Level\u0060). The generator\r\nturns it into a runtime \u0060LevelState\u0060."
+        }
       },
       "LevelLayoutResponse": {
         "required": [
@@ -3475,309 +2732,63 @@
         ],
         "description": "How a zombie chooses its next step towards the nearest player."
       },
-      "Obstacle": {
-        "required": [
-          "type"
-        ],
-        "type": "object",
-        "anyOf": [
-          {
-            "$ref": "#/components/schemas/ObstacleWall"
-          },
-          {
-            "$ref": "#/components/schemas/ObstacleWater"
-          },
-          {
-            "$ref": "#/components/schemas/ObstaclePit"
-          }
-        ],
-        "description": "A terrain obstacle. The JSON field \u0060type\u0060 picks the subclass.",
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "Wall": "#/components/schemas/ObstacleWall",
-            "Water": "#/components/schemas/ObstacleWater",
-            "Pit": "#/components/schemas/ObstaclePit"
-          }
-        }
-      },
-      "ObstacleKind": {
-        "enum": [
-          "Wall",
-          "Pit",
-          "Water"
-        ]
-      },
-      "ObstaclePit": {
-        "properties": {
-          "type": {
-            "enum": [
-              "Pit"
-            ],
-            "type": "string"
-          },
-          "kind": {
-            "$ref": "#/components/schemas/ObstacleKind"
-          },
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "traversalRequirements": {
-            "description": "The power needed to enter this tile. \u0060None\u0060 means no power allows it (walls).",
-            "$ref": "#/components/schemas/PowerType"
-          },
-          "blocksZombies": {
-            "type": "boolean"
-          },
-          "minSize": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "Smallest and largest patch the generator places, in tiles.",
-            "format": "int32"
-          },
-          "maxSize": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          },
-          "moveSpeedMultiplier": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
-            "type": [
-              "number",
-              "string"
-            ],
-            "description": "Speed multiplier while crossing this tile (e.g. water is slower).",
-            "format": "double"
-          }
-        }
-      },
-      "ObstacleWall": {
-        "properties": {
-          "type": {
-            "enum": [
-              "Wall"
-            ],
-            "type": "string"
-          },
-          "kind": {
-            "$ref": "#/components/schemas/ObstacleKind"
-          },
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "traversalRequirements": {
-            "description": "The power needed to enter this tile. \u0060None\u0060 means no power allows it (walls).",
-            "$ref": "#/components/schemas/PowerType"
-          },
-          "blocksZombies": {
-            "type": "boolean"
-          },
-          "minSize": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "Smallest and largest patch the generator places, in tiles.",
-            "format": "int32"
-          },
-          "maxSize": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          },
-          "moveSpeedMultiplier": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
-            "type": [
-              "number",
-              "string"
-            ],
-            "description": "Speed multiplier while crossing this tile (e.g. water is slower).",
-            "format": "double"
-          }
-        }
-      },
-      "ObstacleWater": {
-        "properties": {
-          "type": {
-            "enum": [
-              "Water"
-            ],
-            "type": "string"
-          },
-          "kind": {
-            "$ref": "#/components/schemas/ObstacleKind"
-          },
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "traversalRequirements": {
-            "description": "The power needed to enter this tile. \u0060None\u0060 means no power allows it (walls).",
-            "$ref": "#/components/schemas/PowerType"
-          },
-          "blocksZombies": {
-            "type": "boolean"
-          },
-          "minSize": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "Smallest and largest patch the generator places, in tiles.",
-            "format": "int32"
-          },
-          "maxSize": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          },
-          "moveSpeedMultiplier": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
-            "type": [
-              "number",
-              "string"
-            ],
-            "description": "Speed multiplier while crossing this tile (e.g. water is slower).",
-            "format": "double"
-          }
-        }
-      },
-      "PatternDemoResponse": {
-        "required": [
-          "pattern",
-          "summary",
-          "trace",
-          "evidence"
-        ],
-        "type": "object",
-        "properties": {
-          "pattern": {
-            "type": "string",
-            "description": "Pattern name."
-          },
-          "summary": {
-            "type": "string",
-            "description": "One-line conclusion."
-          },
-          "trace": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "What happened, step by step (the same lines the console demo prints)."
-          },
-          "evidence": {
-            "type": "object",
-            "description": "Values that prove the requirement (identities, counts, addresses...)."
-          }
-        },
-        "description": "Result of running a pattern demo: a readable trace plus structured evidence."
-      },
-      "PatternDto": {
-        "required": [
-          "key",
-          "name",
-          "category",
-          "owner",
-          "problem",
-          "requirement",
-          "howMet",
-          "doc",
-          "demo",
-          "participants"
-        ],
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string",
-            "description": "URL key, e.g. \u0022abstract-factory\u0022."
-          },
-          "name": {
-            "type": "string",
-            "description": "Pattern name."
-          },
-          "category": {
-            "type": "string",
-            "description": "Creational, Structural or Behavioral."
-          },
-          "owner": {
-            "type": "string",
-            "description": "Student responsible for the pattern."
-          },
-          "problem": {
-            "type": "string",
-            "description": "The problem it solves in this game."
-          },
-          "requirement": {
-            "type": "string",
-            "description": "The course\u0027s pattern-specific requirement."
-          },
-          "howMet": {
-            "type": "string",
-            "description": "How the requirement is met here."
-          },
-          "doc": {
-            "type": "string",
-            "description": "Path to the pattern\u0027s document in the repository."
-          },
-          "demo": {
-            "type": "string",
-            "description": "Demo endpoint."
-          },
-          "participants": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PatternParticipantDto"
-            },
-            "description": "Classes marked with [DesignPattern] for this pattern."
-          }
-        },
-        "description": "One P1 design pattern as applied in this game."
-      },
-      "PatternParticipantDto": {
+      "ObstacleDto": {
         "required": [
           "type",
-          "role",
-          "file"
+          "id",
+          "name",
+          "kind",
+          "traversalRequirements",
+          "blocksZombies",
+          "minSize",
+          "maxSize",
+          "moveSpeedMultiplier"
         ],
         "type": "object",
         "properties": {
           "type": {
-            "type": "string",
-            "description": "Class or interface name."
+            "type": "string"
           },
-          "role": {
-            "type": "string",
-            "description": "Role in the pattern (e.g. ConcreteDecorator)."
+          "id": {
+            "type": "string"
           },
-          "file": {
-            "type": "string",
-            "description": "Source file, relative to the repository."
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "traversalRequirements": {
+            "$ref": "#/components/schemas/PowerType"
+          },
+          "blocksZombies": {
+            "type": "boolean"
+          },
+          "minSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "maxSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "moveSpeedMultiplier": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
           }
-        },
-        "description": "A class that takes part in a pattern, found by reflection on \u0060[DesignPattern]\u0060."
+        }
       },
       "PlayerStateDto": {
         "required": [
@@ -3959,7 +2970,14 @@
         },
         "description": "Messages read from the polling channel (\u0060GET /api/sessions/{id}/messages\u0060)."
       },
-      "PowerCombo": {
+      "PowerComboDto": {
+        "required": [
+          "id",
+          "name",
+          "requiredPowers",
+          "granted",
+          "modifiers"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -3978,43 +2996,20 @@
             "$ref": "#/components/schemas/PowerType"
           },
           "modifiers": {
-            "$ref": "#/components/schemas/StatModifiers"
+            "$ref": "#/components/schemas/StatModifiersDto"
           }
-        },
-        "description": "A super power that is active while all required base powers are active (PWR-2)."
+        }
       },
-      "PowerGrant": {
+      "PowerGrantDto": {
         "required": [
-          "type"
+          "type",
+          "power",
+          "durationSeconds",
+          "modifiers"
         ],
         "type": "object",
-        "anyOf": [
-          {
-            "$ref": "#/components/schemas/PowerGrantJump"
-          },
-          {
-            "$ref": "#/components/schemas/PowerGrantSprint"
-          },
-          {
-            "$ref": "#/components/schemas/PowerGrantSwim"
-          }
-        ],
-        "description": "A temporary base power granted by a Power item (PWR-1). The JSON field \u0060type\u0060 picks the subclass.",
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "Jump": "#/components/schemas/PowerGrantJump",
-            "Sprint": "#/components/schemas/PowerGrantSprint",
-            "Swim": "#/components/schemas/PowerGrantSwim"
-          }
-        }
-      },
-      "PowerGrantJump": {
         "properties": {
           "type": {
-            "enum": [
-              "Jump"
-            ],
             "type": "string"
           },
           "power": {
@@ -4027,63 +3022,10 @@
               "number",
               "string"
             ],
-            "description": "How long the power lasts. Null means the \u0060Game:PowerDurationSeconds\u0060 setting.",
             "format": "double"
           },
           "modifiers": {
-            "$ref": "#/components/schemas/StatModifiers"
-          }
-        }
-      },
-      "PowerGrantSprint": {
-        "properties": {
-          "type": {
-            "enum": [
-              "Sprint"
-            ],
-            "type": "string"
-          },
-          "power": {
-            "$ref": "#/components/schemas/PowerType"
-          },
-          "durationSeconds": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
-            "type": [
-              "null",
-              "number",
-              "string"
-            ],
-            "description": "How long the power lasts. Null means the \u0060Game:PowerDurationSeconds\u0060 setting.",
-            "format": "double"
-          },
-          "modifiers": {
-            "$ref": "#/components/schemas/StatModifiers"
-          }
-        }
-      },
-      "PowerGrantSwim": {
-        "properties": {
-          "type": {
-            "enum": [
-              "Swim"
-            ],
-            "type": "string"
-          },
-          "power": {
-            "$ref": "#/components/schemas/PowerType"
-          },
-          "durationSeconds": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d\u002B)?(?:[eE][\u002B-]?\\d\u002B)?$",
-            "type": [
-              "null",
-              "number",
-              "string"
-            ],
-            "description": "How long the power lasts. Null means the \u0060Game:PowerDurationSeconds\u0060 setting.",
-            "format": "double"
-          },
-          "modifiers": {
-            "$ref": "#/components/schemas/StatModifiers"
+            "$ref": "#/components/schemas/StatModifiersDto"
           }
         }
       },
@@ -4469,7 +3411,11 @@
         },
         "description": "One row of \u0060GET /api/sessions\u0060."
       },
-      "SpawnTableEntry": {
+      "SpawnTableEntryDto": {
+        "required": [
+          "id",
+          "weight"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -4483,10 +3429,14 @@
             ],
             "format": "double"
           }
-        },
-        "description": "A reference to content by id with a relative spawn weight, used in level tables."
+        }
       },
-      "StatModifiers": {
+      "StatModifiersDto": {
+        "required": [
+          "moveSpeedMultiplier",
+          "jumpForceMultiplier",
+          "swimSpeedMultiplier"
+        ],
         "type": "object",
         "properties": {
           "moveSpeedMultiplier": {
@@ -4513,8 +3463,7 @@
             ],
             "format": "double"
           }
-        },
-        "description": "Multipliers applied on top of a character\u0027s base stats. Immutable."
+        }
       },
       "TickStateMessage": {
         "required": [
@@ -4617,7 +3566,16 @@
         },
         "description": "Result of an undo request: the command undone, or null if there was nothing to undo."
       },
-      "ZombieDefinition": {
+      "ZombieDefinitionDto": {
+        "required": [
+          "id",
+          "name",
+          "speed",
+          "contactDamage",
+          "attackCooldownSeconds",
+          "size",
+          "movementStrategy"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -4632,7 +3590,6 @@
               "number",
               "string"
             ],
-            "description": "Tiles per second.",
             "format": "double"
           },
           "contactDamage": {
@@ -4641,7 +3598,6 @@
               "integer",
               "string"
             ],
-            "description": "Lives taken on contact (ZMB-2).",
             "format": "int32"
           },
           "attackCooldownSeconds": {
@@ -4661,11 +3617,9 @@
             "format": "int32"
           },
           "movementStrategy": {
-            "description": "Default way this type chases the nearest player (ZMB-1).",
             "$ref": "#/components/schemas/MovementStrategyKind"
           }
-        },
-        "description": "A zombie type. Types differ by data and movement strategy, not by subclass."
+        }
       },
       "ZombieStateDto": {
         "required": [
@@ -4771,10 +3725,6 @@
       "description": "Preview generated or preset levels with their validation report."
     },
     {
-      "name": "Patterns",
-      "description": "The P1 design patterns: participants, requirements and runnable demos."
-    },
-    {
       "name": "Diagnostics",
       "description": "Health, game loop timings, command history and event log."
     },
@@ -4802,12 +3752,6 @@
       "tags": [
         "Content",
         "Levels"
-      ]
-    },
-    {
-      "name": "Course",
-      "tags": [
-        "Patterns"
       ]
     },
     {

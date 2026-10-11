@@ -22,6 +22,3 @@ public sealed record GivePowerRequest(PowerType Power, double? DurationSeconds =
 
 /// <summary>Result of an undo request: the command undone, or null if there was nothing to undo.</summary>
 public sealed record UndoResponse(string? Undone);
-
-/// <summary>The Prototype pattern's clone mode used on level start and restart: <c>Deep</c> or <c>Shallow</c>.</summary>
-public sealed record CloneModeDto(string Mode);

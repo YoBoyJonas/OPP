@@ -1,7 +1,10 @@
 using System.Diagnostics;
-using CastleEscape.Game.Configuration;
-using CastleEscape.Game.Messaging;
-using CastleEscape.Game.Sessions;
+using CastleEscape.Application.Configuration;
+using CastleEscape.Domain.Configuration;
+using CastleEscape.Application.Messaging;
+using CastleEscape.Infrastructure.Serialization;
+using CastleEscape.Application.Sessions;
+using CastleEscape.Domain.Sessions;
 using Microsoft.Extensions.Options;
 
 namespace CastleEscape.Server.Realtime;

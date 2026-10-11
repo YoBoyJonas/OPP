@@ -1,5 +1,6 @@
 using CastleEscape.Contracts.Realtime;
-using CastleEscape.Game.Sessions;
+using CastleEscape.Application.Sessions;
+using CastleEscape.Domain.Sessions;
 using Microsoft.AspNetCore.SignalR;
 
 namespace CastleEscape.Server.Hubs;

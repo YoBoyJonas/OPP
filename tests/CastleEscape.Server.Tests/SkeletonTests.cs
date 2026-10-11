@@ -31,13 +31,13 @@ public class SkeletonTests(WebApplicationFactory<Program> factory) : IClassFixtu
 
         var tags = root.GetProperty("tags").EnumerateArray().Select(t => t.GetProperty("name").GetString()).ToList();
         Assert.Equal(
-            ["Content", "Dev", "Diagnostics", "Gameplay", "Levels", "Patterns", "Realtime", "Sessions"],
+            ["Content", "Dev", "Diagnostics", "Gameplay", "Levels", "Realtime", "Sessions"],
             tags.Order());
 
         var groups = root.GetProperty("x-tagGroups").EnumerateArray()
             .ToDictionary(g => g.GetProperty("name").GetString()!,
                           g => g.GetProperty("tags").EnumerateArray().Select(t => t.GetString()).ToList());
-        Assert.Equal(["Lobby", "Gameplay", "Content", "Course", "Ops"], groups.Keys);
+        Assert.Equal(["Lobby", "Gameplay", "Content", "Ops"], groups.Keys);
         Assert.Equal(["Gameplay", "Realtime"], groups["Gameplay"]);
         Assert.Equal(["Diagnostics", "Dev"], groups["Ops"]);
     }

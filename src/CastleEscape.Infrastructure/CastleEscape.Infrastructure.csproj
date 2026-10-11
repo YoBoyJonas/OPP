@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../CastleEscape.Application/CastleEscape.Application.csproj" />
+    <ProjectReference Include="../CastleEscape.Domain/CastleEscape.Domain.csproj" />
+    <ProjectReference Include="../CastleEscape.Contracts/CastleEscape.Contracts.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="CastleEscape.Core.Tests" />
+    <None Include="../../content/**/*" Link="content/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

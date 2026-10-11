@@ -149,11 +149,7 @@ function bindDevButtons(connection) {
   $("skip").onclick = () => dev("POST", `/sessions/${session.id}/skip-level`);
   $("setStrategy").onclick = () => dev("PUT", `/sessions/${session.id}/zombies/strategy`, { strategy: $("strategy").value });
   $("givePower").onclick = () => dev("POST", `/sessions/${session.id}/players/${session.playerId}/powers`, { power: $("power").value });
-  $("setClone").onclick = async () => {
-    const result = await dev("PUT", "/patterns/prototype-clone-mode", { mode: $("cloneMode").value });
-    if (result) addEvent(`Prototype clone mode: ${result.mode} (applies on the next start or restart)`);
-  };
-  api("GET", "/api/dev/patterns/prototype-clone-mode").then((m) => { $("cloneMode").value = m.mode; }).catch(() => {});
+
 }
 
 // ------------------------------------------------------------------ drawing

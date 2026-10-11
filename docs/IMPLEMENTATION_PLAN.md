@@ -44,7 +44,7 @@ docs/
 | # | Phase | Contents | Commit(s) |
 |---|---|---|---|
 | 0 ✅ | Audit | `REPO_AUDIT.md`, this file | `docs: repo audit and implementation plan` |
-| 1 ✅ | Skeleton | `git mv` server → `src/CastleEscape.Server`, content models → `src/CastleEscape.Game/Content` (compile-fixed), screenshot → `docs/diagrams/`; `.sln`; empty projects + test projects; OpenAPI + Scalar + `x-tagGroups` transformer + `X-Player-Token` scheme; `/health`; CORS; camelCase + string enums for HTTP and SignalR; ProblemDetails; options classes with validation; workflow path fix; pin patched `Microsoft.OpenApi` | `chore: restructure into solution layout`, `feat(server): OpenAPI, Scalar, health, options` |
+| 1 ✅ | Skeleton | `git mv` server → `src/CastleEscape.Server`, content models → `src/CastleEscape.Domain/Content` (compile-fixed), screenshot → `docs/diagrams/`; `.sln`; empty projects + test projects; OpenAPI + Scalar + `x-tagGroups` transformer + `X-Player-Token` scheme; `/health`; CORS; camelCase + string enums for HTTP and SignalR; ProblemDetails; options classes with validation; workflow path fix; pin patched `Microsoft.OpenApi` | `chore: restructure into solution layout`, `feat(server): OpenAPI, Scalar, health, options` |
 | 2 ✅ | Content & domain | JSON content (3 characters, 5 consumables incl. Reward, 3 powers, 2 combos, obstacles for 2 themes, 3 zombie types, 10 levels, 2 presets), loader, validation; `GridPos`, `Grid`, entities, `LevelState` | `feat(content)…`, `feat(world)…` |
 | 3 ✅ | Naive prototype | lobby (create/join/select/leave), `SessionPhase` switch, `GameLoopService` (`PeriodicTimer`, 20 Hz, per-session exception isolation, snapshot swap), input queue, step movement, straight-line chase with a `switch` on zombie type, items via `switch`, powers as a plain dictionary + `if`s, levers/door latch/exit, lives, win/lose, restart by regenerating, hub + REST mirror, naive single-class generator + naive JSON-only state endpoint. Integration test: 2 SignalR clients finish a preset level | several `feat(game)…`; tag **`p1-prototype-before-patterns`** |
 | 4 | Patterns | one commit each, in dependency order: Singleton → Adapter → Factory Method → Abstract Factory → Builder → Prototype → Strategy → Decorator → Command → Observer → Bridge → Facade. Each: refactor, `[DesignPattern]` tags, demo runner, unit test for the course requirement, `docs/patterns/<Name>.md` with before/after Mermaid | `feat(patterns): apply <X> to <Y>` ×12 |
@@ -128,8 +128,8 @@ Everything is on `backend/p1`, committed locally, **not pushed or merged**.
 Each pattern's design, participants, before/after diagrams and requirement proof are in
 [`patterns/`](patterns/README.md). The conventions every pattern commit followed:
 - `[DesignPattern("<Name>", "<Role>")]` on each participant (listed live by `GET /api/patterns`);
-- a demo in `src/CastleEscape.Game/PatternDemos/`, shared by the console app and `POST /api/patterns/{key}/demo`;
-- a test in `tests/CastleEscape.Game.Tests/Patterns/` proving the course requirement;
+- a demo in `tools/CastleEscape.PatternDemos/Demos/`, shared by the console app and `POST /api/patterns/{key}/demo`;
+- a test in `tests/CastleEscape.Core.Tests/Patterns/` proving the course requirement;
 - `docs/patterns/<Name>.md`.
 
 Open with the user: Q3 (is the team OK with rewriting Jonas's code?) was answered only

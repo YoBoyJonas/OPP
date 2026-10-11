@@ -1,6 +1,6 @@
 # P1 design patterns
 
-Each pattern lives in one feature folder of `src/CastleEscape.Game`. It has:
+Patterns live with the feature they implement in Domain, Application, Infrastructure or Server. Course demos live separately under `tools/CastleEscape.PatternDemos`. It has:
 - its participants tagged `[DesignPattern("<Pattern>", "<Role>")]`;
 - a demo shared by the console app and the API;
 - a unit test proving the course requirement;
@@ -21,18 +21,17 @@ No pattern is used twice, as the course requires.
 ## Running the demos
 
 ```bash
-dotnet run --project src/CastleEscape.PatternDemos                      # all 12
-dotnet run --project src/CastleEscape.PatternDemos -- prototype --mode Shallow
+dotnet run --project tools/CastleEscape.PatternDemos                      # all 12
+dotnet run --project tools/CastleEscape.PatternDemos -- prototype --mode Shallow
 ```
 
-The same demos run as `POST /api/patterns/{key}/demo` in Scalar (Course → Patterns).
-`GET /api/patterns` lists every pattern with its participants, read from the code.
+The normal server exposes gameplay operations only. Run demonstrations in the console; the tooling catalog discovers participants across the runtime assemblies.
 
 ## Defence switches
 
 | Switch | Where |
 |---|---|
-| Prototype deep ↔ shallow | `Patterns:PrototypeCloneMode` in appsettings, or `?mode=` on the demo |
+| Prototype deep ↔ shallow | `--mode Deep` or `--mode Shallow` on the console demo; live sessions always use Deep |
 | Zombie strategy | `movementStrategy` in `content/zombies.json`; live: `PUT /api/dev/sessions/{id}/zombies/strategy` |
 | Door mode | `Game:DoorMode = Latch \| HoldWhileActive` |
 | Delivery channels | `Realtime:EnabledChannels` |

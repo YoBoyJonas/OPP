@@ -13,7 +13,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CastleEscape.Contracts\CastleEscape.Contracts.csproj" />
-    <ProjectReference Include="..\CastleEscape.Game\CastleEscape.Game.csproj" />
+    <ProjectReference Include="../CastleEscape.Domain/CastleEscape.Domain.csproj" />
+    <ProjectReference Include="../CastleEscape.Application/CastleEscape.Application.csproj" />
+    <ProjectReference Include="../CastleEscape.Infrastructure/CastleEscape.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

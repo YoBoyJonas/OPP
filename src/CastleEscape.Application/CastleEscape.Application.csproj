@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../CastleEscape.Domain/CastleEscape.Domain.csproj" />
+    <ProjectReference Include="../CastleEscape.Contracts/CastleEscape.Contracts.csproj" />
+  </ItemGroup>
+</Project>

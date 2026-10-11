@@ -95,20 +95,7 @@ public class DevEndpointTests(ArenaFactory factory) : IClassFixture<ArenaFactory
         await Api.Eventually(async () => (await State(http, game.SessionId))!.LevelIndex == 2 ? "ok" : null, TimeSpan.FromSeconds(5));
     }
 
-    [Fact]
-    public async Task CloneMode_CanBeFlippedAtRuntime()
-    {
-        var http = factory.CreateClient();
-        const string url = "/api/dev/patterns/prototype-clone-mode";
 
-        var shallow = await (await http.PutAsJsonAsync(url, new CloneModeDto("shallow"), Api.Json, Api.Ct)).Content.ReadFromJsonAsync<CloneModeDto>(Api.Json, Api.Ct);
-        var deep = await (await http.PutAsJsonAsync(url, new CloneModeDto("Deep"), Api.Json, Api.Ct)).Content.ReadFromJsonAsync<CloneModeDto>(Api.Json, Api.Ct);
-        var bad = await http.PutAsJsonAsync(url, new CloneModeDto("medium"), Api.Json, Api.Ct);
-
-        Assert.Equal("Shallow", shallow!.Mode);
-        Assert.Equal("Deep", deep!.Mode);
-        Assert.Equal(HttpStatusCode.BadRequest, bad.StatusCode);
-    }
 }
 
 public class DevToolsDisabledTests(NoDevToolsFactory factory) : IClassFixture<NoDevToolsFactory>

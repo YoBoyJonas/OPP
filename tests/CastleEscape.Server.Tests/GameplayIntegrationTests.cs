@@ -5,7 +5,7 @@ using CastleEscape.Contracts;
 using CastleEscape.Contracts.Gameplay;
 using CastleEscape.Contracts.Realtime;
 using CastleEscape.Contracts.Sessions;
-using CastleEscape.Game.World;
+using CastleEscape.Domain.World;
 using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace CastleEscape.Server.Tests;
@@ -253,6 +253,6 @@ public class SessionDiagnosticsTests(TutorialFactory factory) : IClassFixture<Tu
 
         var later = await http.GetFromJsonAsync<CastleEscape.Contracts.Diagnostics.EventLogEntryDto[]>(
             $"/api/diagnostics/sessions/{sessionId}/events?afterTick={events!.Max(e => e.Tick)}", Api.Json, Api.Ct);
-        Assert.All(later!, e => Assert.True(e.Tick > events.Max(x => x.Tick)));
+        Assert.All(later!, e => Assert.True(e.Tick > events!.Max(x => x.Tick)));
     }
 }

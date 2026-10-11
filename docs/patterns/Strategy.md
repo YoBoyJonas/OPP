@@ -1,7 +1,7 @@
 # Strategy — zombie chase algorithms
 
-**Owner:** Student B · **Category:** Behavioral · **Code:** `src/CastleEscape.Game/AI/` (`IZombieMovementStrategy`, `ChaseStrategies.cs`), `World/PathFinder.cs` (`AStar`)
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- strategy` · `POST /api/patterns/strategy/demo?strategy=all&steps=12`
+**Owner:** Student B · **Category:** Behavioral · **Code:** `src/CastleEscape.Domain/AI/` (`IZombieMovementStrategy`, `ChaseStrategies.cs`), `World/PathFinder.cs` (`AStar`)
+**Demo:** `dotnet run --project tools/CastleEscape.PatternDemos -- strategy`
 **Used by:** `GameSession.MoveZombies` (every zombie, every tile). `StateUpdated` messages carry each zombie's current `strategy`.
 **Switch:** `movementStrategy` per zombie type in `content/zombies.json`; at runtime `zombie.Strategy = …` (the Phase 5 dev endpoint `PUT /api/dev/sessions/{id}/zombies/strategy`).
 

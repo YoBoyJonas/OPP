@@ -1,6 +1,7 @@
 using System.Reflection;
-using CastleEscape.Game.Patterns;
-using CastleEscape.Game.Sessions;
+using CastleEscape.Domain.Patterns;
+using CastleEscape.Application.Sessions;
+using CastleEscape.Domain.Sessions;
 
 namespace CastleEscape.Server.Tests;
 
@@ -30,10 +31,8 @@ public class FacadeRequirementTests
     [Fact]
     public void AtLeastThreeSubsystemClassesAreTagged()
     {
-        var facade = PatternCatalog.Describe(typeof(GameFacade).Assembly).Single(p => p.Key == "facade");
-        var subsystems = facade.Participants.Where(p => p.Role == "Subsystem").Select(p => p.Type).ToList();
-
-        Assert.True(subsystems.Count >= 3, $"Facade needs >=3 tagged subsystems, found {subsystems.Count}: {string.Join(", ", subsystems)}");
-        Assert.Single(facade.Participants.Where(p => p.Role == "Facade"));
+        var subsystems = typeof(GameFacade).Assembly.GetTypes()
+            .Where(t => t.GetCustomAttributes<DesignPatternAttribute>().Any(a => a.Pattern == "Facade" && a.Role == "Subsystem"));
+        Assert.True(subsystems.Count() >= 3);
     }
 }

@@ -1,7 +1,7 @@
 # Command — player inputs with undo
 
-**Owner:** Student D · **Category:** Behavioral · **Code:** `src/CastleEscape.Game/Commands/`, `Sessions/GameWorld.cs`, `Sessions/PlayerMovement.cs`
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- command` · `POST /api/patterns/command/demo?undoRestart=true`
+**Owner:** Student D · **Category:** Behavioral · **Code:** `src/CastleEscape.Domain/Commands/`, `Sessions/GameWorld.cs`, `Sessions/PlayerMovement.cs`
+**Demo:** `dotnet run --project tools/CastleEscape.PatternDemos -- command`
 **Used by:** `GameSession.SubmitDirection` / `RequestRestart` / `GivePower` (hub and REST inputs), `PlayerMovement` (every step), `GameSession.UndoLastCommand` (dev tools, Phase 5) and `CommandHistory` (diagnostics).
 
 ## Problem in this game

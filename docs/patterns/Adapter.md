@@ -1,7 +1,7 @@
 # Adapter — message serialization (JSON / XML)
 
-**Owner:** Student C · **Category:** Structural · **Code:** `src/CastleEscape.Game/Messaging/`
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- adapter --format xml` · `POST /api/patterns/adapter/demo?format=json|xml`
+**Owner:** Student C · **Category:** Structural · **Code:** `src/CastleEscape.Infrastructure/Serialization/`
+**Demo:** `dotnet run --project tools/CastleEscape.PatternDemos -- adapter --format xml`
 **Used by:** `GET /api/sessions/{id}/state?format=xml` (or `Accept: application/xml`); Phase 4 Bridge's `PollingBufferChannel`.
 
 ## Problem in this game
