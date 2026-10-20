@@ -1,7 +1,7 @@
 # Singleton — `ContentCatalog`
 
 **Owner:** Student C · **Category:** Creational · **Code:** `src/CastleEscape.Game/Content/ContentCatalog.cs`
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- singleton --threads 64` · `POST /api/patterns/singleton/demo?threads=64&naive=true`
+**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- singleton` · `POST /api/patterns/singleton/demo`
 
 ## Problem in this game
 
@@ -9,8 +9,7 @@ All game content (characters, items, combos, obstacles, zombie types, 10 levels)
 `content/*.json`. Every session, the level generator, the zombie AI and the Content endpoints
 need it. It must be:
 - loaded and validated **once**;
-- **the same object everywhere**, so content can't differ between sessions or endpoints;
-- **safe to reach from many threads**: the game loop, request threads and hub threads all read it at once.
+- **the same object everywhere**, so content can't differ between sessions or endpoints.
 
 ## Why Singleton
 
@@ -18,17 +17,16 @@ The catalog is one read-only thing for the whole process, and the class itself s
 that. Nobody should be able to make a second catalog by accident, with a different or
 unvalidated content set.
 
-**Why still register it in DI?** `builder.Services.AddSingleton(_ => ContentCatalog.Instance)`
-lets endpoints receive it as a parameter. The *lifetime* stays owned by the class, not by the
-container. That is why the console demo and the unit tests can use `ContentCatalog.Instance`
-without any container at all. A DI singleton alone would not stop `new ContentCatalog()`.
+**No framework, no DI.** The pattern is hand-written: a private static field, a private
+constructor, and a static `Instance` property. It doesn't use `Lazy<T>` or `lock`, and it isn't
+registered in the DI container. `Program.cs`, the endpoints, the console demo and the unit tests
+all read `ContentCatalog.Instance` directly.
 
 ## Participants
 
 | Role | Class | Notes |
 |---|---|---|
-| Singleton | `ContentCatalog` | private constructor, `static Instance`, `Lazy<T>` with `ExecutionAndPublication` |
-| (demo only) | `NaiveCatalogHolder` | the classic unsafe `if (_instance == null) _instance = new …` for comparison |
+| Singleton | `ContentCatalog` | private constructor, private static `_instance`, `static Instance => _instance ??= Create()` |
 
 ## Before (tag `p1-prototype-before-patterns`)
 
@@ -57,12 +55,10 @@ classDiagram
 classDiagram
     class ContentCatalog {
         <<Singleton>>
-        -LazyInstance Lazy~ContentCatalog~$
-        -_instanceCreations int$
+        -_instance ContentCatalog$
         +Instance ContentCatalog$
-        +InstanceCreations int$
         -ContentCatalog(data)
-        -CreateInstance() ContentCatalog$
+        -Create() ContentCatalog$
         +Validate() List~string~
         +ValidateOrThrow()
         +ComputeContentHash() string
@@ -71,7 +67,7 @@ classDiagram
         +ReadDirectory(dir) ContentData$
     }
     class ContentData
-    ContentCatalog ..> ContentLoader : CreateInstance()
+    ContentCatalog ..> ContentLoader : Create()
     ContentLoader ..> ContentData
     ContentCatalog --> ContentCatalog : Instance
 ```
@@ -79,34 +75,31 @@ classDiagram
 ## Key code
 
 ```csharp
-private static readonly Lazy<ContentCatalog> LazyInstance =
-    new(CreateInstance, LazyThreadSafetyMode.ExecutionAndPublication);
+private static ContentCatalog? _instance;
 
-public static ContentCatalog Instance => LazyInstance.Value;
+public static ContentCatalog Instance => _instance ??= Create();
 
 private ContentCatalog(ContentData data) { ... }   // nobody else can construct one
 ```
 
-`ExecutionAndPublication` means that if many threads read `Instance` together, **exactly one**
-runs `CreateInstance`. The others wait and then all get the same object. There is no hand-written
-double-checked locking to get wrong.
+The first read of `Instance` loads and validates the content and stores it. Every later read
+returns the stored object.
 
-## Requirement: "show that it is thread-safe"
+## Thread safety
 
-`SingletonDemo` starts N real threads (default 64). Each waits at a `Barrier`, so all read
-`Instance` at the same moment. It reports:
-- distinct instances seen, by `RuntimeHelpers.GetHashCode` (identity): **1**;
-- `ContentCatalog.InstanceCreations`: **1**.
+This version is deliberately **not** thread-safe. If two threads read `Instance` for the very first
+time together, both can see `null` and both build a catalog. The server avoids that by reading it
+once in `Program.cs` (`_ = ContentCatalog.Instance;`). That read runs on the main thread before
+`app.Run()`, so the catalog already exists before any request, hub or game-loop thread starts.
 
-The same race against `NaiveCatalogHolder` (no lock, 20 ms constructor) typically shows **N
-distinct instances and N constructor calls**. That is the bug the pattern avoids.
+`SingletonDemo` shows that every read returns the same object (`sameInstance: true`) and that
+`ContentCatalog` has no public constructor (`publicConstructors: 0`).
 Tests: `tests/CastleEscape.Game.Tests/Patterns/SingletonTests.cs`.
 
 ## Likely live-change requests
 
 | Request | Where to edit |
 |---|---|
-| "Make it eager instead of lazy" | Replace the `Lazy` with `public static ContentCatalog Instance { get; } = CreateInstance();`. Thread safety then comes from the CLR's type initializer. |
-| "Show double-checked locking" | In `NaiveCatalogHolder.Instance`: `if (_instance == null) { lock (Gate) { if (_instance == null) _instance = new(); } }`. Rerun the demo: 1 instance. |
-| "Break it on purpose" | Use `LazyThreadSafetyMode.PublicationOnly`. Several threads may run the factory and `InstanceCreations` > 1, but only one result is published. Explain the difference. |
+| "Make it thread-safe" | Add `private static readonly object Gate = new();` and use `get { lock (Gate) { return _instance ??= Create(); } }`. Only one thread at a time can check and create. |
+| "Make it eager instead of lazy" | Replace the field and property with `public static ContentCatalog Instance { get; } = Create();`. The catalog is created when the class is first used, and the CLR runs that initializer once. |
 | "Add a new content type" | Add a list to `ContentData`, `ContentCatalog` (property + constructor), `ContentLoader.ReadDirectory`, plus a JSON file. |

@@ -24,8 +24,8 @@ public static class RealtimeEndpoints
             .WithDescription("Hub URL and query parameters, every server-to-client and client-to-server method with its payload "
                              + "and when it happens, every event type and error code, and the ordering rules.");
 
-        group.MapGet("/examples", (ContentCatalog catalog) => TypedResults.Ok(
-                RealtimeExamples.Capture(catalog).ToDictionary(kv => kv.Key, kv => (object)kv.Value)))
+        group.MapGet("/examples", () => TypedResults.Ok(
+                RealtimeExamples.Capture(ContentCatalog.Instance).ToDictionary(kv => kv.Key, kv => (object)kv.Value)))
             .WithName("GetRealtimeExamples")
             .WithSummary("Example payload of every server message")
             .WithDescription("Captured from a short real session on a small map, keyed by client method name. This is exactly "

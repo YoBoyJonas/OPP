@@ -61,7 +61,7 @@ notifier observer; Facade last because it wraps the final subsystems.
 - The naive prototype is deliberately "clean but pattern-free" (switches, a dictionary of power
   timers, one generator class, one JSON serializer call), so each pattern commit has a clear before/after.
 - `ContentCatalog` has no Singleton in Phase 2–3: it is registered in DI from a loader, and
-  Phase 4 turns it into a `Lazy<T>` Singleton.
+  Phase 4 turns it into a hand-written Singleton.
 - Package APIs (Scalar 2.x, Microsoft.OpenApi 2.x extension types, `AddOpenApi` transformers) will be
   checked against the installed versions via context7 and compilation, not memory.
 - Decisions D1–D10 go to `docs/DECISIONS.md` in Phase 1, plus these repo-specific ones: team

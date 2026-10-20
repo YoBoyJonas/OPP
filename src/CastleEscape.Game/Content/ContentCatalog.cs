@@ -10,6 +10,7 @@ namespace CastleEscape.Game.Content;
 /// All static game content: characters, items, combos, obstacles, zombie types and levels.
 /// Singleton: loaded once from <c>content/*.json</c> on first use of <see cref="Instance"/>, validated,
 /// and shared (read-only) by every session, generator and endpoint.
+/// Not thread-safe: the server reads <see cref="Instance"/> once at startup, before any other thread.
 /// </summary>
 [DesignPattern("Singleton", "Singleton")]
 [DesignPattern("Facade", "Subsystem")]
@@ -17,19 +18,13 @@ public sealed class ContentCatalog
 {
     private static readonly PowerType[] BasePowers = [PowerType.Jump, PowerType.Sprint, PowerType.Swim];
 
-    // ExecutionAndPublication: if many threads ask at once, exactly one runs the factory; all get its result.
-    private static readonly Lazy<ContentCatalog> LazyInstance = new(CreateInstance, LazyThreadSafetyMode.ExecutionAndPublication);
-    private static int _instanceCreations;
+    private static ContentCatalog? _instance;
 
-    /// <summary>The one shared catalog. Thread-safe; loads and validates the content on first access.</summary>
-    public static ContentCatalog Instance => LazyInstance.Value;
+    /// <summary>The one shared catalog, loaded and validated on first access.</summary>
+    public static ContentCatalog Instance => _instance ??= Create();
 
-    /// <summary>How many times <see cref="Instance"/> has been created (always 0 or 1). Used by the demo.</summary>
-    public static int InstanceCreations => Volatile.Read(ref _instanceCreations);
-
-    private static ContentCatalog CreateInstance()
+    private static ContentCatalog Create()
     {
-        Interlocked.Increment(ref _instanceCreations);
         var catalog = new ContentCatalog(ContentLoader.ReadDirectory(ContentLoader.DefaultDirectory));
         catalog.ValidateOrThrow();
         return catalog;

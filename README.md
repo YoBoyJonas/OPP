@@ -58,7 +58,7 @@ docs/                         design documents (below)
 
 | Pattern | Where | Owner |
 |---|---|---|
-| [Singleton](docs/patterns/Singleton.md) | `ContentCatalog`: content loaded once, thread-safe | C |
+| [Singleton](docs/patterns/Singleton.md) | `ContentCatalog`: content loaded once, one shared instance | C |
 | [Adapter](docs/patterns/Adapter.md) | `IMessageSerializer` over `JsonSerializer` / `DataContractSerializer` (JSON and XML) | C |
 | [Bridge](docs/patterns/Bridge.md) | state/event notifiers × SignalR/polling channels | C |
 | [Factory Method](docs/patterns/FactoryMethod.md) | `ItemSpawner.CreateItem` → Health/Reward/Power items | B |

@@ -26,10 +26,10 @@ public static class PatternEndpoints
             .ProducesProblem(StatusCodes.Status404NotFound);
 
         app.MapDemo("singleton",
-            (int threads = 64, bool naive = true) => Run("singleton", ("threads", threads), ("naive", naive)),
-            "Singleton: thread safety",
-            "Starts `threads` threads through a Barrier; all read ContentCatalog.Instance at once. Reports distinct "
-            + "instances (1) and creations (1). With `naive=true` the same race against a lock-free holder makes several.");
+            () => Run("singleton"),
+            "Singleton: one shared catalog",
+            "Reads ContentCatalog.Instance twice and through the demo world, and reports that it is always the same "
+            + "object and that ContentCatalog has no public constructor.");
 
         app.MapDemo("adapter",
             (string format = "xml") => Run("adapter", ("format", format)),

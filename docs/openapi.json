@@ -33,32 +33,9 @@
         "tags": [
           "Patterns"
         ],
-        "summary": "Singleton: thread safety",
-        "description": "Starts \u0060threads\u0060 threads through a Barrier; all read ContentCatalog.Instance at once. Reports distinct instances (1) and creations (1). With \u0060naive=true\u0060 the same race against a lock-free holder makes several.",
+        "summary": "Singleton: one shared catalog",
+        "description": "Reads ContentCatalog.Instance twice and through the demo world, and reports that it is always the same object and that ContentCatalog has no public constructor.",
         "operationId": "DemoSingleton",
-        "parameters": [
-          {
-            "name": "threads",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 64
-            }
-          },
-          {
-            "name": "naive",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": true
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK",

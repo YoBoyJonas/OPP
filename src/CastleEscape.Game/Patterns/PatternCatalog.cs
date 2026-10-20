@@ -21,7 +21,7 @@ public static class PatternCatalog
         new("singleton", "Singleton", "Creational", C,
             "Content is loaded from JSON once and must be one shared, immutable instance for all sessions, generators and endpoints.",
             "Show that it is thread-safe.",
-            "ContentCatalog.Instance uses Lazy<T> with ExecutionAndPublication. The demo starts N threads through a Barrier: 1 distinct instance, 1 creation. A naive holder in the same demo creates several."),
+            "ContentCatalog.Instance is a plain lazy static (_instance ??= Create()) with a private constructor; no Lazy<T>, lock or DI. Not thread-safe by design: the server creates it once on the main thread at startup, before requests or the game loop start."),
         new("factory-method", "Factory Method", "Creational", B,
             "The level builder must place different item kinds without knowing the concrete item classes.",
             "At least 3 classes in the product family.",

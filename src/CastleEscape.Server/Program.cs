@@ -34,14 +34,12 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
     .AllowAnyMethod()
     .AllowCredentials())); // SignalR sends credentials, which rules out AllowAnyOrigin.
 
-// The Singleton owns its own lifetime; DI just hands out the same instance.
-builder.Services.AddSingleton(_ => ContentCatalog.Instance);
 builder.Services.AddSingleton<ILevelProvider>(sp => new LevelProvider(
-    sp.GetRequiredService<ContentCatalog>(),
+    ContentCatalog.Instance,
     sp.GetRequiredService<IOptions<GameOptions>>().Value,
     sp.GetRequiredService<IOptions<GenerationOptions>>().Value));
 builder.Services.AddSingleton(sp => new SessionRegistry(
-    sp.GetRequiredService<ContentCatalog>(),
+    ContentCatalog.Instance,
     sp.GetRequiredService<ILevelProvider>(),
     sp.GetRequiredService<IOptions<GameOptions>>().Value,
     sp.GetRequiredService<IOptions<PatternOptions>>().Value));
@@ -58,14 +56,17 @@ builder.Services.AddSingleton(sp =>
     };
     return scheduler;
 });
-builder.Services.AddSingleton<GameFacade>();
+builder.Services.AddSingleton(sp => new GameFacade(
+    sp.GetRequiredService<SessionRegistry>(),
+    sp.GetRequiredService<GameLoopScheduler>(),
+    ContentCatalog.Instance));
 builder.Services.AddSingleton(sp => new LevelPreviewer(
-    sp.GetRequiredService<ContentCatalog>(),
+    ContentCatalog.Instance,
     sp.GetRequiredService<IOptions<GameOptions>>().Value,
     sp.GetRequiredService<IOptions<GenerationOptions>>().Value));
 builder.Services.AddSingleton(sp => new DevActions(
     sp.GetRequiredService<SessionRegistry>(),
-    sp.GetRequiredService<ContentCatalog>(),
+    ContentCatalog.Instance,
     sp.GetRequiredService<IOptions<PatternOptions>>().Value));
 
 // Bridge: notifiers (what to send) over channels (how), both picked from Realtime settings.
@@ -93,7 +94,8 @@ if (!string.IsNullOrEmpty(port))
 var app = builder.Build();
 
 // Load and validate content now, so a broken content file stops startup instead of the first request.
-app.Services.GetRequiredService<ContentCatalog>();
+// This runs on the main thread before app.Run(), so the (not thread-safe) Singleton is created exactly once.
+_ = ContentCatalog.Instance;
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
