@@ -31,7 +31,7 @@ diagnostics endpoint use them directly. A facade simplifies; it doesn't lock any
 
 | Role | Class |
 |---|---|
-| Facade | `GameFacade` (lobby: `CreateSession`, `JoinSession`, `SelectCharacter`, `LeaveSession`, `ListSessions`, `GetSession`, `CharacterIds`; input: `SubmitDirection`, `RequestRestart`; reads: `GetState`, `GetLevelLayout`, `GetHud`; hub: `Connect`, `Disconnect`, `Ping`; loop: `Tick`) |
+| Facade | `GameFacade` (lobby: `CreateSession`, `JoinSession`, `SelectCharacter`, `LeaveSession`, `ListSessions`, `GetSession`; input: `SubmitDirection`, `RequestRestart`; reads: `GetState`, `GetLevelLayout`, `GetHud`; hub: `Connect`, `Disconnect`, `Ping`; loop: `Tick`) |
 | Subsystems | `SessionRegistry` (lookup, join codes, tokens), `GameSession` (and behind it `CommandProcessor`, `GameWorld`, `GameEventPublisher`), `GameLoopScheduler` (new: ticks all sessions, isolates failures, drains outboxes), `ContentCatalog`; level creation runs through `ILevelProvider` → `LevelDirector` |
 | Clients | `GameHub`, `SessionEndpoints`, `GameplayEndpoints`, `GameLoopService`, `FacadeDemo` |
 

@@ -1,7 +1,6 @@
 using CastleEscape.Contracts;
 using CastleEscape.Game.AI;
 using CastleEscape.Game.Content;
-using CastleEscape.Game.Patterns;
 
 namespace CastleEscape.Game.World;
 
@@ -9,7 +8,6 @@ namespace CastleEscape.Game.World;
 /// A zombie on the map. Chases the nearest player; returns to its spawn tile after contact (ZMB-3).
 /// Each level theme has its own subclass, made by the theme's factory.
 /// </summary>
-[DesignPattern("Abstract Factory", "AbstractProduct")]
 public abstract class ZombieEntity(string id, ZombieDefinition definition, GridPos spawn) : MovableEntity(id, spawn)
 {
     public ZombieDefinition Definition { get; } = definition;

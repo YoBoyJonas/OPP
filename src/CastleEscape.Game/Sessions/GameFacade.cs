@@ -4,7 +4,6 @@ using CastleEscape.Contracts.Gameplay;
 using CastleEscape.Contracts.Realtime;
 using CastleEscape.Contracts.Sessions;
 using CastleEscape.Game.Content;
-using CastleEscape.Game.Patterns;
 
 namespace CastleEscape.Game.Sessions;
 
@@ -17,7 +16,6 @@ public sealed record ConnectResult(Guid SessionId, Guid PlayerId, SessionUpdated
 /// sessions and their command queues, the loop scheduler, and the content catalog.
 /// Callers never see a <see cref="GameSession"/> or a <see cref="PlayerSlot"/>; they get contract DTOs.
 /// </summary>
-[DesignPattern("Facade", "Facade")]
 public sealed class GameFacade(SessionRegistry registry, GameLoopScheduler scheduler, ContentCatalog catalog)
 {
     // ---------------------------------------------------------------- lobby
@@ -51,9 +49,6 @@ public sealed class GameFacade(SessionRegistry registry, GameLoopScheduler sched
         registry.All.Select(s => new SessionSummary(s.Id, s.JoinCode, s.Phase, s.Snapshot.Session.Players.Length)).ToList();
 
     public SessionDto GetSession(Guid sessionId) => registry.Get(sessionId).Snapshot.Session;
-
-    /// <summary>The characters a player can pick (PLR-1).</summary>
-    public IReadOnlyList<string> CharacterIds => catalog.Data.Characters.Select(c => c.Id).ToList();
 
     // ---------------------------------------------------------------- input (queued as commands)
 

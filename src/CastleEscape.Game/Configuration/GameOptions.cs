@@ -2,16 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CastleEscape.Game.Configuration;
 
-/// <summary>How the exit door reacts to the levers (decision D1).</summary>
-public enum DoorMode
-{
-    /// <summary>Once both levers are active in the same tick the door stays open for the rest of the level.</summary>
-    Latch,
-
-    /// <summary>The door is open only while both levers are active (literal requirement; levels become unwinnable).</summary>
-    HoldWhileActive
-}
-
 /// <summary>Core simulation settings, bound from the <c>Game</c> configuration section.</summary>
 public sealed class GameOptions
 {
@@ -24,11 +14,6 @@ public sealed class GameOptions
     /// <summary>Default duration of a base power (PWR-1).</summary>
     [Range(1, 600)]
     public double PowerDurationSeconds { get; set; } = 10;
-
-    public DoorMode DoorMode { get; set; } = DoorMode.Latch;
-
-    /// <summary>Move the player back to their start tile after a zombie hit (decision D6).</summary>
-    public bool RespawnPlayerOnHit { get; set; }
 
     /// <summary>Level width in tiles (LVL-2: at least 20).</summary>
     [Range(20, 200)]

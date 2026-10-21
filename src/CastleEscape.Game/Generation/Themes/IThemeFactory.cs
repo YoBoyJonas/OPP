@@ -1,6 +1,5 @@
 using CastleEscape.Contracts;
 using CastleEscape.Game.Content;
-using CastleEscape.Game.Patterns;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Generation.Themes;
@@ -9,7 +8,6 @@ namespace CastleEscape.Game.Generation.Themes;
 /// Creates one consistent family of level parts for a theme: walls, water, pits and zombies.
 /// A level is built with exactly one factory, so a Dungeon level can never get a Crypt pit.
 /// </summary>
-[DesignPattern("Abstract Factory", "AbstractFactory")]
 public interface IThemeFactory
 {
     LevelTheme Theme { get; }

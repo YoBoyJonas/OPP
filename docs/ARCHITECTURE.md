@@ -20,7 +20,7 @@ flowchart LR
 - **Game** has no ASP.NET Core dependency (decision P7). It contains the whole game and every
   pattern, so the console demos and tests can run a real game in-process.
 - **Server** is a thin host: dependency injection, configuration, endpoints, the SignalR hub,
-  the timer that drives the loop, and the playground page.
+  the timer that drives the loop.
 
 ## Inside the Game project
 
@@ -36,8 +36,7 @@ flowchart LR
 | `Commands/` | `IGameCommand`, the commands, `CommandProcessor` | Command |
 | `Events/` | `GameEvent` records, `GameEventPublisher`, observers | Observer |
 | `Messaging/` | serializer adapters, client notifiers and channels, realtime examples | Adapter, Bridge |
-| `Sessions/` | `GameSession`, `GameWorld`, `PlayerMovement`, `SessionRegistry`, `GameLoopScheduler`, `GameFacade`, `DevActions`, `SnapshotMapper` | Facade |
-| `Patterns/`, `PatternDemos/` | `[DesignPattern]` attribute, the pattern catalog, one demo per pattern | |
+| `Sessions/` | `GameSession`, `GameWorld`, `PlayerMovement`, `SessionRegistry`, `GameLoopScheduler`, `GameFacade`, `SnapshotMapper` | Facade |
 
 ## The tick
 

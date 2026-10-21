@@ -19,7 +19,6 @@ AddValidatedOptions<GenerationOptions>(builder.Services, GenerationOptions.Secti
 AddValidatedOptions<PatternOptions>(builder.Services, PatternOptions.SectionName);
 AddValidatedOptions<RealtimeOptions>(builder.Services, RealtimeOptions.SectionName);
 AddValidatedOptions<CorsSettings>(builder.Services, CorsSettings.SectionName);
-AddValidatedOptions<DevToolsOptions>(builder.Services, DevToolsOptions.SectionName);
 
 builder.Services.ConfigureHttpJsonOptions(options => JsonDefaults.Apply(options.SerializerOptions));
 builder.Services.AddSignalR().AddJsonProtocol(options => JsonDefaults.Apply(options.PayloadSerializerOptions));
@@ -43,15 +42,12 @@ builder.Services.AddSingleton(sp => new SessionRegistry(
     sp.GetRequiredService<ILevelProvider>(),
     sp.GetRequiredService<IOptions<GameOptions>>().Value,
     sp.GetRequiredService<IOptions<PatternOptions>>().Value));
-builder.Services.AddSingleton<GameLoopStats>();
 builder.Services.AddSingleton(sp =>
 {
     var scheduler = new GameLoopScheduler(sp.GetRequiredService<SessionRegistry>());
-    var stats = sp.GetRequiredService<GameLoopStats>();
     var logger = sp.GetRequiredService<ILogger<GameLoopScheduler>>();
     scheduler.SessionFailed += (session, ex) =>
     {
-        stats.RecordFailure();
         logger.LogError(ex, "Tick failed for session {SessionId}; stopping it", session.Id);
     };
     return scheduler;
@@ -60,14 +56,6 @@ builder.Services.AddSingleton(sp => new GameFacade(
     sp.GetRequiredService<SessionRegistry>(),
     sp.GetRequiredService<GameLoopScheduler>(),
     ContentCatalog.Instance));
-builder.Services.AddSingleton(sp => new LevelPreviewer(
-    ContentCatalog.Instance,
-    sp.GetRequiredService<IOptions<GameOptions>>().Value,
-    sp.GetRequiredService<IOptions<GenerationOptions>>().Value));
-builder.Services.AddSingleton(sp => new DevActions(
-    sp.GetRequiredService<SessionRegistry>(),
-    ContentCatalog.Instance,
-    sp.GetRequiredService<IOptions<PatternOptions>>().Value));
 
 // Bridge: notifiers (what to send) over channels (how), both picked from Realtime settings.
 builder.Services.AddSingleton(sp => new PollingBufferChannel(sp.GetRequiredService<IOptions<RealtimeOptions>>().Value.PollingBufferSize));
@@ -109,18 +97,9 @@ app.MapGet("/", () => Results.Redirect("/scalar")).ExcludeFromDescription();
 
 app.MapDiagnosticsEndpoints();
 app.MapContentEndpoints();
-app.MapLevelEndpoints();
 app.MapSessionEndpoints();
 app.MapGameplayEndpoints();
-app.MapRealtimeEndpoints();
-app.MapPatternEndpoints();
-if (app.Services.GetRequiredService<IOptions<DevToolsOptions>>().Value.Enabled)
-{
-    app.MapDevEndpoints();
-    app.UseStaticFiles(); // wwwroot holds only the playground, a dev tool
-    app.MapGet("/playground", () => Results.Redirect("/playground/index.html")).ExcludeFromDescription();
-}
-app.MapHub<GameHub>(RealtimeEndpoints.HubPath);
+app.MapHub<GameHub>(GameHub.Path);
 
 app.Run();
 

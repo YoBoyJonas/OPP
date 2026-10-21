@@ -21,17 +21,6 @@ public class ContentFilesTests
     }
 
     [Fact]
-    public void ComputeContentHash_SameContent_SameHash()
-    {
-        static ContentCatalog Make() => ContentCatalog.FromData(new ContentData
-        {
-            Characters = [new CharacterDefinition { Id = "scout", Name = "scout", MaxHealth = 3, BaseMoveSpeed = 4 }]
-        });
-
-        Assert.Equal(Make().ComputeContentHash(), Make().ComputeContentHash());
-    }
-
-    [Fact]
     public void Characters_DifferInLivesSpeedAndJump_Plr1()
     {
         Assert.Equal(3, Catalog.Data.Characters.Select(c => c.MaxHealth).Distinct().Count());

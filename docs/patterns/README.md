@@ -1,7 +1,6 @@
 # P1 design patterns
 
 Each pattern lives in one feature folder of `src/CastleEscape.Game`. It has:
-- its participants tagged `[DesignPattern("<Pattern>", "<Role>")]`;
 - a demo shared by the console app and the API;
 - a unit test proving the course requirement;
 - one document here: the problem, why the pattern fits, a before/after Mermaid class diagram,
@@ -26,13 +25,10 @@ dotnet run --project src/CastleEscape.PatternDemos -- prototype --mode Shallow
 ```
 
 The same demos run as `POST /api/patterns/{key}/demo` in Scalar (Course → Patterns).
-`GET /api/patterns` lists every pattern with its participants, read from the code.
 
 ## Defence switches
 
 | Switch | Where |
 |---|---|
 | Prototype deep ↔ shallow | `Patterns:PrototypeCloneMode` in appsettings, or `?mode=` on the demo |
-| Zombie strategy | `movementStrategy` in `content/zombies.json`; live: `PUT /api/dev/sessions/{id}/zombies/strategy` |
-| Door mode | `Game:DoorMode = Latch \| HoldWhileActive` |
 | Delivery channels | `Realtime:EnabledChannels` |

@@ -44,8 +44,7 @@ public sealed record ComboActivated(Guid? PlayerId, string Message, PowerType Po
 // Zombies, levers, door, exit
 public sealed record LifeLost(Guid? PlayerId, string Message, string ZombieId, int Lives) : GameEvent(PlayerId, Message);
 public sealed record LeverChanged(Guid? PlayerId, string Message, string LeverId, bool Active) : GameEvent(PlayerId, Message);
-public sealed record DoorOpened(Guid? PlayerId, string Message, DoorMode DoorMode) : GameEvent(PlayerId, Message);
-public sealed record DoorClosed(Guid? PlayerId, string Message, DoorMode DoorMode) : GameEvent(PlayerId, Message);
+public sealed record DoorOpened(Guid? PlayerId, string Message) : GameEvent(PlayerId, Message);
 public sealed record PlayerReachedExit(Guid? PlayerId, string Message) : GameEvent(PlayerId, Message);
 
 // Commands and presentation

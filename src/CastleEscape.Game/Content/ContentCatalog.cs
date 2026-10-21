@@ -1,8 +1,4 @@
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
 using CastleEscape.Contracts;
-using CastleEscape.Game.Patterns;
 
 namespace CastleEscape.Game.Content;
 
@@ -12,8 +8,6 @@ namespace CastleEscape.Game.Content;
 /// and shared (read-only) by every session, generator and endpoint.
 /// Not thread-safe: the server reads <see cref="Instance"/> once at startup, before any other thread.
 /// </summary>
-[DesignPattern("Singleton", "Singleton")]
-[DesignPattern("Facade", "Subsystem")]
 public sealed class ContentCatalog
 {
     private static ContentCatalog? _instance;
@@ -45,11 +39,4 @@ public sealed class ContentCatalog
     /// <summary>The level at a 1-based position in the sequence.</summary>
     public LevelDefinition GetLevel(int index) =>
         Data.Levels.FirstOrDefault(l => l.Index == index) ?? throw new KeyNotFoundException($"Unknown level index {index}.");
-
-    public string ComputeContentHash()
-    {
-        var json = JsonSerializer.Serialize(Data);
-        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(json));
-        return Convert.ToHexString(hash);
-    }
 }

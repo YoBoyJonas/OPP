@@ -11,11 +11,3 @@ public sealed class CorsSettings
     [MinLength(1)]
     public string[] AllowedOrigins { get; set; } = [];
 }
-
-/// <summary>Developer-only endpoints and the playground page, bound from the <c>DevTools</c> section.</summary>
-public sealed class DevToolsOptions
-{
-    public const string SectionName = "DevTools";
-
-    public bool Enabled { get; set; }
-}

@@ -64,7 +64,7 @@ public sealed class GameWorld(IReadOnlyList<PlayerSlot> slots, GameOptions optio
     private void Replace(LevelState level, double elapsed)
     {
         Level = level;
-        Exit = new ExitMechanism(level, options.DoorMode);
+        Exit = new ExitMechanism(level);
         LevelElapsed = elapsed;
         LevelVersion++;
     }

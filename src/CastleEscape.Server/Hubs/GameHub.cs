@@ -11,6 +11,8 @@ namespace CastleEscape.Server.Hubs;
 /// </summary>
 public class GameHub(GameFacade game) : Hub<IGameClient>
 {
+    public const string Path = "/hubs/game";
+
     private const string SessionKey = "sessionId";
     private const string TokenKey = "playerToken";
 

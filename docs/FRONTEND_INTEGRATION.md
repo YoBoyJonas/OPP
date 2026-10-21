@@ -5,10 +5,6 @@ session over REST, (2) connects to the SignalR hub, (3) sends key presses, and (
 
 **Live references while you work** (run `dotnet run --project src/CastleEscape.Server`):
 - http://localhost:5035/scalar is the REST reference, where you can try every call.
-- `GET /api/realtime/protocol` describes the hub: methods, payloads, event types, error codes.
-- `GET /api/realtime/examples` gives a real example of every hub message, as JSON.
-- http://localhost:5035/playground is a working reference client (`src/CastleEscape.Server/wwwroot/playground/playground.js`, ~250 lines).
-- [docs/openapi.json](openapi.json) is the OpenAPI document, for code generators.
 
 ## Conventions
 
@@ -39,8 +35,7 @@ DELETE /api/sessions/{sessionId}/players/me              X-Player-Token: …   (
 ```
 
 The first player shows the join code to the second. When both have picked a character, the
-first level loads automatically; there is no "start" call (D11). For development, skip all of this
-with `POST /api/dev/quickstart` (Development only), which returns two ready players with their tokens.
+first level loads automatically; there is no "start" call (D11).
 
 ## 2. Connect to the hub
 
@@ -112,7 +107,7 @@ terrain from `rows`; take levers, items and zombies from the state, because they
 current `strategy`; `items[]`; `levers[]` (`isActive`); `doorOpen`; `phase`; `levelIndex`.
 
 **Events** (`GameEvent.type`): `ItemCollected`, `PowerGained`, `PowerExpired`, `ComboActivated`,
-`LifeLost`, `LeverChanged`, `DoorOpened`, `DoorClosed`, `PlayerReachedExit`, `LevelStarted`,
+`LifeLost`, `LeverChanged`, `DoorOpened`, `PlayerReachedExit`, `LevelStarted`,
 `LevelRestarted`, `LevelCompleted`, `GameWon`, `GameLost`, `PlayerJoined`, `PlayerLeft`,
 `PhaseChanged` and `CommandUndone`. `data` holds the event's fields as strings, e.g.
 `LifeLost` → `{ "zombieId": "zombie-1", "lives": "2" }`. Pick sounds from the event type.
@@ -150,11 +145,9 @@ returns the latest state (`?format=xml` or `Accept: application/xml` for XML, NE
 messages from a per-session buffer (the last 200). `StateUpdated` is kept every 5th tick, and
 events are never dropped. Each `body` is the serialized message; `latestSeq` is your next `afterSeq`.
 
-## Developer shortcuts (Development only)
+## Diagnostics
 
-`/api/dev/*` (see Scalar → Ops → Dev): quickstart, undo the last command, switch every zombie's
-strategy, give a power, skip the level, flip the Prototype clone mode. `/api/diagnostics/sessions/{id}/commands`
-and `/events` show what the server did.
+`/api/diagnostics/sessions/{id}/commands` shows the last 100 commands the server ran.
 
 ## Migration from the first prototype protocol
 

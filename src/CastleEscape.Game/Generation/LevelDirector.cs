@@ -1,7 +1,6 @@
 using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Generation.Themes;
-using CastleEscape.Game.Patterns;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Generation;
@@ -11,7 +10,6 @@ namespace CastleEscape.Game.Generation;
 /// The same director works with any <see cref="ILevelBuilder"/> (start-level activity diagram:
 /// generate, validate, retry).
 /// </summary>
-[DesignPattern("Builder", "Director")]
 public sealed class LevelDirector(ContentCatalog catalog, GenerationOptions generation)
 {
     /// <summary>The step order. Terrain and exit come first: starts, levers and obstacles depend on them.</summary>

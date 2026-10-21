@@ -8,12 +8,12 @@ does and why. Configurable decisions name their setting.
 
 | ID | Decision | Source of conflict | Setting |
 |---|---|---|---|
-| D1 | **Door latches.** Once both levers are active in the same tick, the door opens and stays open for the rest of the level. | Requirements: "durys atviros tik kol abi svirtys aktyvios tuo pačiu kadru". Taken literally, the players must leave the levers to reach the exit, so no level can be won. The pull-lever diagram ("other player has opened lever → Open exit door") and the open-door diagram (a one-off "Update door state") already read as a latch. | `Game:DoorMode = Latch \| HoldWhileActive` (default `Latch`) |
+| D1 | **Door latches.** Once both levers are active in the same tick, the door opens and stays open for the rest of the level. | Requirements: "durys atviros tik kol abi svirtys aktyvios tuo pačiu kadru". Taken literally, the players must leave the levers to reach the exit, so no level can be won. The pull-lever diagram ("other player has opened lever → Open exit door") and the open-door diagram (a one-off "Update door state") already read as a latch. | none |\| HoldWhileActive` (default `Latch`) |
 | D2 | **Levers activate while a player stands on them.** There is no "pull" input. | Pull-lever diagram: "Presses button to pull lever". Requirements (collisions): "Ant svirties langelio svirtis aktyvi". | — |
 | D3 | **Powers start on pickup.** "Use active power" is carried out automatically: tiles that need a power can be crossed while it is active. | Use-active-power diagram: "Presses activate power button". Requirements: "laikina galia… galioja fiksuotą laiką". The team should update the use case and activity diagrams. | — |
 | D4 | **Three item kinds**: Power, Reward (score), Health (+1 life). `Reward` and `Consumable.ScoreValue` are added to the content model. | Requirements list 3 kinds; the class diagram and the collect-item diagram show only Health and Power. | — |
-| D5 | **No soft-locks.** The critical path (start → both levers → door → exit) must be walkable without powers. Power obstacles guard shortcuts and reward pockets, and each level has at least one (GEN-3). | Powers expire, so a mandatory power gate can make a level unwinnable. | `Generation:RequirePowerOnCriticalPath` (default `false`) |
-| D6 | **No player respawn on hit.** Only the zombie resets. | Lose-life diagram has "Respawn player"; the requirements only reset the zombie ("zombis iškart perkeliamas į savo starto langelį"). | `Game:RespawnPlayerOnHit` (default `false`) |
+| D5 | **No soft-locks.** The critical path (start → both levers → door → exit) must be walkable without powers. Power obstacles guard shortcuts and reward pockets, and each level has at least one (GEN-3). | Powers expire, so a mandatory power gate can make a level unwinnable. | none |
+| D6 | **No player respawn on hit.** Only the zombie resets. | Lose-life diagram has "Respawn player"; the requirements only reset the zombie ("zombis iškart perkeliamas į savo starto langelį"). | none |
 | D7 | Two players can't occupy the same tile, or step into the tile the other is on or stepping into. If both start a step into the same tile in the same tick, the step from the **later direction input** is undone (Command `Undo()`), so the earlier key press wins. | Not specified. Makes the Command pattern's `Undo()` part of normal play. | — |
 | D8 | **Restart level**: either player may request it. The level goes back to its generated layout (a fresh deep copy of the pristine level: Prototype) and both players' lives, score and powers go back to their level-start values. The confirmation dialog is client-side. | Restart diagram shows the dialog in the "Castle escape" lane; the server can't show dialogs. | — |
 | D9 | Score is per player; the HUD shows both players. | Not specified. | — |
@@ -51,18 +51,16 @@ does and why. Configurable decisions name their setting.
 | P3 | The hub moves from `/gamehub` to `/hubs/game`, and its methods change (see `FRONTEND_INTEGRATION.md`). No compatibility alias. | There is no frontend yet, and the old console client is removed. |
 | P4 | CI builds the whole solution and runs `dotnet test` before publishing. | Approved 2026-09-25. The broken client build had gone unnoticed because CI built only the server. |
 | P5 | `Microsoft.OpenApi` is pinned to 2.12.2. | GHSA-v5pm-xwqc-g5wc affects versions ≤ 2.7.4. `Microsoft.AspNetCore.OpenApi` 10 requires 2.x. |
-| P6 | Scalar and the OpenAPI document are served in every environment, Azure included. The Dev endpoints and the playground need `DevTools:Enabled` (true only in `appsettings.Development.json`). | The API reference is useful at the defence; the dev shortcuts must not be exposed on a public deployment by default. |
-| P7 | Options that the game rules read (`Game`, `Generation`, `Patterns`, `Realtime`) live in `CastleEscape.Game.Configuration`; host-only options (`Cors`, `DevTools`) live in the Server project. | The Game project must not depend on ASP.NET Core. |
+| P6 | Scalar and the OpenAPI document are served in every environment, Azure included. | The API reference is useful at the defence; the dev shortcuts must not be exposed on a public deployment by default. |
+| P7 | Options that the game rules read (`Game`, `Generation`, `Patterns`, `Realtime`) live in `CastleEscape.Game.Configuration`; host-only options (`Cors`) live in the Server project. | The Game project must not depend on ASP.NET Core. |
 | P8 | Tests use xUnit v3 with plain `Assert`. | Brief §10. No licensed assertion libraries. |
 | P10 | **Threading**: each session has one lock. Only `Tick` changes the world. Hub/REST input is queued (sequence-numbered) and applied at the start of the next tick. Lobby calls (join, pick character, leave) take the lock briefly, because they must answer synchronously. REST reads use the immutable snapshot published after each tick and never take the lock. | Brief §4. The lobby exception keeps create/join responses immediate without a second queue. |
-| P11 | `Generation:PresetLevel` (e.g. `tutorial`) makes every level a preset map. Used by integration tests, demos and the playground. | Deterministic multiplayer runs without changing code. |
+| P11 | `Generation:PresetLevel` (e.g. `tutorial`) makes every level a preset map. Used by integration tests and demos. | Deterministic multiplayer runs without changing code. |
 | P12 | Wire DTOs in `CastleEscape.Contracts` use arrays and `Dictionary<,>` (not `IReadOnlyList`/`IReadOnlyDictionary`). Realtime and session messages carry `[DataContract]`/`[DataMember]`. | `DataContractSerializer` (XML adaptee, NET-2) can't construct positional records without them, and can't serialize interface-typed collections whose runtime type is compiler-generated. The JSON is unchanged. |
-| P9 | Changes to Jonas's server code stay minimal until the rewrite list in `IMPLEMENTATION_PLAN.md` is confirmed. Phase 1 changed only namespaces and the hub path. | The team hasn't confirmed the rewrite scope yet (open question 3). |
 
 ## Course context notes
 
-- "Simple graphics only (System.Drawing / swing level)" applies to the frontend. The dev
-  playground is a debugging tool, not the graded client.
+- "Simple graphics only (System.Drawing / swing level)" applies to the frontend. The graded client is a separate project.
 - "Game objects may be stored in a database" is optional; content stays in JSON behind
   `ContentCatalog` for now.
 - "No pattern may be used twice in the team": each P1 pattern has exactly one owner and one

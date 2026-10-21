@@ -180,7 +180,6 @@ public static class GameEventTypes
     public const string GameLost = "GameLost";
     public const string LeverChanged = "LeverChanged";
     public const string DoorOpened = "DoorOpened";
-    public const string DoorClosed = "DoorClosed";
     public const string PlayerReachedExit = "PlayerReachedExit";
     public const string LevelCompleted = "LevelCompleted";
     public const string GameWon = "GameWon";

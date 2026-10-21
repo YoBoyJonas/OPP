@@ -1,5 +1,4 @@
 using CastleEscape.Contracts;
-using CastleEscape.Game.Patterns;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.AI;
@@ -8,7 +7,6 @@ namespace CastleEscape.Game.AI;
 /// How a zombie chases (ZMB-1). Called whenever the zombie stands on a tile; returns its next step,
 /// or <see cref="Direction.None"/> to wait. Strategies are stateless, so one instance serves every zombie.
 /// </summary>
-[DesignPattern("Strategy", "Strategy")]
 public interface IZombieMovementStrategy
 {
     MovementStrategyKind Kind { get; }
@@ -17,7 +15,6 @@ public interface IZombieMovementStrategy
 }
 
 /// <summary>What a strategy may look at: the grid, the players, and where zombies may walk. Read-only.</summary>
-[DesignPattern("Strategy", "Context data")]
 public sealed class WorldView(LevelState level, IReadOnlyList<PlayerEntity> players)
 {
     public Grid Grid => level.Grid;

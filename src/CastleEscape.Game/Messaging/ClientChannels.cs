@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using CastleEscape.Contracts.Realtime;
-using CastleEscape.Game.Patterns;
 
 namespace CastleEscape.Game.Messaging;
 
@@ -8,7 +7,6 @@ namespace CastleEscape.Game.Messaging;
 /// How a message physically reaches a session's clients. The notifiers decide <i>what</i> to send;
 /// a channel only knows <i>how</i> to deliver it.
 /// </summary>
-[DesignPattern("Bridge", "Implementor")]
 public interface IClientChannel
 {
     /// <summary>Short name for logs and diagnostics, e.g. "SignalR".</summary>
@@ -24,7 +22,6 @@ public sealed record BufferedMessage(long Seq, string Method, IServerMessage Mes
 /// Keeps the last messages of each session in memory, for clients that can't hold a SignalR connection.
 /// They read them with <c>GET /api/sessions/{id}/messages?afterSeq=</c>, serialized as JSON or XML (Adapter).
 /// </summary>
-[DesignPattern("Bridge", "ConcreteImplementor")]
 public sealed class PollingBufferChannel(int capacity) : IClientChannel
 {
     private readonly ConcurrentDictionary<Guid, Queue<BufferedMessage>> _buffers = new();

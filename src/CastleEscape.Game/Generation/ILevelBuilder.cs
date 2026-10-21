@@ -1,6 +1,5 @@
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Generation.Themes;
-using CastleEscape.Game.Patterns;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Generation;
@@ -10,7 +9,6 @@ namespace CastleEscape.Game.Generation;
 /// builder decides how to do them (random generation, or a hand-made map).
 /// A step that can't be done throws <see cref="LevelBuildException"/>.
 /// </summary>
-[DesignPattern("Builder", "Builder")]
 public interface ILevelBuilder
 {
     /// <summary>True if the result depends on the seed, so a failed attempt is worth retrying with another one.</summary>

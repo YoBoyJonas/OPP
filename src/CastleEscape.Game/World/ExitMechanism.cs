@@ -1,5 +1,4 @@
 using CastleEscape.Contracts;
-using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Events;
 
 namespace CastleEscape.Game.World;
@@ -8,7 +7,7 @@ namespace CastleEscape.Game.World;
 /// Levers, exit door and exit tiles of one level (DOOR-1, DOOR-2, COL-4, D1, D2).
 /// All lever/door/exit logic lives here; seam for the P2 Mediator.
 /// </summary>
-public class ExitMechanism(LevelState level, DoorMode doorMode)
+public class ExitMechanism(LevelState level)
 {
     private readonly HashSet<Guid> _playersOnExit = [];
 
@@ -30,36 +29,23 @@ public class ExitMechanism(LevelState level, DoorMode doorMode)
         }
     }
 
-    /// <summary>Opens or closes the door, then checks the exit. Returns true when the level is complete.</summary>
+    /// <summary>Opens the door, then checks the exit. Returns true when the level is complete.</summary>
     public bool Update(IReadOnlyList<PlayerEntity> players, List<GameEvent> events)
     {
         UpdateDoor(events);
         return UpdateExit(players, events);
     }
 
+    /// <summary>D1: once both levers are active in the same tick, the door opens and stays open.</summary>
     private void UpdateDoor(List<GameEvent> events)
     {
-        if (level.Door is not { } door)
+        if (level.Door is not { IsOpen: false } door || level.Levers.Count < 2 || !level.Levers.All(l => l.IsActive))
         {
             return;
         }
 
-        var allLeversActive = level.Levers.Count >= 2 && level.Levers.All(l => l.IsActive);
-        var shouldBeOpen = doorMode switch
-        {
-            DoorMode.Latch => door.IsOpen || allLeversActive,
-            _ => allLeversActive,
-        };
-
-        if (shouldBeOpen == door.IsOpen)
-        {
-            return;
-        }
-
-        door.IsOpen = shouldBeOpen;
-        events.Add(shouldBeOpen
-            ? new DoorOpened(null, "The exit door is open!", doorMode)
-            : new DoorClosed(null, "The exit door closed.", doorMode));
+        door.IsOpen = true;
+        events.Add(new DoorOpened(null, "The exit door is open!"));
     }
 
     private bool UpdateExit(IReadOnlyList<PlayerEntity> players, List<GameEvent> events)

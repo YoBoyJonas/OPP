@@ -1,7 +1,6 @@
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Generation.Themes;
 using CastleEscape.Game.Items;
-using CastleEscape.Game.Patterns;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Generation;
@@ -11,7 +10,6 @@ namespace CastleEscape.Game.Generation;
 /// The same steps as the procedural builder, but each one reads its objects from the map.
 /// The seed is ignored, so one attempt is enough.
 /// </summary>
-[DesignPattern("Builder", "ConcreteBuilder")]
 public sealed class PresetLevelBuilder : ILevelBuilder
 {
     private readonly ContentCatalog _catalog;

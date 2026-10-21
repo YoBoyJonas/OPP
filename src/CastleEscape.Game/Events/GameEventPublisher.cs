@@ -1,9 +1,7 @@
-using CastleEscape.Game.Patterns;
 
 namespace CastleEscape.Game.Events;
 
 /// <summary>Something that reacts to game events.</summary>
-[DesignPattern("Observer", "Observer")]
 public interface IGameEventObserver
 {
     void OnEvent(GameEvent gameEvent);
@@ -14,7 +12,6 @@ public interface IGameEventObserver
 /// The session owns one publisher and publishes each tick's events at its end.
 /// Observers must not attach or detach from inside <see cref="IGameEventObserver.OnEvent"/>.
 /// </summary>
-[DesignPattern("Observer", "Subject")]
 public sealed class GameEventPublisher
 {
     private readonly List<IGameEventObserver> _observers = [];

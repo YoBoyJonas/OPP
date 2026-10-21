@@ -19,59 +19,22 @@ public static class GameplayEndpoints
 {
     public static IEndpointRouteBuilder MapGameplayEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/sessions/{sessionId:guid}").WithTags(ApiTags.Gameplay);
+        var group = app.MapGroup("/api/sessions/{sessionId:guid}").WithTags("Gameplay");
 
         group.MapPost("/input", SubmitInput)
-            .WithName("SubmitDirection")
-            .WithSummary("Set the held direction")
-            .WithDescription("Same as the hub's SetDirection. Send a direction on key down and None on key up. "
-                             + "Applied at the start of the next tick.")
-            .RequirePlayerToken()
-            .ProducesProblem(StatusCodes.Status401Unauthorized)
-            .ProducesProblem(StatusCodes.Status404NotFound);
+            .RequirePlayerToken();
 
         group.MapPost("/restart", Restart)
-            .WithName("RestartLevel")
-            .WithSummary("Restart the current level")
-            .WithDescription("D8: the level returns to its generated layout; both players' lives and score return to the level start.")
-            .RequirePlayerToken()
-            .ProducesProblem(StatusCodes.Status401Unauthorized)
-            .ProducesProblem(StatusCodes.Status409Conflict);
+            .RequirePlayerToken();
 
-        group.MapGet("/state", GetState)
-            .WithName("GetGameState")
-            .WithSummary("Latest game state")
-            .WithDescription("The latest per-tick state: players, zombies, items, levers, door. "
-                             + "JSON by default; `?format=xml` or `Accept: application/xml` for XML (NET-2, Adapter pattern).")
-            .Produces<TickStateMessage>(StatusCodes.Status200OK, "application/json", "application/xml")
-            .ProducesProblem(StatusCodes.Status400BadRequest)
-            .ProducesProblem(StatusCodes.Status404NotFound)
-            .ProducesProblem(StatusCodes.Status409Conflict);
+        group.MapGet("/state", GetState);
 
         group.MapGet("/messages", GetMessages)
-            .WithTags(ApiTags.Realtime)
-            .WithName("PollMessages")
-            .WithSummary("Read buffered messages (polling channel)")
-            .WithDescription("The same messages SignalR pushes, kept in a per-session buffer for clients without a hub "
-                             + "connection (Bridge pattern: the polling channel). Pass the last `seq` you saw as `afterSeq`. "
-                             + "Each `body` is serialized as `format=json|xml`. StateUpdated is buffered every "
-                             + "`Realtime:PollingStateEveryNthTick` ticks; events are never skipped.")
-            .ProducesProblem(StatusCodes.Status400BadRequest)
-            .ProducesProblem(StatusCodes.Status404NotFound);
+            .WithTags("Realtime");
 
-        group.MapGet("/level", GetLevel)
-            .WithName("GetLevelLayout")
-            .WithSummary("Static layout of the current level")
-            .WithDescription("Rows of map legend characters, plus the legend itself.")
-            .ProducesProblem(StatusCodes.Status404NotFound)
-            .ProducesProblem(StatusCodes.Status409Conflict);
+        group.MapGet("/level", GetLevel);
 
-        group.MapGet("/hud", GetHud)
-            .WithName("GetHud")
-            .WithSummary("View game state (HUD table)")
-            .WithDescription("Per player: lives, score, active powers with time left, combos, statistics. "
-                             + "Plus level, levers and door status.")
-            .ProducesProblem(StatusCodes.Status404NotFound);
+        group.MapGet("/hud", GetHud);
 
         return app;
     }

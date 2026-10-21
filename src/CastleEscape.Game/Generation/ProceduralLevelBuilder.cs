@@ -3,7 +3,6 @@ using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Generation.Themes;
 using CastleEscape.Game.Items;
-using CastleEscape.Game.Patterns;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Generation;
@@ -12,7 +11,6 @@ namespace CastleEscape.Game.Generation;
 /// Builds a random level from a <see cref="LevelDefinition"/> with a seeded RNG. Same seed, same level.
 /// The exit is in an alcove on the top or bottom border; the players start on the opposite side.
 /// </summary>
-[DesignPattern("Builder", "ConcreteBuilder")]
 public sealed class ProceduralLevelBuilder(ContentCatalog catalog, GameOptions game, GenerationOptions generation) : ILevelBuilder
 {
     private LevelDefinition _definition = null!;

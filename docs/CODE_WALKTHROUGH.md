@@ -4,21 +4,20 @@ Start at [Program.cs](../src/CastleEscape.Server/Program.cs), then open [GameSes
 
 ## Backend and client boundary
 
-The deliverable is the **game backend**. Two things drive it without a real client: the Scalar API explorer, for sending HTTP requests and inspecting responses, and the [browser playground](../src/CastleEscape.Server/wwwroot/playground) at `/playground`, a developer-only page (`DevTools:Enabled`) that connects over SignalR so you can actually play with the arrow keys. A production game client is still out of scope.
+The deliverable is the **game backend**. Without a real client, the Scalar API explorer lets you send HTTP requests and inspect responses. A production game client is still out of scope.
 
 | Location | Responsibility |
 |---|---|
 | [CastleEscape.Server](../src/CastleEscape.Server) | Accept HTTP/SignalR requests, configure services, run the clock and deliver updates |
 | [CastleEscape.Game](../src/CastleEscape.Game) | Own and simulate sessions, levels, players, zombies and game rules |
 | [CastleEscape.Contracts](../src/CastleEscape.Contracts) | Define the data crossing the network boundary |
-| [playground](../src/CastleEscape.Server/wwwroot/playground) | Developer-only browser page: keyboard input over SignalR, canvas rendering |
 
-The Server and Game projects execute in **one backend process**. The backend decides positions, collisions, damage, powers, score and victory. Requests contain intentions such as “hold Right.” A client communicates using the HTTP endpoints or the `/hubs/game` SignalR connection; the playground does the latter.
+The Server and Game projects execute in **one backend process**. The backend decides positions, collisions, damage, powers, score and victory. Requests contain intentions such as “hold Right.” A client communicates using the HTTP endpoints or the `/hubs/game` SignalR connection.
 
 ```mermaid
 flowchart TB
     Scalar["Scalar or another API caller"] -->|HTTP| Endpoints["Server/Endpoints"]
-    Client["Playground or game client"] -->|SignalR| Hub["Server/Hubs/GameHub"]
+    Client["Game client"] -->|SignalR| Hub["Server/Hubs/GameHub"]
     Endpoints --> Registry["SessionRegistry: locate and authenticate"]
     Hub --> Registry
     Registry --> Session["GameSession: queue input and simulate"]

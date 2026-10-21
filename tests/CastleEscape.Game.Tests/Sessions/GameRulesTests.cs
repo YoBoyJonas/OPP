@@ -257,21 +257,6 @@ public class GameRulesTests
     }
 
     [Fact]
-    public void Door_HoldWhileActive_ClosesWhenALeverIsReleased()
-    {
-        var game = TestGame.Start(LeverRoom, new GameOptions { DoorMode = DoorMode.HoldWhileActive, LevelTransitionSeconds = 0 });
-
-        game.WalkTo(game.P1, new GridPos(2, 1));
-        game.WalkTo(game.P2, new GridPos(6, 1));
-        game.Tick();
-        Assert.True(game.State.DoorOpen);
-
-        game.WalkTo(game.P1, new GridPos(3, 2));
-
-        Assert.False(game.State.DoorOpen);
-    }
-
-    [Fact]
     public void Exit_NeedsBothPlayers_Door2()
     {
         var game = TestGame.Start(LeverRoom, moreLevels: [LeverRoom]);

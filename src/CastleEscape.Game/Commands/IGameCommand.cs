@@ -1,4 +1,3 @@
-using CastleEscape.Game.Patterns;
 using CastleEscape.Game.Sessions;
 
 namespace CastleEscape.Game.Commands;
@@ -7,7 +6,6 @@ namespace CastleEscape.Game.Commands;
 /// One thing a player (or the game on a player's behalf) does to the world, as an object: it can be
 /// queued, ordered by <see cref="Sequence"/>, logged, and undone.
 /// </summary>
-[DesignPattern("Command", "Command")]
 public interface IGameCommand
 {
     /// <summary>Who the command is for; null for commands not tied to a player.</summary>

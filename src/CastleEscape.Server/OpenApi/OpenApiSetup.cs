@@ -1,4 +1,3 @@
-using System.Text.Json.Nodes;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
 
@@ -15,7 +14,7 @@ public static class OpenApiSetup
     public static IServiceCollection AddCastleEscapeOpenApi(this IServiceCollection services) =>
         services.AddOpenApi(options =>
         {
-            options.AddDocumentTransformer(DescribeDocument);
+            options.AddDocumentTransformer(AddPlayerTokenScheme);
             options.AddOperationTransformer(AddPlayerTokenRequirement);
         });
 
@@ -24,34 +23,8 @@ public static class OpenApiSetup
         where TBuilder : IEndpointConventionBuilder =>
         builder.WithMetadata(new PlayerTokenRequiredMetadata());
 
-    private static Task DescribeDocument(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken ct)
+    private static Task AddPlayerTokenScheme(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken ct)
     {
-        document.Info = new OpenApiInfo
-        {
-            Title = "Castle Escape API",
-            Version = "v1",
-            Description = "Authoritative game server for Castle Escape (KTU T120B516). "
-                          + "Lobby and inspection over REST, real-time play over the SignalR hub at /hubs/game. "
-                          + "Endpoints that act as a player need the X-Player-Token header returned by create/join.",
-        };
-
-        document.Tags = new HashSet<OpenApiTag>(
-            ApiTags.Groups.SelectMany(g => g.Tags).Select(t => new OpenApiTag { Name = t.Name, Description = t.Description }));
-
-        // Scalar renders these as the sidebar sections Lobby / Gameplay / Content / Course / Ops.
-        var groups = new JsonArray();
-        foreach (var group in ApiTags.Groups)
-        {
-            var tags = new JsonArray();
-            foreach (var tag in group.Tags)
-            {
-                tags.Add(tag.Name);
-            }
-            groups.Add(new JsonObject { ["name"] = group.Name, ["tags"] = tags });
-        }
-        document.Extensions ??= new Dictionary<string, IOpenApiExtension>();
-        document.Extensions["x-tagGroups"] = new JsonNodeExtension(groups);
-
         document.Components ??= new OpenApiComponents();
         document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
         document.Components.SecuritySchemes[PlayerTokenScheme] = new OpenApiSecurityScheme
@@ -61,7 +34,6 @@ public static class OpenApiSetup
             Name = PlayerTokenHeader,
             Description = "The playerToken returned by POST /api/sessions or POST /api/sessions/join.",
         };
-
         return Task.CompletedTask;
     }
 
@@ -75,7 +47,6 @@ public static class OpenApiSetup
                 [new OpenApiSecuritySchemeReference(PlayerTokenScheme, context.Document)] = [],
             });
         }
-
         return Task.CompletedTask;
     }
 }

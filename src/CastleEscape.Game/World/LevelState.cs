@@ -1,7 +1,6 @@
 using CastleEscape.Contracts;
 using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
-using CastleEscape.Game.Patterns;
 
 namespace CastleEscape.Game.World;
 
@@ -11,7 +10,6 @@ namespace CastleEscape.Game.World;
 /// Collections are private and changed only through methods (seam for P2 Iterator/Composite/Visitor).
 /// A freshly built level is kept as the prototype: every play and restart runs on a clone of it.
 /// </summary>
-[DesignPattern("Prototype", "ConcretePrototype")]
 public class LevelState(LevelDefinition definition, int seed, Grid grid) : ILevelPrototype<LevelState>
 {
     private readonly List<ItemEntity> _items = [];

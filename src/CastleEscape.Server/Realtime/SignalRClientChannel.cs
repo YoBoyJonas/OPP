@@ -1,13 +1,11 @@
 using CastleEscape.Contracts.Realtime;
 using CastleEscape.Game.Messaging;
-using CastleEscape.Game.Patterns;
 using CastleEscape.Server.Hubs;
 using Microsoft.AspNetCore.SignalR;
 
 namespace CastleEscape.Server.Realtime;
 
 /// <summary>Pushes messages to the session's SignalR group; the method name is the client method.</summary>
-[DesignPattern("Bridge", "ConcreteImplementor")]
 public sealed class SignalRClientChannel(IHubContext<GameHub> hub) : IClientChannel
 {
     public string Name => "SignalR";

@@ -41,7 +41,6 @@ classDiagram
         +ContentCatalog()
         +Validate() List~string~
         +ValidateOrThrow()
-        +ComputeContentHash() string
     }
     class Program
     ContentLoader ..> ContentCatalog : new
@@ -61,7 +60,6 @@ classDiagram
         -Create() ContentCatalog$
         +Validate() List~string~
         +ValidateOrThrow()
-        +ComputeContentHash() string
     }
     class ContentLoader {
         +ReadDirectory(dir) ContentData$
