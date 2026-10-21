@@ -43,11 +43,11 @@ public sealed class DecoratorDemo : IPatternDemo
             });
         }
 
-        PowerGrant Grant(PowerType type) => catalog.Consumables.First(c => c.Grant?.Power == type).Grant!;
+        PowerGrant Grant(PowerType type) => catalog.Data.Consumables.First(c => c.Grant?.Power == type).Grant!;
         void Pick(PowerType type)
         {
             powers.Gain(Grant(type), 10, maxLevel: 3);
-            powers.RefreshCombos(catalog.Combos);
+            powers.RefreshCombos(catalog.Data.Combos);
             Show($"+ {type}");
         }
 
@@ -57,7 +57,7 @@ public sealed class DecoratorDemo : IPatternDemo
         Pick(PowerType.Swim);
 
         powers.Tick(10 * (sprintPickups + 1)); // every timer runs out (stacked pickups add time)
-        powers.RefreshCombos(catalog.Combos);
+        powers.RefreshCombos(catalog.Data.Combos);
         Show("all expired");
 
         var maxDepth = layers.Max(l => (int)l["depth"]!);

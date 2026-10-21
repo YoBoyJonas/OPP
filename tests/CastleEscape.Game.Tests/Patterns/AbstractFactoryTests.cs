@@ -13,7 +13,7 @@ public class AbstractFactoryTests
 {
     private static ContentCatalog Catalog => ContentCatalog.Instance;
 
-    private static ZombieDefinition Greedy => Catalog.Zombies.First(z => z.MovementStrategy == MovementStrategyKind.Greedy);
+    private static ZombieDefinition Greedy => Catalog.Data.Zombies.First(z => z.MovementStrategy == MovementStrategyKind.Greedy);
 
     [Fact]
     public void AtLeastTwoConcreteFactories_WithAtLeastThreeProductsEach()
@@ -51,7 +51,7 @@ public class AbstractFactoryTests
     public void ThemedProductsKeepTheTemplateRules()
     {
         var water = ThemeFactories.For(LevelTheme.Crypt, Catalog).CreateWater();
-        var template = Catalog.Obstacles.OfType<Water>().First();
+        var template = Catalog.Data.Obstacles.OfType<Water>().First();
 
         Assert.IsType<PoisonWater>(water);
         Assert.Equal(template.TraversalRequirements, water.TraversalRequirements);
@@ -72,7 +72,7 @@ public class AbstractFactoryTests
     [Fact]
     public void GeneratedLevels_NeverMixFamilies()
     {
-        foreach (var definition in Catalog.Levels)
+        foreach (var definition in Catalog.Data.Levels)
         {
             var family = AbstractFactoryDemo.Family(ThemeFactories.For(definition, Catalog), Greedy)
                 .Select(p => p.GetType().Name).ToHashSet();

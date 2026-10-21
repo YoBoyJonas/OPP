@@ -64,7 +64,7 @@ public class PrototypeTests
     public void DeepClone_EntitiesMoveIndependently()
     {
         var original = DemoWorld.TutorialLevel();
-        var zombie = new DungeonZombie("z", DemoWorld.Catalog.Zombies[0], new GridPos(3, 5));
+        var zombie = new DungeonZombie("z", DemoWorld.Catalog.Data.Zombies[0], new GridPos(3, 5));
         original.AddZombie(zombie);
 
         var clone = original.DeepClone();

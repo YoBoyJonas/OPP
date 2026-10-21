@@ -19,12 +19,12 @@ public static class ContentEndpoints
             .WithSummary("Content summary")
             .WithDescription("Counts of every content type and a hash that changes whenever a content file changes.");
 
-        group.MapGet("/characters", () => ContentCatalog.Instance.Characters)
+        group.MapGet("/characters", () => ContentCatalog.Instance.Data.Characters)
             .WithName("GetCharacters")
             .WithSummary("Playable characters")
             .WithDescription("At least 3 characters that differ in lives, move speed and jump parameter (PLR-1).");
 
-        group.MapGet("/consumables", () => ContentCatalog.Instance.Consumables)
+        group.MapGet("/consumables", () => ContentCatalog.Instance.Data.Consumables)
             .WithName("GetConsumables")
             .WithSummary("Item types")
             .WithDescription("Health (+lives), Reward (+score) and Power (temporary power) items (ITM-1). "
@@ -36,22 +36,22 @@ public static class ContentEndpoints
             .WithDescription("Jump, Sprint and Swim with their duration and the items that grant them; "
                              + "JumpDash and FastSwim with the base powers they need (PWR-1, PWR-2).");
 
-        group.MapGet("/combos", () => ContentCatalog.Instance.Combos)
+        group.MapGet("/combos", () => ContentCatalog.Instance.Data.Combos)
             .WithName("GetCombos")
             .WithSummary("Super-power combos")
             .WithDescription("Two different active base powers create a super power (PWR-2).");
 
-        group.MapGet("/obstacles", () => ContentCatalog.Instance.Obstacles)
+        group.MapGet("/obstacles", () => ContentCatalog.Instance.Data.Obstacles)
             .WithName("GetObstacles")
             .WithSummary("Obstacle types")
             .WithDescription("Wall (never passable), Water (needs Swim), Pit (needs Jump) (MOV-2).");
 
-        group.MapGet("/zombies", () => ContentCatalog.Instance.Zombies)
+        group.MapGet("/zombies", () => ContentCatalog.Instance.Data.Zombies)
             .WithName("GetZombies")
             .WithSummary("Zombie types")
             .WithDescription("Speed, contact damage and the default movement strategy of each zombie type.");
 
-        group.MapGet("/levels", () => ContentCatalog.Instance.Levels)
+        group.MapGet("/levels", () => ContentCatalog.Instance.Data.Levels)
             .WithName("GetLevelDefinitions")
             .WithSummary("Level definitions")
             .WithDescription("The fixed sequence of 10 levels: theme, obstacle/zombie/item counts and spawn tables.");
@@ -69,18 +69,18 @@ public static class ContentEndpoints
         var catalog = ContentCatalog.Instance;
         return new(
             catalog.ComputeContentHash(),
-            catalog.Characters.Count,
-            catalog.Consumables.Count,
-            catalog.Combos.Count,
-            catalog.Obstacles.Count,
-            catalog.Zombies.Count,
-            catalog.Levels.Count);
+            catalog.Data.Characters.Count,
+            catalog.Data.Consumables.Count,
+            catalog.Data.Combos.Count,
+            catalog.Data.Obstacles.Count,
+            catalog.Data.Zombies.Count,
+            catalog.Data.Levels.Count);
     }
 
     private static List<PowerSummary> GetPowers(IOptions<GameOptions> options)
     {
         var catalog = ContentCatalog.Instance;
-        var basePowers = catalog.Consumables
+        var basePowers = catalog.Data.Consumables
             .Where(c => c.Grant is not null)
             .GroupBy(c => c.Grant!.Power)
             .OrderBy(g => g.Key)
@@ -91,7 +91,7 @@ public static class ContentEndpoints
                 g.Select(c => c.Id).ToArray(),
                 []));
 
-        var superPowers = catalog.Combos.Select(combo => new PowerSummary(
+        var superPowers = catalog.Data.Combos.Select(combo => new PowerSummary(
             combo.Granted, IsSuperPower: true, DurationSeconds: null, [], combo.RequiredPowers.ToArray()));
 
         return basePowers.Concat(superPowers).ToList();
@@ -100,9 +100,9 @@ public static class ContentEndpoints
     private static Results<Ok<LevelDefinition>, ProblemHttpResult> GetLevel(int index)
     {
         var catalog = ContentCatalog.Instance;
-        var level = catalog.Levels.FirstOrDefault(l => l.Index == index);
+        var level = catalog.Data.Levels.FirstOrDefault(l => l.Index == index);
         return level is null
-            ? TypedResults.Problem($"There is no level {index}; levels run 1..{catalog.Levels.Count}.",
+            ? TypedResults.Problem($"There is no level {index}; levels run 1..{catalog.Data.Levels.Count}.",
                 statusCode: StatusCodes.Status404NotFound, title: "Level not found")
             : TypedResults.Ok(level);
     }

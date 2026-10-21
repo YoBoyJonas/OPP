@@ -12,21 +12,31 @@ public class ContentFilesTests
     [Fact]
     public void Load_ReadsEveryFile()
     {
-        Assert.Equal(3, Catalog.Characters.Count);
-        Assert.Equal(6, Catalog.Consumables.Count);
-        Assert.Equal(2, Catalog.Combos.Count);
-        Assert.Equal(3, Catalog.Obstacles.Count);
-        Assert.Equal(4, Catalog.Zombies.Count);
-        Assert.Equal(10, Catalog.Levels.Count);
-        Assert.Empty(Catalog.Validate());
+        Assert.Equal(3, Catalog.Data.Characters.Count);
+        Assert.Equal(6, Catalog.Data.Consumables.Count);
+        Assert.Equal(2, Catalog.Data.Combos.Count);
+        Assert.Equal(3, Catalog.Data.Obstacles.Count);
+        Assert.Equal(4, Catalog.Data.Zombies.Count);
+        Assert.Equal(10, Catalog.Data.Levels.Count);
+    }
+
+    [Fact]
+    public void ComputeContentHash_SameContent_SameHash()
+    {
+        static ContentCatalog Make() => ContentCatalog.FromData(new ContentData
+        {
+            Characters = [new CharacterDefinition { Id = "scout", Name = "scout", MaxHealth = 3, BaseMoveSpeed = 4 }]
+        });
+
+        Assert.Equal(Make().ComputeContentHash(), Make().ComputeContentHash());
     }
 
     [Fact]
     public void Characters_DifferInLivesSpeedAndJump_Plr1()
     {
-        Assert.Equal(3, Catalog.Characters.Select(c => c.MaxHealth).Distinct().Count());
-        Assert.Equal(3, Catalog.Characters.Select(c => c.BaseMoveSpeed).Distinct().Count());
-        Assert.Equal(3, Catalog.Characters.Select(c => c.BaseJumpForce).Distinct().Count());
+        Assert.Equal(3, Catalog.Data.Characters.Select(c => c.MaxHealth).Distinct().Count());
+        Assert.Equal(3, Catalog.Data.Characters.Select(c => c.BaseMoveSpeed).Distinct().Count());
+        Assert.Equal(3, Catalog.Data.Characters.Select(c => c.BaseJumpForce).Distinct().Count());
     }
 
     [Fact]
@@ -54,14 +64,14 @@ public class ContentFilesTests
     {
         Assert.Equal(
             [ConsumableKind.Health, ConsumableKind.Reward, ConsumableKind.Power],
-            Catalog.Consumables.Select(c => c.Kind).Distinct().Order());
+            Catalog.Data.Consumables.Select(c => c.Kind).Distinct().Order());
     }
 
     [Fact]
     public void Combos_AreJumpDashAndFastSwim_Pwr2()
     {
-        var jumpDash = Catalog.Combos.Single(c => c.Granted == PowerType.JumpDash);
-        var fastSwim = Catalog.Combos.Single(c => c.Granted == PowerType.FastSwim);
+        var jumpDash = Catalog.Data.Combos.Single(c => c.Granted == PowerType.JumpDash);
+        var fastSwim = Catalog.Data.Combos.Single(c => c.Granted == PowerType.FastSwim);
 
         Assert.Equal([PowerType.Jump, PowerType.Sprint], jumpDash.RequiredPowers.Order());
         Assert.Equal([PowerType.Sprint, PowerType.Swim], fastSwim.RequiredPowers.Order());
@@ -78,13 +88,13 @@ public class ContentFilesTests
     [Fact]
     public void Zombies_CoverEveryMovementStrategy()
     {
-        Assert.Equal(Enum.GetValues<MovementStrategyKind>(), Catalog.Zombies.Select(z => z.MovementStrategy).Distinct().Order());
+        Assert.Equal(Enum.GetValues<MovementStrategyKind>(), Catalog.Data.Zombies.Select(z => z.MovementStrategy).Distinct().Order());
     }
 
     [Fact]
     public void Levels_ZombieCountNeverDecreases_Zmb4()
     {
-        var counts = Catalog.Levels.OrderBy(l => l.Index).Select(l => l.ZombieCount).ToList();
+        var counts = Catalog.Data.Levels.OrderBy(l => l.Index).Select(l => l.ZombieCount).ToList();
 
         Assert.Equal(counts.Order(), counts);
     }
@@ -92,7 +102,7 @@ public class ContentFilesTests
     [Fact]
     public void Levels_OneToFiveDungeon_SixToTenCrypt()
     {
-        Assert.All(Catalog.Levels, l => Assert.Equal(l.Index <= 5 ? LevelTheme.Dungeon : LevelTheme.Crypt, l.Theme));
+        Assert.All(Catalog.Data.Levels, l => Assert.Equal(l.Index <= 5 ? LevelTheme.Dungeon : LevelTheme.Crypt, l.Theme));
     }
 
     [Theory]

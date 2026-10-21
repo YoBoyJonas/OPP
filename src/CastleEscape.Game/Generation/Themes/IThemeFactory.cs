@@ -24,7 +24,7 @@ public interface IThemeFactory
 public sealed record ObstacleTemplates(Wall Wall, Water Water, Pit Pit)
 {
     public static ObstacleTemplates From(ContentCatalog catalog) =>
-        new(catalog.Obstacles.OfType<Wall>().First(), catalog.Obstacles.OfType<Water>().First(), catalog.Obstacles.OfType<Pit>().First());
+        new(catalog.Data.Obstacles.OfType<Wall>().First(), catalog.Data.Obstacles.OfType<Water>().First(), catalog.Data.Obstacles.OfType<Pit>().First());
 }
 
 public static class ThemeFactories

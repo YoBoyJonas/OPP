@@ -16,8 +16,8 @@ public sealed class LevelPreviewer(ContentCatalog catalog, GameOptions game, Gen
     /// <exception cref="GameException">Unknown level or preset, or the procedural builder found no valid level.</exception>
     public LevelPreviewResponse Preview(int index, int seed, string? preset = null)
     {
-        var definition = catalog.Levels.FirstOrDefault(l => l.Index == index)
-            ?? throw new GameException(Contracts.GameErrorCode.InvalidRequest, $"There is no level {index}; levels are 1-{catalog.Levels.Count}.");
+        var definition = catalog.Data.Levels.FirstOrDefault(l => l.Index == index)
+            ?? throw new GameException(Contracts.GameErrorCode.InvalidRequest, $"There is no level {index}; levels are 1-{catalog.Data.Levels.Count}.");
         var director = new LevelDirector(catalog, generation);
 
         ILevelBuilder builder;

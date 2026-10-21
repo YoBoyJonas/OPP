@@ -28,12 +28,12 @@ public sealed class AbstractFactoryDemo : IPatternDemo
         foreach (var theme in themes)
         {
             var factory = ThemeFactories.For(theme, catalog);
-            var zombieType = catalog.Zombies.First(z => z.MovementStrategy == MovementStrategyKind.Greedy);
+            var zombieType = catalog.Data.Zombies.First(z => z.MovementStrategy == MovementStrategyKind.Greedy);
             var family = Family(factory, zombieType);
             trace.Line($"{factory.GetType().Name}: {Describe(family)}.");
 
             // A real level of this theme: every part must come from this one factory.
-            var definition = catalog.Levels.First(l => l.Theme == theme && l.ZombieCount > 0);
+            var definition = catalog.Data.Levels.First(l => l.Theme == theme && l.ZombieCount > 0);
             var level = DemoWorld.Generate(definition, seed);
             var used = PartsIn(level);
             var foreign = used.Except(family.Select(p => p.GetType().Name)).ToArray();

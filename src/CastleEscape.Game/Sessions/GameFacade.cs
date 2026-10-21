@@ -53,7 +53,7 @@ public sealed class GameFacade(SessionRegistry registry, GameLoopScheduler sched
     public SessionDto GetSession(Guid sessionId) => registry.Get(sessionId).Snapshot.Session;
 
     /// <summary>The characters a player can pick (PLR-1).</summary>
-    public IReadOnlyList<string> CharacterIds => catalog.Characters.Select(c => c.Id).ToList();
+    public IReadOnlyList<string> CharacterIds => catalog.Data.Characters.Select(c => c.Id).ToList();
 
     // ---------------------------------------------------------------- input (queued as commands)
 

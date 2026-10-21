@@ -85,10 +85,10 @@ public class CommandTests
     public void GivePower_UndoRestoresThePreviousPowerState()
     {
         var (world, ana, _) = World();
-        var sprint = Catalog.Consumables.First(c => c.Grant?.Power == PowerType.Sprint).Grant!;
+        var sprint = Catalog.Data.Consumables.First(c => c.Grant?.Power == PowerType.Sprint).Grant!;
         ana.Powers.Gain(sprint, 5, maxLevel: 3);
 
-        var command = new GivePowerCommand(1, ana.PlayerId, sprint, 10, 3, Catalog.Combos);
+        var command = new GivePowerCommand(1, ana.PlayerId, sprint, 10, 3, Catalog.Data.Combos);
         command.Execute(world);
         Assert.Equal(2, ana.Powers.Get(PowerType.Sprint)!.Level);
 
@@ -96,7 +96,7 @@ public class CommandTests
         Assert.Equal(1, ana.Powers.Get(PowerType.Sprint)!.Level);
         Assert.Equal(5, ana.Powers.Get(PowerType.Sprint)!.RemainingSeconds);
 
-        var jump = new GivePowerCommand(2, ana.PlayerId, Catalog.Consumables.First(c => c.Grant?.Power == PowerType.Jump).Grant!, 10, 3, Catalog.Combos);
+        var jump = new GivePowerCommand(2, ana.PlayerId, Catalog.Data.Consumables.First(c => c.Grant?.Power == PowerType.Jump).Grant!, 10, 3, Catalog.Data.Combos);
         jump.Execute(world);
         Assert.Contains(ana.Powers.Combos, c => c.Granted == PowerType.JumpDash);
         jump.Undo(world);

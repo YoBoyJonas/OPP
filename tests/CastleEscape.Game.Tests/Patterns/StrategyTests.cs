@@ -116,8 +116,8 @@ public class StrategyTests
     [Fact]
     public void Strategy_StartsFromTheZombieType_AndCanBeSwappedAtRuntime()
     {
-        var hunter = Catalog.Zombies.First(z => z.MovementStrategy == MovementStrategyKind.Bfs);
-        var greedy = Catalog.Zombies.First(z => z.MovementStrategy == MovementStrategyKind.Greedy);
+        var hunter = Catalog.Data.Zombies.First(z => z.MovementStrategy == MovementStrategyKind.Bfs);
+        var greedy = Catalog.Data.Zombies.First(z => z.MovementStrategy == MovementStrategyKind.Greedy);
         var dungeon = new DungeonZombie("z1", hunter, new GridPos(1, 1));
         var crypt = new CryptZombie("z2", greedy, new GridPos(1, 1));
 

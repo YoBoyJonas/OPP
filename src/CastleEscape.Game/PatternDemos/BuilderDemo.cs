@@ -14,7 +14,7 @@ public sealed class BuilderDemo : IPatternDemo
     public PatternDemoResponse Run(DemoOptions options)
     {
         var catalog = DemoWorld.Catalog;
-        var definition = catalog.GetLevel(Math.Clamp(options.GetInt("level", 1), 1, catalog.Levels.Count));
+        var definition = catalog.GetLevel(Math.Clamp(options.GetInt("level", 1), 1, catalog.Data.Levels.Count));
         var seed = options.GetInt("seed", 7);
         var preset = options.Get("preset", "tutorial");
         var generation = new GenerationOptions();

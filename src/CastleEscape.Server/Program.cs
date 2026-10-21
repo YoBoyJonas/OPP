@@ -93,8 +93,7 @@ if (!string.IsNullOrEmpty(port))
 
 var app = builder.Build();
 
-// Load and validate content now, so a broken content file stops startup instead of the first request.
-// This runs on the main thread before app.Run(), so the (not thread-safe) Singleton is created exactly once.
+// užkrauna contentCatalog dabar, kad nesusidarytų lenktynės
 _ = ContentCatalog.Instance;
 
 app.UseExceptionHandler();

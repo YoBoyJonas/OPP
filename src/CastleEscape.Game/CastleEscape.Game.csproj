@@ -6,7 +6,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Tests may build throw-away catalogs (ContentCatalog.FromData) to check validation rules. -->
+    <!-- Tests may build throw-away catalogs (ContentCatalog.FromData) to check the content hash. -->
     <InternalsVisibleTo Include="CastleEscape.Game.Tests" />
   </ItemGroup>
 

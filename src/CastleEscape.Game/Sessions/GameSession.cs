@@ -73,7 +73,7 @@ public class GameSession
     /// <summary>Latest published state. Safe to read from any thread without locking.</summary>
     public SessionSnapshot Snapshot => _snapshot;
 
-    public int MaxLevel => Math.Min(_options.MaxLevel, _catalog.Levels.Count);
+    public int MaxLevel => Math.Min(_options.MaxLevel, _catalog.Data.Levels.Count);
     public double TickSeconds => 1.0 / _options.TickRate;
     public bool IsFinished => Phase is SessionPhase.Victory or SessionPhase.Defeat or SessionPhase.Aborted;
 
@@ -115,7 +115,7 @@ public class GameSession
             if (_catalog.FindCharacter(characterId) is null)
             {
                 throw new GameException(GameErrorCode.UnknownCharacter,
-                    $"Unknown character '{characterId}'. Choose one of: {string.Join(", ", _catalog.Characters.Select(c => c.Id))}.");
+                    $"Unknown character '{characterId}'. Choose one of: {string.Join(", ", _catalog.Data.Characters.Select(c => c.Id))}.");
             }
 
             GetSlot(playerId).CharacterId = characterId;
@@ -222,10 +222,10 @@ public class GameSession
         {
             GetSlot(playerId);
         }
-        var grant = _catalog.Consumables.Select(c => c.Grant).FirstOrDefault(g => g?.Power == power)
+        var grant = _catalog.Data.Consumables.Select(c => c.Grant).FirstOrDefault(g => g?.Power == power)
             ?? throw new GameException(GameErrorCode.InvalidRequest, $"No item grants {power}; only base powers can be given.");
         _commands.Enqueue(new GivePowerCommand(_commands.NextSequence(), playerId, grant,
-            durationSeconds ?? grant.DurationSeconds ?? _options.PowerDurationSeconds, _options.MaxPowerStackLevel, _catalog.Combos));
+            durationSeconds ?? grant.DurationSeconds ?? _options.PowerDurationSeconds, _options.MaxPowerStackLevel, _catalog.Data.Combos));
     }
 
     /// <summary>Undoes the most recent command (optionally only one of a player's). Returns its name, or null if none.</summary>
@@ -339,10 +339,10 @@ public class GameSession
         var players = _world.Players;
         var events = _world.Events;
         _world.LevelElapsed += seconds;
-        PowerRules.TickPowers(players, _catalog.Combos, seconds, events);                 // 2. power timers, combos
+        PowerRules.TickPowers(players, _catalog.Data.Combos, seconds, events);                 // 2. power timers, combos
         PlayerMovement.Move(_world, _commands, _tick, seconds);                           // 3. players
         MoveZombies(players, seconds);                                                    // 4. zombies
-        InteractionResolver.CollectItems(level, players, _catalog.Combos, _interaction, events); // 5. interactions
+        InteractionResolver.CollectItems(level, players, _catalog.Data.Combos, _interaction, events); // 5. interactions
         InteractionResolver.ResolveZombieContacts(level, players, _interaction, events);
         _world.Exit!.UpdateLevers(players, events);
 
