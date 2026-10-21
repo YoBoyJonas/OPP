@@ -1,7 +1,6 @@
 using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Messaging;
 using CastleEscape.Game.Sessions;
-using Microsoft.Extensions.Options;
 
 namespace CastleEscape.Server.Realtime;
 
@@ -12,19 +11,25 @@ namespace CastleEscape.Server.Realtime;
 /// </summary>
 public sealed class GameLoopService(
     GameFacade game,
-    IReadOnlyList<ClientNotifier> notifiers,
-    IOptions<GameOptions> options,
+    SignalRClientChannel signalR,
+    PollingBufferChannel polling,
+    RealtimeOptions realtime,
+    GameOptions options,
     ILogger<GameLoopService> logger) : BackgroundService
 {
+    private readonly IReadOnlyList<ClientNotifier> _notifiers = ClientNotifiers.For(
+        realtime.EnabledChannels.Distinct().Select(c => c == RealtimeChannel.SignalR ? (IClientChannel)signalR : polling),
+        new Dictionary<string, int> { ["Polling"] = realtime.PollingStateEveryNthTick });
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var tickSeconds = 1.0 / options.Value.TickRate;
+        var tickSeconds = 1.0 / options.TickRate;
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(tickSeconds));
 
         while (await timer.WaitForNextTickAsync(stoppingToken))
         {
             var sends = game.Tick(tickSeconds)
-                .SelectMany(m => ClientNotifiers.Dispatch(notifiers, m.SessionId, m.Message))
+                .SelectMany(m => ClientNotifiers.Dispatch(_notifiers, m.SessionId, m.Message))
                 .ToList();
             try
             {

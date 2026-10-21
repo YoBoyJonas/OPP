@@ -33,43 +33,13 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
     .AllowAnyMethod()
     .AllowCredentials())); // SignalR sends credentials, which rules out AllowAnyOrigin.
 
-builder.Services.AddSingleton<ILevelProvider>(sp => new LevelProvider(
-    ContentCatalog.Instance,
-    sp.GetRequiredService<IOptions<GameOptions>>().Value,
-    sp.GetRequiredService<IOptions<GenerationOptions>>().Value));
-builder.Services.AddSingleton(sp => new SessionRegistry(
-    ContentCatalog.Instance,
-    sp.GetRequiredService<ILevelProvider>(),
-    sp.GetRequiredService<IOptions<GameOptions>>().Value,
-    sp.GetRequiredService<IOptions<PatternOptions>>().Value));
-builder.Services.AddSingleton(sp =>
-{
-    var scheduler = new GameLoopScheduler(sp.GetRequiredService<SessionRegistry>());
-    var logger = sp.GetRequiredService<ILogger<GameLoopScheduler>>();
-    scheduler.SessionFailed += (session, ex) =>
-    {
-        logger.LogError(ex, "Tick failed for session {SessionId}; stopping it", session.Id);
-    };
-    return scheduler;
-});
-builder.Services.AddSingleton(sp => new GameFacade(
-    sp.GetRequiredService<SessionRegistry>(),
-    sp.GetRequiredService<GameLoopScheduler>(),
-    ContentCatalog.Instance));
-
-// Bridge: notifiers (what to send) over channels (how), both picked from Realtime settings.
-builder.Services.AddSingleton(sp => new PollingBufferChannel(sp.GetRequiredService<IOptions<RealtimeOptions>>().Value.PollingBufferSize));
+// One shared instance each for the whole app; the container fills the constructors.
+builder.Services.AddSingleton<ILevelProvider, LevelProvider>();
+builder.Services.AddSingleton<SessionRegistry>();
+builder.Services.AddSingleton<GameLoopScheduler>();
+builder.Services.AddSingleton<GameFacade>();
+builder.Services.AddSingleton(sp => new PollingBufferChannel(sp.GetRequiredService<RealtimeOptions>().PollingBufferSize));
 builder.Services.AddSingleton<SignalRClientChannel>();
-builder.Services.AddSingleton<IReadOnlyList<ClientNotifier>>(sp =>
-{
-    var realtime = sp.GetRequiredService<IOptions<RealtimeOptions>>().Value;
-    var channels = realtime.EnabledChannels.Distinct().Select(c => c switch
-    {
-        RealtimeChannel.SignalR => (IClientChannel)sp.GetRequiredService<SignalRClientChannel>(),
-        _ => sp.GetRequiredService<PollingBufferChannel>(),
-    });
-    return ClientNotifiers.For(channels, new Dictionary<string, int> { ["Polling"] = realtime.PollingStateEveryNthTick });
-});
 builder.Services.AddHostedService<GameLoopService>();
 
 // Azure Linux/container hosting sets PORT; Azure App Service and local dev don't.
@@ -105,8 +75,12 @@ app.Run();
 
 return 0;
 
-static void AddValidatedOptions<TOptions>(IServiceCollection services, string section) where TOptions : class =>
+// Also registers the plain TOptions object, so classes can take GameOptions instead of IOptions<GameOptions>.
+static void AddValidatedOptions<TOptions>(IServiceCollection services, string section) where TOptions : class
+{
     services.AddOptions<TOptions>()
         .BindConfiguration(section)
         .ValidateDataAnnotations()
         .ValidateOnStart();
+    services.AddSingleton(sp => sp.GetRequiredService<IOptions<TOptions>>().Value);
+}

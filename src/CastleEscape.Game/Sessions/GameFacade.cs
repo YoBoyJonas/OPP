@@ -3,7 +3,6 @@ using CastleEscape.Contracts.Diagnostics;
 using CastleEscape.Contracts.Gameplay;
 using CastleEscape.Contracts.Realtime;
 using CastleEscape.Contracts.Sessions;
-using CastleEscape.Game.Content;
 
 namespace CastleEscape.Game.Sessions;
 
@@ -13,10 +12,10 @@ public sealed record ConnectResult(Guid SessionId, Guid PlayerId, SessionUpdated
 /// <summary>
 /// The one entry point to the game for every client: the SignalR hub, the REST endpoints and the console
 /// demo. Each operation is one call here; behind it are the session registry (lookup, tokens), the
-/// sessions and their command queues, the loop scheduler, and the content catalog.
+/// sessions and their command queues, and the loop scheduler.
 /// Callers never see a <see cref="GameSession"/> or a <see cref="PlayerSlot"/>; they get contract DTOs.
 /// </summary>
-public sealed class GameFacade(SessionRegistry registry, GameLoopScheduler scheduler, ContentCatalog catalog)
+public sealed class GameFacade(SessionRegistry registry, GameLoopScheduler scheduler)
 {
     // ---------------------------------------------------------------- lobby
 

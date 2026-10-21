@@ -8,13 +8,13 @@ namespace CastleEscape.Game.Generation;
 /// Default level source: the director builds each level with the procedural builder, or with the
 /// preset builder for every level when <c>Generation:PresetLevel</c> is set (tests, demos).
 /// </summary>
-public class LevelProvider(ContentCatalog catalog, GameOptions game, GenerationOptions generation) : ILevelProvider
+public class LevelProvider(GameOptions game, GenerationOptions generation) : ILevelProvider
 {
-    private readonly LevelDirector _director = new(catalog, generation);
+    private readonly LevelDirector _director = new(ContentCatalog.Instance, generation);
 
     public LevelState CreateLevel(int levelIndex, int seed)
     {
-        var definition = catalog.GetLevel(levelIndex);
+        var definition = ContentCatalog.Instance.GetLevel(levelIndex);
         try
         {
             return _director.Construct(CreateBuilder(), definition, seed);
@@ -28,6 +28,6 @@ public class LevelProvider(ContentCatalog catalog, GameOptions game, GenerationO
     /// <summary>Builders keep per-level state, so each level gets a new one.</summary>
     private ILevelBuilder CreateBuilder() =>
         string.IsNullOrWhiteSpace(generation.PresetLevel)
-            ? new ProceduralLevelBuilder(catalog, game, generation)
-            : PresetLevelBuilder.FromPreset(catalog, generation.PresetLevel);
+            ? new ProceduralLevelBuilder(ContentCatalog.Instance, game, generation)
+            : PresetLevelBuilder.FromPreset(ContentCatalog.Instance, generation.PresetLevel);
 }
