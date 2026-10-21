@@ -1,3 +1,4 @@
+using CasteEscapeServer.Game.PowerGrants;
 using CasteEscapeServer.Hubs;
 using CasteEscapeServer.Models;
 using Microsoft.AspNetCore.SignalR;
@@ -207,7 +208,8 @@ public class GameSession
                 case ItemKind.Power:
                     if (item.GrantedPower.HasValue)
                     {
-                        player.ActivePowers[item.GrantedPower.Value] = item.GrantDurationSeconds;
+                        PowerGrantRegistry.For(item.GrantedPower.Value)
+                            ?.Grant(player, item.GrantDurationSeconds);
                     }
                     break;
             }
@@ -235,7 +237,7 @@ public class GameSession
             }
             foreach (var power in expired)
             {
-                player.ActivePowers.Remove(power);
+                PowerGrantRegistry.For(power)?.Revoke(player);
             }
         }
     }
