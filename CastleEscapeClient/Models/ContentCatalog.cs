@@ -6,11 +6,11 @@ namespace CastleEscapeClient.Models;
 
 public class ContentCatalog
 {
-    public List<CharacterDefinition> Characters { get; set; } = new();
+    public List<Character> Characters { get; set; } = new();
     public List<Consumable> Consumables { get; set; } = new();
     public List<PowerCombo> Combos { get; set; } = new();
     public List<Obstacle> Obstacles { get; set; } = new();
-    public List<ZombieDefinition> Zombies { get; set; } = new();
+    public List<Zombie> Zombies { get; set; } = new();
     public List<Level> Levels { get; set; } = new();
 
     public List<string> Validate()

@@ -8,7 +8,7 @@ public class Level
     public int ObstacleCount { get; set; }
     public List<Obstacle> ObstacleTable { get; set; } = new();
     public int ZombieCount { get; set; }
-    public List<ZombieDefinition> ZombieTable { get; set; } = new();
+    public List<Zombie> ZombieTable { get; set; } = new();
     public int PickupCount { get; set; }
     public List<Consumable> ConsumableTable { get; set; } = new();
     public double TimeLimitSeconds { get; set; }
