@@ -94,10 +94,7 @@ async function connect() {
     draw();
   });
   connection.on("StateUpdated", (m) => { view.state = m; draw(); renderHud(); });
-  connection.on("GameEvent", (m) => {
-    if (m.type === "SoundCue") return; // a real client plays a sound here
-    addEvent(m.message);
-  });
+  connection.on("GameEvent", (m) => addEvent(m.message));
   connection.on("Error", (m) => addEvent(`⚠ ${m.code}: ${m.message}`));
 
   await connection.start();

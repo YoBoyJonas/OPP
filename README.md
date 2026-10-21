@@ -68,7 +68,7 @@ docs/                         design documents (below)
 | [Builder](docs/patterns/Builder.md) | `LevelDirector` + procedural and preset level builders | A |
 | [Prototype](docs/patterns/Prototype.md) | restart = deep (or shallow, switchable) clone of the pristine level | A |
 | [Command](docs/patterns/Command.md) | every input and step is an undoable command | D |
-| [Observer](docs/patterns/Observer.md) | game events → client messages, HUD stats, log, sound cues | D |
+| [Observer](docs/patterns/Observer.md) | game events → client messages, HUD stats | D |
 | [Facade](docs/patterns/Facade.md) | `GameFacade`, the single entry point for hub, REST and loop | D |
 
 Every participant carries `[DesignPattern("…", "role")]`; `GET /api/patterns` lists them from the code.

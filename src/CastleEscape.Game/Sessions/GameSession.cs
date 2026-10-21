@@ -26,7 +26,6 @@ public class GameSession
     private readonly CommandProcessor _commands = new();
     private readonly GameWorld _world;
     private readonly GameEventPublisher _events = new();
-    private readonly EventLogObserver _eventLog;
     private readonly ContentCatalog _catalog;
     private readonly ILevelProvider _levels;
     private readonly GameOptions _options;
@@ -55,12 +54,9 @@ public class GameSession
         _world = new GameWorld(_slots, options, patterns ?? new PatternOptions());
 
         // Everyone who reacts to game events, notified in this order at the end of each tick.
-        _eventLog = new EventLogObserver(() => _tick);
         _events.Attach(new ClientNotificationObserver(e =>
             Send(ClientMethods.GameEvent, new GameEventMessage(Id, NextSeq(), _tick, e.Type, e.PlayerId, e.Message, e.Data()))));
         _events.Attach(new SessionStatisticsObserver(_slots));
-        _events.Attach(_eventLog);
-        _events.Attach(new SoundCueObserver(_events));
         _interaction = new InteractionSettings(options.PowerDurationSeconds, options.MaxPowerStackLevel, options.RespawnPlayerOnHit);
         _snapshot = BuildSnapshot();
     }
@@ -243,15 +239,6 @@ public class GameSession
             SendState();
             _snapshot = BuildSnapshot();
             return undone?.Name;
-        }
-    }
-
-    /// <summary>The last <see cref="EventLogObserver.DefaultCapacity"/> game events, oldest first.</summary>
-    public IReadOnlyList<EventLogEntry> RecentEvents()
-    {
-        lock (_gate)
-        {
-            return _eventLog.Entries;
         }
     }
 

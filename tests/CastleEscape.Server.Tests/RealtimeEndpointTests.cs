@@ -15,7 +15,7 @@ public class RealtimeEndpointTests(WebApplicationFactory<Program> factory) : ICl
         Assert.Equal("/hubs/game", protocol!.HubPath);
         Assert.Equal(typeof(ClientMethods).GetFields().Length, protocol.ServerToClient.Length);
         Assert.Equal(typeof(HubMethods).GetFields().Length, protocol.ClientToServer.Length);
-        Assert.Contains(GameEventTypes.SoundCue, protocol.EventTypes);
+        Assert.Contains(GameEventTypes.ItemCollected, protocol.EventTypes);
     }
 
     [Fact]

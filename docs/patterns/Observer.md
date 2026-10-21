@@ -7,15 +7,13 @@
 ## Problem in this game
 
 Many things happen during a tick: an item is collected, a life lost, a lever pulled, the door
-opens. Each fact matters to several parts of the system:
-- the clients need a message (with sound and animation);
-- the HUD counts per-player statistics (view-game-state diagram);
-- diagnostics keep a log;
-- sounds must be chosen.
+opens. Each fact matters to more than one part of the system:
+- the clients need a message;
+- the HUD counts per-player statistics (view-game-state diagram).
 
-In the prototype, `GameSession.FlushEvents` did all of that in one loop: it counted stats and built
+In the prototype, `GameSession.FlushEvents` did both in one loop: it counted stats and built
 the message inline. Events were stringly typed (`PendingEvent.Of("ItemCollected", ..., new { … })`
-with an anonymous object read by reflection). Adding a reaction (a log, sound cues, achievements)
+with an anonymous object read by reflection). Adding a reaction (a log, achievements)
 meant editing the session again.
 
 ## Why Observer
@@ -23,8 +21,11 @@ meant editing the session again.
 The rules that detect events should not know who cares about them. Observer gives a subject
 (`GameEventPublisher`) that keeps a list of observers and notifies each one of every event.
 Reactions become independent classes that can be attached or detached at runtime. The session
-wires up four; tests and demos attach their own. Events became typed records, so each event's data
+wires up two; tests and demos attach their own. Events became typed records, so each event's data
 is checked by the compiler, and its wire name is its class name.
+
+No framework is used (no `IObservable<T>`, C# `event`s or libraries): the subject is a plain
+`List<IGameEventObserver>` with `Attach`, `Detach` and a `foreach` in `Publish`.
 
 ## Participants
 
@@ -32,8 +33,8 @@ is checked by the compiler, and its wire name is its class name.
 |---|---|
 | Subject | `GameEventPublisher` (`Attach`, `Detach`, `Publish`) |
 | Observer | `IGameEventObserver` (`OnEvent(GameEvent)`) |
-| ConcreteObserver | `ClientNotificationObserver` (outbox → SignalR), `SessionStatisticsObserver` (HUD stats), `EventLogObserver` (last 200, for diagnostics), `SoundCueObserver` (event → `SoundCue` event) |
-| Event (the notification) | `GameEvent` and 19 records: `ItemCollected`, `LifeLost`, `DoorOpened`, … `SoundCue` |
+| ConcreteObserver | `ClientNotificationObserver` (outbox → SignalR), `SessionStatisticsObserver` (HUD stats) |
+| Event (the notification) | `GameEvent` and 18 records: `ItemCollected`, `LifeLost`, `DoorOpened`, … |
 | Event sources | `InteractionResolver`, `ExitMechanism`, `PowerRules`, `PowerItem`, commands, `GameSession` (they add to `GameWorld.Events`) |
 
 Events are collected during the tick and published at its end, so observers always see a
@@ -51,8 +52,6 @@ sequenceDiagram
     participant P as GameEventPublisher
     participant C as ClientNotificationObserver
     participant St as SessionStatisticsObserver
-    participant L as EventLogObserver
-    participant Snd as SoundCueObserver
 
     Loop->>S: Tick(0.05)
     S->>R: CollectItems(level, players, ...)
@@ -65,15 +64,6 @@ sequenceDiagram
     C-->>S: outbox += GameEvent message
     P->>St: OnEvent(ItemCollected)
     St->>St: Ana.Stats["ItemCollected"]++
-    P->>L: OnEvent(ItemCollected)
-    L->>L: append (keep last 200)
-    P->>Snd: OnEvent(ItemCollected)
-    Snd->>P: Publish(SoundCue "pickup")
-    P->>C: OnEvent(SoundCue)
-    C-->>S: outbox += GameEvent message
-    P->>St: OnEvent(SoundCue) (ignored)
-    P->>L: OnEvent(SoundCue)
-    P->>Snd: OnEvent(SoundCue) (no cue for a cue)
     Loop->>S: DrainOutbox() and send to the SignalR group
 ```
 
@@ -110,13 +100,8 @@ classDiagram
     }
     class ItemCollected
     class LifeLost
-    class SoundCue {
-        +Cue string
-        +Source string
-    }
     GameEvent <|-- ItemCollected
     GameEvent <|-- LifeLost
-    GameEvent <|-- SoundCue
     class GameEventPublisher {
         <<Subject>>
         +Attach(observer)
@@ -129,20 +114,12 @@ classDiagram
     }
     class ClientNotificationObserver
     class SessionStatisticsObserver
-    class EventLogObserver {
-        +Entries
-    }
-    class SoundCueObserver
     GameEventPublisher o--> IGameEventObserver : observers
     IGameEventObserver <|.. ClientNotificationObserver
     IGameEventObserver <|.. SessionStatisticsObserver
-    IGameEventObserver <|.. EventLogObserver
-    IGameEventObserver <|.. SoundCueObserver
-    SoundCueObserver --> GameEventPublisher : publishes SoundCue
     class GameSession {
         +Attach(observer)
         +Detach(observer)
-        +RecentEvents()
         -FlushEvents()
     }
     GameSession --> GameEventPublisher
@@ -152,12 +129,21 @@ classDiagram
 ## Key code
 
 ```csharp
+// The whole subject.
+private readonly List<IGameEventObserver> _observers = [];
+public void Attach(IGameEventObserver observer) => _observers.Add(observer);
+public void Detach(IGameEventObserver observer) => _observers.Remove(observer);
+public void Publish(GameEvent gameEvent)
+{
+    foreach (var observer in _observers) observer.OnEvent(gameEvent);
+}
+```
+
+```csharp
 // GameSession constructor: who reacts to events, in notification order.
 _events.Attach(new ClientNotificationObserver(e =>
     Send(ClientMethods.GameEvent, new GameEventMessage(Id, NextSeq(), _tick, e.Type, e.PlayerId, e.Message, e.Data()))));
 _events.Attach(new SessionStatisticsObserver(_slots));
-_events.Attach(_eventLog);
-_events.Attach(new SoundCueObserver(_events));
 
 private void FlushEvents()                          // end of every tick
 {
@@ -176,19 +162,15 @@ public sealed record LifeLost(Guid? PlayerId, string Message, string ZombieId, i
 
 The sequence diagram above follows one real tick. The demo runs it live. It attaches a Recorder
 observer, plays a coin pickup and a zombie hit, and prints what each observer did. Then it detaches
-the Recorder and shows it stops receiving events, while the event log keeps growing:
+the Recorder and shows it stops receiving events, while the clients keep getting them:
 
 ```text
-The Recorder saw, in order: SoundCue(pickup), ItemCollected, SoundCue(life_lost), LifeLost.
-Recorder detached; 40 more ticks: it still has 4 events (was 4), while the EventLog observer kept going (17 entries).
+The Recorder saw, in order: ItemCollected, LifeLost.
+Recorder detached; 40 more ticks: it still has 2 events (was 2), while ClientNotification kept going (4 GameEvent messages to the clients).
 SessionStatistics: Ana ItemCollected 1; Ben LifeLost 3.
-SoundCue turned events into cues: pickup, life_lost, life_lost, life_lost, game_over.
 ```
 
-The Recorder sees each cue *before* its event. The SoundCue observer is attached before the Recorder
-and publishes the cue while the event is still being delivered (a nested notification). The clients
-are notified first, so they get the event and then its cue. `ObserverTests` checks this order in a
-real session, as well as attach, detach, statistics, the log limit, and that every event class has a
+`ObserverTests` checks attach, detach, statistics, the demo, and that every event class has a
 `GameEventTypes` wire name.
 
 ## Likely live-change requests
@@ -196,7 +178,6 @@ real session, as well as attach, detach, statistics, the log limit, and that eve
 | Request | Where to edit |
 |---|---|
 | "Add achievements (e.g. 10 coins)" | A new `AchievementObserver` counting `ItemCollected`, publishing an `AchievementUnlocked` event; attach it in `GameSession`. No rule changes. |
-| "No sound when collecting coins" | `SoundCueObserver.Cues`. |
 | "Log events to the console/file" | Another observer, or attach one at runtime with `session.Attach(...)`. |
 | "A new event type" | A `GameEvent` record, a `GameEventTypes` constant, and the rule that adds it to `world.Events`. |
 | "Observer vs Mediator?" | Here the publisher only broadcasts: observers don't talk to each other and the subject has no logic. A Mediator (P2 seam: `ExitMechanism` for levers and door) holds the coordination logic between colleagues that would otherwise reference each other. |

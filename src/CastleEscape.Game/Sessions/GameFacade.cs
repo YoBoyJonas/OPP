@@ -118,13 +118,6 @@ public sealed class GameFacade(SessionRegistry registry, GameLoopScheduler sched
     public IReadOnlyList<CommandRecordDto> GetCommandHistory(Guid sessionId) =>
         registry.Get(sessionId).CommandHistory().Select(c => new CommandRecordDto(c.Sequence, c.Name, c.PlayerId, c.Tick, c.Undone)).ToList();
 
-    /// <summary>The session's recent game events, oldest first; optionally only those after <paramref name="afterTick"/>.</summary>
-    public IReadOnlyList<EventLogEntryDto> GetEventLog(Guid sessionId, long afterTick = -1) =>
-        registry.Get(sessionId).RecentEvents()
-            .Where(e => e.Tick > afterTick)
-            .Select(e => new EventLogEntryDto(e.Tick, e.At, e.Type, e.PlayerId, e.Message, new Dictionary<string, string>(e.Data)))
-            .ToList();
-
     // ---------------------------------------------------------------- loop
 
     /// <summary>One fixed step for every session; returns the messages to deliver.</summary>

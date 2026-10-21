@@ -114,10 +114,8 @@ current `strategy`; `items[]`; `levers[]` (`isActive`); `doorOpen`; `phase`; `le
 **Events** (`GameEvent.type`): `ItemCollected`, `PowerGained`, `PowerExpired`, `ComboActivated`,
 `LifeLost`, `LeverChanged`, `DoorOpened`, `DoorClosed`, `PlayerReachedExit`, `LevelStarted`,
 `LevelRestarted`, `LevelCompleted`, `GameWon`, `GameLost`, `PlayerJoined`, `PlayerLeft`,
-`PhaseChanged`, `CommandUndone`, and `SoundCue`. `data` holds the event's fields as strings, e.g.
-`LifeLost` → `{ "zombieId": "zombie-1", "lives": "2" }`. **`SoundCue`** events name a sound in
-`data.cue` (`pickup`, `power_up`, `combo`, `life_lost`, `door_open`, `level_complete`, `victory`,
-`game_over`); map these names to your sound files.
+`PhaseChanged` and `CommandUndone`. `data` holds the event's fields as strings, e.g.
+`LifeLost` → `{ "zombieId": "zombie-1", "lives": "2" }`. Pick sounds from the event type.
 
 ## 4. Sending input
 

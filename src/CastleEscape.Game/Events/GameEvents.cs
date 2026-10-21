@@ -50,6 +50,3 @@ public sealed record PlayerReachedExit(Guid? PlayerId, string Message) : GameEve
 
 // Commands and presentation
 public sealed record CommandUndone(Guid? PlayerId, string Message, string Command, long Sequence, string Reason) : GameEvent(PlayerId, Message);
-
-/// <summary>A sound the clients should play, e.g. <c>life_lost</c>. Produced by <see cref="SoundCueObserver"/> from other events.</summary>
-public sealed record SoundCue(Guid? PlayerId, string Message, string Cue, string Source) : GameEvent(PlayerId, Message);

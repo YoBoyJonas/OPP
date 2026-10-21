@@ -377,7 +377,7 @@
           "Patterns"
         ],
         "summary": "Observer: game events",
-        "description": "Plays a scripted session with an extra Recorder observer attached: a coin pickup and a zombie hit. Shows what each observer did (client messages, HUD statistics, event log, sound cues), then detaches the Recorder and shows it no longer receives events.",
+        "description": "Plays a scripted session with an extra Recorder observer attached: a coin pickup and a zombie hit. Shows what each observer did (client messages, HUD statistics), then detaches the Recorder and shows it no longer receives events.",
         "operationId": "DemoObserver",
         "responses": {
           "200": {
@@ -523,64 +523,6 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/CommandRecordDto"
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/diagnostics/sessions/{sessionId}/events": {
-      "get": {
-        "tags": [
-          "Diagnostics"
-        ],
-        "summary": "Event log of a session",
-        "description": "The last 200 game events, oldest first, as recorded by the EventLogObserver (Observer pattern). Pass \u0060afterTick\u0060 to get only newer ones.",
-        "operationId": "GetEventLog",
-        "parameters": [
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "afterTick",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/EventLogEntryDto"
                   }
                 }
               }
@@ -2591,57 +2533,6 @@
           }
         },
         "description": "Body of \u0060POST /api/sessions/{id}/input\u0060: the direction key now held."
-      },
-      "EventLogEntryDto": {
-        "required": [
-          "tick",
-          "at",
-          "type",
-          "playerId",
-          "message",
-          "data"
-        ],
-        "type": "object",
-        "properties": {
-          "tick": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "Tick it was published in.",
-            "format": "int64"
-          },
-          "at": {
-            "type": "string",
-            "description": "Server time it was published.",
-            "format": "date-time"
-          },
-          "type": {
-            "type": "string",
-            "description": "Event type, as in \u0060GameEventTypes\u0060."
-          },
-          "playerId": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The player it concerns, if any.",
-            "format": "uuid"
-          },
-          "message": {
-            "type": "string",
-            "description": "Human-readable text."
-          },
-          "data": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            },
-            "description": "The event\u0027s own fields."
-          }
-        },
-        "description": "A game event from a session\u0027s event log (Observer pattern: \u0060EventLogObserver\u0060)."
       },
       "GivePowerRequest": {
         "required": [

@@ -87,7 +87,7 @@ public static class PatternEndpoints
             () => Run("observer"),
             "Observer: game events",
             "Plays a scripted session with an extra Recorder observer attached: a coin pickup and a zombie hit. Shows what "
-            + "each observer did (client messages, HUD statistics, event log, sound cues), then detaches the Recorder and "
+            + "each observer did (client messages, HUD statistics), then detaches the Recorder and "
             + "shows it no longer receives events.");
 
         app.MapDemo("bridge",

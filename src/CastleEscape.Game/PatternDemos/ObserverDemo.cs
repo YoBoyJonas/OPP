@@ -23,7 +23,7 @@ public sealed class ObserverDemo : IPatternDemo
     private sealed class Recorder : IGameEventObserver
     {
         public List<string> Seen { get; } = [];
-        public void OnEvent(GameEvent gameEvent) => Seen.Add(gameEvent is SoundCue cue ? $"SoundCue({cue.Cue})" : gameEvent.Type);
+        public void OnEvent(GameEvent gameEvent) => Seen.Add(gameEvent.Type);
     }
 
     public PatternDemoResponse Run(DemoOptions options)
@@ -34,38 +34,31 @@ public sealed class ObserverDemo : IPatternDemo
         var trace = new DemoTrace("Observer");
 
         session.Attach(recorder);
-        trace.Line("Subject: the session's GameEventPublisher. Observers: ClientNotification, SessionStatistics, EventLog, SoundCue, "
+        trace.Line("Subject: the session's GameEventPublisher. Observers: ClientNotification, SessionStatistics, "
                    + "plus this demo's Recorder (attached now).");
 
         session.SubmitDirection(ana.PlayerId, Direction.Right);
         DemoWorld.RunUntil(session, () => recorder.Seen.Contains(nameof(ItemCollected)));
         session.SubmitDirection(ana.PlayerId, Direction.None);
         DemoWorld.RunUntil(session, () => recorder.Seen.Contains(nameof(LifeLost)));
-        trace.Line($"Ana picks up the coin, then the zombie catches Ben. The Recorder saw, in order: {string.Join(", ", recorder.Seen)}.")
-            .Line("  Each cue arrives before its event here: the SoundCue observer (attached before the Recorder) publishes it while "
-                  + "the event is still being delivered. The clients, notified first, get ItemCollected and then SoundCue.");
+        trace.Line($"Ana picks up the coin, then the zombie catches Ben. The Recorder saw, in order: {string.Join(", ", recorder.Seen)}.");
 
         var seenWhileAttached = recorder.Seen.Count;
         session.Detach(recorder);
+        session.DrainOutbox();
         DemoWorld.RunUntil(session, () => false, maxTicks: 40);
-        var logSize = session.RecentEvents().Count;
+        var clientEventsAfterDetach = session.DrainOutbox().Count(m => m.Method == ClientMethods.GameEvent);
         trace.Line($"Recorder detached; 40 more ticks: it still has {recorder.Seen.Count} events (was {seenWhileAttached}), "
-                   + $"while the EventLog observer kept going ({logSize} entries).");
+                   + $"while ClientNotification kept going ({clientEventsAfterDetach} GameEvent messages to the clients).");
 
-        var gameEventMessages = session.DrainOutbox().Count(m => m.Method == ClientMethods.GameEvent);
         var hud = session.Snapshot.Hud.Players;
         var anaStats = hud.Single(p => p.PlayerId == ana.PlayerId).Stats;
         var benStats = hud.Single(p => p.PlayerId == ben.PlayerId).Stats;
-        var cues = session.RecentEvents().Where(e => e.Type == nameof(SoundCue)).Select(e => e.Data["cue"]).ToArray();
-        trace.Line($"ClientNotification sent {gameEventMessages} GameEvent messages to the clients.")
-            .Line($"SessionStatistics: Ana {Format(anaStats)}; Ben {Format(benStats)}.")
-            .Line($"SoundCue turned events into cues: {string.Join(", ", cues)}.");
+        trace.Line($"SessionStatistics: Ana {Format(anaStats)}; Ben {Format(benStats)}.");
 
         trace.Evidence("recorderSaw", recorder.Seen)
             .Evidence("recorderCountAfterDetach", recorder.Seen.Count)
-            .Evidence("eventLogEntries", logSize)
-            .Evidence("gameEventMessages", gameEventMessages)
-            .Evidence("soundCues", cues)
+            .Evidence("clientEventsAfterDetach", clientEventsAfterDetach)
             .Evidence("statsAna", anaStats)
             .Evidence("statsBen", benStats);
         return trace.Done("One Publish per event; each observer does its own job and none of them knows about the others.");

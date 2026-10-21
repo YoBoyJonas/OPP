@@ -17,7 +17,7 @@ disagree, [DECISIONS.md](DECISIONS.md) says what the server does (Dn).
 | Use active power (`use_active_power.png`) | nothing extra: active from pickup until it expires (D3) | `PowerManager` (timers, stacking, combos) rebuilding the decorator chain | `Powers_*` tests, `DecoratorTests` |
 | Pull lever (`pull_lever.png`) | stand on the lever (D2) | `ExitMechanism.UpdateLevers`; `LeverChanged` event | `Door_OpensWhenBothLeversActive_AndLatches_D1` |
 | Open exit door (`open_exit_door.png`) | both players on levers in the same tick | `ExitMechanism.Update` (Latch or HoldWhileActive, D1); `DoorOpened` | `Door_OpensWhenBothLeversActive_AndLatches_D1`, `Door_HoldWhileActive_ClosesWhenALeverIsReleased` |
-| Lose life (`lose_life.png`) | — (a zombie touches the player) | `InteractionResolver.ResolveZombieContacts`: −1 life, zombie back to spawn (D6); `LifeLost` + `SoundCue` | `Zombie_ContactCostsALifeAndResetsZombie_Zmb2_Zmb3` |
+| Lose life (`lose_life.png`) | — (a zombie touches the player) | `InteractionResolver.ResolveZombieContacts`: −1 life, zombie back to spawn (D6); `LifeLost` | `Zombie_ContactCostsALifeAndResetsZombie_Zmb2_Zmb3` |
 | Lose game (`lose_game.png`) | — | `GameSession.TickPlaying`: any player at 0 lives → `GameLost`, phase `Defeat` (D10) | `Defeat_WhenAnyPlayerHasNoLives_Plr3` |
 | Restart level (`restart_level.png`) | hub `RequestRestart` (confirm in the client) | `RestartLevelCommand`: fresh prototype clone, checkpoint stats (D8); undoable | `Restart_RestoresItemsAndScore_D8`, `PrototypeTests`, `CommandTests` |
 | View game state (`view_game_state.png`) | `GET /api/sessions/{id}/hud`, or draw from `StateUpdated` | `SnapshotMapper.ToHud`, statistics from `SessionStatisticsObserver` | `GameRulesTests` (HUD stats), `ObserverTests` |

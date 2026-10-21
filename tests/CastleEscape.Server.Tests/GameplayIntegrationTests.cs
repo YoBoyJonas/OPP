@@ -225,7 +225,7 @@ public class PollingChannelTests(TutorialFactory factory) : IClassFixture<Tutori
 public class SessionDiagnosticsTests(TutorialFactory factory) : IClassFixture<TutorialFactory>
 {
     [Fact]
-    public async Task CommandsAndEvents_AreListed()
+    public async Task Commands_AreListed()
     {
         var http = factory.CreateClient();
         var (sessionId, p1, _) = await Api.StartTwoPlayerGame(http);
@@ -246,13 +246,5 @@ public class SessionDiagnosticsTests(TutorialFactory factory) : IClassFixture<Tu
             return list!.Any(c => c.Name == "SetDirection Down") ? list : null;
         }, TimeSpan.FromSeconds(5));
         Assert.Contains(commands, c => c.PlayerId == p1.Id);
-
-        var events = await http.GetFromJsonAsync<CastleEscape.Contracts.Diagnostics.EventLogEntryDto[]>(
-            $"/api/diagnostics/sessions/{sessionId}/events", Api.Json, Api.Ct);
-        Assert.Contains(events!, e => e.Type == GameEventTypes.LevelStarted && e.Data["level"] == "1");
-
-        var later = await http.GetFromJsonAsync<CastleEscape.Contracts.Diagnostics.EventLogEntryDto[]>(
-            $"/api/diagnostics/sessions/{sessionId}/events?afterTick={events!.Max(e => e.Tick)}", Api.Json, Api.Ct);
-        Assert.All(later!, e => Assert.True(e.Tick > events.Max(x => x.Tick)));
     }
 }

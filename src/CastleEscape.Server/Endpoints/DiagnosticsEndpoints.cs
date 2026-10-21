@@ -36,13 +36,6 @@ public static class DiagnosticsEndpoints
                              + "in and whether it was undone (Command pattern). An undone StartStep is a D7 tile conflict.")
             .ProducesProblem(StatusCodes.Status404NotFound);
 
-        sessions.MapGet("/events", (Guid sessionId, long? afterTick, GameFacade game) => game.GetEventLog(sessionId, afterTick ?? -1))
-            .WithName("GetEventLog")
-            .WithSummary("Event log of a session")
-            .WithDescription("The last 200 game events, oldest first, as recorded by the EventLogObserver (Observer pattern). "
-                             + "Pass `afterTick` to get only newer ones.")
-            .ProducesProblem(StatusCodes.Status404NotFound);
-
         return app;
     }
 
