@@ -23,7 +23,12 @@ public class ActivePower(PowerGrant grant, double durationSeconds)
     }
 
     public void Tick(double seconds) => RemainingSeconds -= seconds;
+    
+    /// <summary>Same power picked up again: more time, same level.</summary>
+    public void Extend(double durationSeconds) => RemainingSeconds += durationSeconds;
 
+    /// <summary>Same power picked up again: timer resets to the longer of the two, same level.</summary>
+    public void Refresh(double durationSeconds) => RemainingSeconds = Math.Max(RemainingSeconds, durationSeconds);
     /// <summary>An independent copy (to put a power back exactly as it was, e.g. on undo).</summary>
     public ActivePower Copy() => new(Grant, RemainingSeconds) { Level = Level };
 

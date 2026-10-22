@@ -39,17 +39,11 @@ public sealed class PowerManager
     /// <summary>Adds a power, or stacks it if already active (PWR-3). Returns the resulting power.</summary>
     public ActivePower Gain(PowerGrant grant, double durationSeconds, int maxLevel)
     {
-        if (_powers.TryGetValue(grant.Power, out var existing))
-        {
-            existing.Stack(durationSeconds, maxLevel);
-        }
-        else
-        {
-            existing = new ActivePower(grant, durationSeconds);
-            _powers[grant.Power] = existing;
-        }
+        var strategy = PowerGrantStrategies.For(grant.Stacking);
+        var power = strategy.Apply(_powers.GetValueOrDefault(grant.Power), grant, durationSeconds, maxLevel);
+        _powers[grant.Power] = power;
         Rebuild();
-        return existing;
+        return power;
     }
 
     /// <summary>Counts timers down; returns the powers that just ran out.</summary>

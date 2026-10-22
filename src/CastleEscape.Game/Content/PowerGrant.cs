@@ -14,6 +14,8 @@ public abstract class PowerGrant
 
     /// <summary>How long the power lasts. Null means the <c>Game:PowerDurationSeconds</c> setting.</summary>
     public double? DurationSeconds { get; init; }
+    public PowerGrantStrategyKind Stacking { get; init; } = PowerGrantStrategyKind.Stack;
 
     public StatModifiers Modifiers { get; init; } = StatModifiers.Identity;
+    
 }

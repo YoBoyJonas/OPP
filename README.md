@@ -61,7 +61,7 @@ docs/                         design documents (below)
 | [Adapter](docs/patterns/Adapter.md) | `IMessageSerializer` over `JsonSerializer` / `DataContractSerializer` (JSON and XML) | C |
 | [Bridge](docs/patterns/Bridge.md) | state/event notifiers × SignalR/polling channels | C |
 | [Factory Method](docs/patterns/FactoryMethod.md) | `ItemSpawner.CreateItem` → Health/Reward/Power items | B |
-| [Strategy](docs/patterns/Strategy.md) | zombie chase: Greedy, BFS, A*, Predictive | B |
+| [Strategy](docs/patterns/PowerGrantStrategy.md) | power pickup rule: Stack, ExtendTime, Refresh, IgnoreWhileActive | B |
 | [Decorator](docs/patterns/Decorator.md) | power stacking: `IAbilities` wrapped by Jump/Sprint/Swim/combo decorators | B |
 | [Abstract Factory](docs/patterns/AbstractFactory.md) | level themes: Dungeon/Crypt walls, water, pits, zombies | A |
 | [Builder](docs/patterns/Builder.md) | `LevelDirector` + procedural and preset level builders | A |
