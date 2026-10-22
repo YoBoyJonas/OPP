@@ -1,0 +1,572 @@
+[
+  {
+    "id": "level-1",
+    "index": 1,
+    "theme": "Dungeon",
+    "obstacleCount": 2,
+    "obstacleTable": [
+      {
+        "id": "water",
+        "weight": 2
+      },
+      {
+        "id": "pit",
+        "weight": 1
+      }
+    ],
+    "zombieCount": 1,
+    "zombieTable": [
+      {
+        "id": "shambler",
+        "weight": 1
+      }
+    ],
+    "pickupCount": 4,
+    "consumableTable": [
+      {
+        "id": "health-potion",
+        "weight": 1
+      },
+      {
+        "id": "gold-coin",
+        "weight": 3
+      },
+      {
+        "id": "ruby",
+        "weight": 0.5
+      },
+      {
+        "id": "jump-boots",
+        "weight": 1
+      },
+      {
+        "id": "sprint-elixir",
+        "weight": 1
+      },
+      {
+        "id": "swim-fins",
+        "weight": 1
+      }
+    ],
+    "timeLimitSeconds": 0
+  },
+  {
+    "id": "level-2",
+    "index": 2,
+    "theme": "Dungeon",
+    "obstacleCount": 3,
+    "obstacleTable": [
+      {
+        "id": "water",
+        "weight": 1
+      },
+      {
+        "id": "pit",
+        "weight": 1
+      }
+    ],
+    "zombieCount": 1,
+    "zombieTable": [
+      {
+        "id": "shambler",
+        "weight": 1
+      }
+    ],
+    "pickupCount": 4,
+    "consumableTable": [
+      {
+        "id": "health-potion",
+        "weight": 1
+      },
+      {
+        "id": "gold-coin",
+        "weight": 3
+      },
+      {
+        "id": "ruby",
+        "weight": 0.5
+      },
+      {
+        "id": "jump-boots",
+        "weight": 1
+      },
+      {
+        "id": "sprint-elixir",
+        "weight": 1
+      },
+      {
+        "id": "swim-fins",
+        "weight": 1
+      }
+    ],
+    "timeLimitSeconds": 0
+  },
+  {
+    "id": "level-3",
+    "index": 3,
+    "theme": "Dungeon",
+    "obstacleCount": 3,
+    "obstacleTable": [
+      {
+        "id": "water",
+        "weight": 1
+      },
+      {
+        "id": "pit",
+        "weight": 1
+      }
+    ],
+    "zombieCount": 2,
+    "zombieTable": [
+      {
+        "id": "shambler",
+        "weight": 2
+      },
+      {
+        "id": "hunter",
+        "weight": 1
+      }
+    ],
+    "pickupCount": 5,
+    "consumableTable": [
+      {
+        "id": "health-potion",
+        "weight": 1
+      },
+      {
+        "id": "gold-coin",
+        "weight": 3
+      },
+      {
+        "id": "ruby",
+        "weight": 0.5
+      },
+      {
+        "id": "jump-boots",
+        "weight": 1
+      },
+      {
+        "id": "sprint-elixir",
+        "weight": 1
+      },
+      {
+        "id": "swim-fins",
+        "weight": 1
+      }
+    ],
+    "timeLimitSeconds": 0
+  },
+  {
+    "id": "level-4",
+    "index": 4,
+    "theme": "Dungeon",
+    "obstacleCount": 4,
+    "obstacleTable": [
+      {
+        "id": "water",
+        "weight": 1
+      },
+      {
+        "id": "pit",
+        "weight": 2
+      }
+    ],
+    "zombieCount": 2,
+    "zombieTable": [
+      {
+        "id": "shambler",
+        "weight": 1
+      },
+      {
+        "id": "hunter",
+        "weight": 1
+      }
+    ],
+    "pickupCount": 5,
+    "consumableTable": [
+      {
+        "id": "health-potion",
+        "weight": 1
+      },
+      {
+        "id": "gold-coin",
+        "weight": 3
+      },
+      {
+        "id": "ruby",
+        "weight": 1
+      },
+      {
+        "id": "jump-boots",
+        "weight": 1
+      },
+      {
+        "id": "sprint-elixir",
+        "weight": 1
+      },
+      {
+        "id": "swim-fins",
+        "weight": 1
+      }
+    ],
+    "timeLimitSeconds": 0
+  },
+  {
+    "id": "level-5",
+    "index": 5,
+    "theme": "Dungeon",
+    "obstacleCount": 4,
+    "obstacleTable": [
+      {
+        "id": "water",
+        "weight": 1
+      },
+      {
+        "id": "pit",
+        "weight": 1
+      }
+    ],
+    "zombieCount": 3,
+    "zombieTable": [
+      {
+        "id": "shambler",
+        "weight": 1
+      },
+      {
+        "id": "hunter",
+        "weight": 1
+      },
+      {
+        "id": "stalker",
+        "weight": 1
+      }
+    ],
+    "pickupCount": 6,
+    "consumableTable": [
+      {
+        "id": "health-potion",
+        "weight": 1
+      },
+      {
+        "id": "gold-coin",
+        "weight": 3
+      },
+      {
+        "id": "ruby",
+        "weight": 1
+      },
+      {
+        "id": "jump-boots",
+        "weight": 1
+      },
+      {
+        "id": "sprint-elixir",
+        "weight": 1
+      },
+      {
+        "id": "swim-fins",
+        "weight": 1
+      }
+    ],
+    "timeLimitSeconds": 0
+  },
+  {
+    "id": "level-6",
+    "index": 6,
+    "theme": "Crypt",
+    "obstacleCount": 4,
+    "obstacleTable": [
+      {
+        "id": "water",
+        "weight": 2
+      },
+      {
+        "id": "pit",
+        "weight": 1
+      }
+    ],
+    "zombieCount": 3,
+    "zombieTable": [
+      {
+        "id": "hunter",
+        "weight": 2
+      },
+      {
+        "id": "tracker",
+        "weight": 1
+      }
+    ],
+    "pickupCount": 6,
+    "consumableTable": [
+      {
+        "id": "health-potion",
+        "weight": 1
+      },
+      {
+        "id": "gold-coin",
+        "weight": 3
+      },
+      {
+        "id": "ruby",
+        "weight": 1
+      },
+      {
+        "id": "jump-boots",
+        "weight": 1
+      },
+      {
+        "id": "sprint-elixir",
+        "weight": 1
+      },
+      {
+        "id": "swim-fins",
+        "weight": 1
+      }
+    ],
+    "timeLimitSeconds": 0
+  },
+  {
+    "id": "level-7",
+    "index": 7,
+    "theme": "Crypt",
+    "obstacleCount": 5,
+    "obstacleTable": [
+      {
+        "id": "water",
+        "weight": 1
+      },
+      {
+        "id": "pit",
+        "weight": 1
+      }
+    ],
+    "zombieCount": 4,
+    "zombieTable": [
+      {
+        "id": "hunter",
+        "weight": 1
+      },
+      {
+        "id": "tracker",
+        "weight": 1
+      },
+      {
+        "id": "stalker",
+        "weight": 1
+      }
+    ],
+    "pickupCount": 6,
+    "consumableTable": [
+      {
+        "id": "health-potion",
+        "weight": 1
+      },
+      {
+        "id": "gold-coin",
+        "weight": 3
+      },
+      {
+        "id": "ruby",
+        "weight": 1
+      },
+      {
+        "id": "jump-boots",
+        "weight": 1
+      },
+      {
+        "id": "sprint-elixir",
+        "weight": 1
+      },
+      {
+        "id": "swim-fins",
+        "weight": 1
+      }
+    ],
+    "timeLimitSeconds": 0
+  },
+  {
+    "id": "level-8",
+    "index": 8,
+    "theme": "Crypt",
+    "obstacleCount": 5,
+    "obstacleTable": [
+      {
+        "id": "water",
+        "weight": 1
+      },
+      {
+        "id": "pit",
+        "weight": 2
+      }
+    ],
+    "zombieCount": 4,
+    "zombieTable": [
+      {
+        "id": "hunter",
+        "weight": 1
+      },
+      {
+        "id": "tracker",
+        "weight": 1
+      },
+      {
+        "id": "stalker",
+        "weight": 1
+      }
+    ],
+    "pickupCount": 7,
+    "consumableTable": [
+      {
+        "id": "health-potion",
+        "weight": 1
+      },
+      {
+        "id": "gold-coin",
+        "weight": 3
+      },
+      {
+        "id": "ruby",
+        "weight": 1
+      },
+      {
+        "id": "jump-boots",
+        "weight": 1
+      },
+      {
+        "id": "sprint-elixir",
+        "weight": 1
+      },
+      {
+        "id": "swim-fins",
+        "weight": 1
+      }
+    ],
+    "timeLimitSeconds": 0
+  },
+  {
+    "id": "level-9",
+    "index": 9,
+    "theme": "Crypt",
+    "obstacleCount": 6,
+    "obstacleTable": [
+      {
+        "id": "water",
+        "weight": 1
+      },
+      {
+        "id": "pit",
+        "weight": 1
+      }
+    ],
+    "zombieCount": 5,
+    "zombieTable": [
+      {
+        "id": "shambler",
+        "weight": 1
+      },
+      {
+        "id": "hunter",
+        "weight": 1
+      },
+      {
+        "id": "tracker",
+        "weight": 1
+      },
+      {
+        "id": "stalker",
+        "weight": 1
+      }
+    ],
+    "pickupCount": 7,
+    "consumableTable": [
+      {
+        "id": "health-potion",
+        "weight": 1
+      },
+      {
+        "id": "gold-coin",
+        "weight": 3
+      },
+      {
+        "id": "ruby",
+        "weight": 1
+      },
+      {
+        "id": "jump-boots",
+        "weight": 1
+      },
+      {
+        "id": "sprint-elixir",
+        "weight": 1
+      },
+      {
+        "id": "swim-fins",
+        "weight": 1
+      }
+    ],
+    "timeLimitSeconds": 0
+  },
+  {
+    "id": "level-10",
+    "index": 10,
+    "theme": "Crypt",
+    "obstacleCount": 6,
+    "obstacleTable": [
+      {
+        "id": "water",
+        "weight": 1
+      },
+      {
+        "id": "pit",
+        "weight": 1
+      }
+    ],
+    "zombieCount": 5,
+    "zombieTable": [
+      {
+        "id": "shambler",
+        "weight": 1
+      },
+      {
+        "id": "hunter",
+        "weight": 1
+      },
+      {
+        "id": "tracker",
+        "weight": 1
+      },
+      {
+        "id": "stalker",
+        "weight": 2
+      }
+    ],
+    "pickupCount": 8,
+    "consumableTable": [
+      {
+        "id": "health-potion",
+        "weight": 1
+      },
+      {
+        "id": "gold-coin",
+        "weight": 3
+      },
+      {
+        "id": "ruby",
+        "weight": 1
+      },
+      {
+        "id": "jump-boots",
+        "weight": 1
+      },
+      {
+        "id": "sprint-elixir",
+        "weight": 1
+      },
+      {
+        "id": "swim-fins",
+        "weight": 1
+      }
+    ],
+    "timeLimitSeconds": 0
+  }
+]

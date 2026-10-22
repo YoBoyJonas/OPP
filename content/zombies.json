@@ -1,0 +1,30 @@
+[
+  {
+    "id": "shambler",
+    "name": "Shambler",
+    "speed": 1.5,
+    "contactDamage": 1,
+    "movementStrategy": "Greedy"
+  },
+  {
+    "id": "hunter",
+    "name": "Hunter",
+    "speed": 2.0,
+    "contactDamage": 1,
+    "movementStrategy": "Bfs"
+  },
+  {
+    "id": "tracker",
+    "name": "Tracker",
+    "speed": 2.0,
+    "contactDamage": 1,
+    "movementStrategy": "AStar"
+  },
+  {
+    "id": "stalker",
+    "name": "Stalker",
+    "speed": 2.2,
+    "contactDamage": 1,
+    "movementStrategy": "Predictive"
+  }
+]
