@@ -1,0 +1,89 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Castle Escape test client</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+<style>body{font:14px monospace;margin:12px}canvas{display:block;background:#111;margin-top:8px}</style>
+
+<div id="lobby">
+  <input id="name" placeholder="name" value="Player">
+  <button onclick="start()">Create</button>
+  <input id="code" placeholder="join code"><button onclick="start(code.value)">Join</button>
+</div>
+<div id="chars"></div>
+<div id="info"></div>
+<canvas id="cv"></canvas>
+<pre id="log"></pre>
+
+<script>
+const T = 32, $ = (id) => document.getElementById(id);
+let sid, token, conn, rows = [], st, logLines = [], session;
+
+async function api(method, url, body) {
+  const r = await fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json", "X-Player-Token": token ?? "" },
+    body: body && JSON.stringify(body),
+  });
+  const j = await r.json().catch(() => null);
+  if (!r.ok) throw new Error(j?.code ?? r.status);
+  return j;
+}
+
+async function start(joinCode) {
+  try {
+    const r = joinCode
+      ? await api("POST", "/api/sessions/join", { joinCode, playerName: $("name").value })
+      : await api("POST", "/api/sessions", { playerName: $("name").value });
+    sid = r.sessionId; token = r.playerToken;
+    $("lobby").hidden = true;
+    conn = new signalR.HubConnectionBuilder()
+      .withUrl(`/hubs/game?sessionId=${sid}&playerToken=${encodeURIComponent(token)}`)
+      .withAutomaticReconnect().build();
+    conn.on("SessionUpdated", (m) => { session = m.session; });
+    conn.on("LevelStarted", (m) => { rows = m.rows; st = m.state; $("cv").width = m.width * T; $("cv").height = m.height * T; });
+    conn.on("StateUpdated", (m) => { st = m; });
+    conn.on("GameEvent", (m) => { logLines = [...logLines.slice(-7), m.message]; $("log").textContent = logLines.join("\n"); });
+    conn.on("Error", (m) => alert(m.code + ": " + m.message));
+    await conn.start();
+    for (const c of await api("GET", "/api/content/characters")) {
+      const b = document.createElement("button");
+      b.textContent = `${c.name} (${c.maxHealth} lives)`;
+      b.onclick = () => api("PUT", `/api/sessions/${sid}/players/me/character`, { characterId: c.id }).catch((e) => alert(e.message));
+      $("chars").append(b);
+    }
+  } catch (e) { alert(e.message); }
+}
+
+const colors = { "#": "#555", "~": "#26c", O: "#000", E: "#2a2", D: "#a62" };
+const ctx = $("cv").getContext("2d");
+(function draw() {
+  requestAnimationFrame(draw);
+  $("info").textContent = session
+    ? `code ${session.joinCode} | ${session.phase} | level ${st?.levelIndex ?? "-"} | ` +
+      (st?.players ?? []).map((p) => `${p.name}: ${p.lives}/${p.maxLives} lives, ${p.score} pts, ${p.powers.map((w) => w.power).join("+")}`).join(" | ")
+    : "";
+  rows.forEach((row, y) => [...row].forEach((ch, x) => {
+    ctx.fillStyle = ch === "D" && st?.doorOpen ? "#6c6" : colors[ch] ?? "#2b2b2b";
+    ctx.fillRect(x * T, y * T, T, T);
+  }));
+  const dot = (x, y, fill, txt) => {
+    ctx.fillStyle = fill; ctx.fillRect(x * T + 4, y * T + 4, T - 8, T - 8);
+    ctx.fillStyle = "#000"; ctx.fillText(txt, x * T + 10, y * T + 21);
+  };
+  ctx.font = "16px monospace";
+  st?.levers.forEach((l) => dot(l.x, l.y, l.isActive ? "#ff0" : "#770", "L"));
+  st?.items.forEach((i) => dot(i.x, i.y, "#f8f", (i.power ?? i.kind)[0]));
+  st?.zombies.forEach((z) => dot(z.x, z.y, "#e33", "Z"));
+  st?.players.forEach((p) => dot(p.x, p.y, p.slot === 1 ? "#4cf" : "#fa4", p.slot));
+})();
+
+const keys = { ArrowUp: "Up", ArrowDown: "Down", ArrowLeft: "Left", ArrowRight: "Right" }, held = [];
+const send = () => conn?.invoke("SetDirection", held.at(-1) ?? "None");
+addEventListener("keydown", (e) => {
+  if (e.key === "r" && conn && confirm("Restart level?")) return conn.invoke("RequestRestart");
+  const d = keys[e.key];
+  if (d) { e.preventDefault(); if (!held.includes(d)) { held.push(d); send(); } }
+});
+addEventListener("keyup", (e) => { const d = keys[e.key]; if (d && held.includes(d)) { held.splice(held.indexOf(d), 1); send(); } });
+addEventListener("blur", () => { if (held.length) { held.length = 0; send(); } });
+</script>

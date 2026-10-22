@@ -57,6 +57,7 @@ _ = ContentCatalog.Instance;
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseCors();
+app.UseStaticFiles(); // wwwroot/play.html: minimal test client
 
 app.MapOpenApi(); // /openapi/v1.json
 app.MapScalarApiReference(options => options
