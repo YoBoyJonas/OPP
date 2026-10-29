@@ -19,8 +19,8 @@ public class FacadeRequirementTests
 
         Assert.Contains("GameHub", clients);
         Assert.Contains("GameLoopService", clients);
-        Assert.Contains("SessionEndpoints", clients);
-        Assert.Contains("GameplayEndpoints", clients);
+        Assert.Contains("SessionsController", clients);
+        Assert.Contains("GameplayController", clients);
     }
 
     /// <summary>

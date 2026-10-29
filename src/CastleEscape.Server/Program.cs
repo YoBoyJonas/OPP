@@ -3,11 +3,16 @@ using CastleEscape.Game.Content;
 using CastleEscape.Game.Generation;
 using CastleEscape.Game.Sessions;
 using CastleEscape.Game.Messaging;
-using CastleEscape.Server.Endpoints;
+using CastleEscape.Server.Controllers;
+using CastleEscape.Server.Errors;
 using CastleEscape.Server.Hubs;
 using CastleEscape.Server.OpenApi;
 using CastleEscape.Server.Options;
 using CastleEscape.Server.Realtime;
+using System.Reflection;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Options;
 using Scalar.AspNetCore;
 
@@ -22,6 +27,33 @@ AddValidatedOptions<CorsSettings>(builder.Services, CorsSettings.SectionName);
 AddValidatedOptions<DevToolsOptions>(builder.Services, DevToolsOptions.SectionName);
 
 builder.Services.ConfigureHttpJsonOptions(options => JsonDefaults.Apply(options.SerializerOptions));
+// The dev controller is left out entirely when DevTools:Enabled is false, so /api/dev does not exist.
+var devToolsEnabled = builder.Configuration.GetValue<bool>($"{DevToolsOptions.SectionName}:{nameof(DevToolsOptions.Enabled)}");
+// Controllers read and write application/json only (no text/plain or text/json), as the Minimal API endpoints did.
+// Output keeps application/*+json so ProblemDetails errors go out as application/problem+json.
+builder.Services.AddControllers(options =>
+    {
+        options.Conventions.Add(new ApiDocumentationConvention()); // OpenAPI text lives in OpenApi/ApiDocumentation.cs
+        options.OutputFormatters.RemoveType<StringOutputFormatter>();
+        foreach (var json in options.InputFormatters.OfType<SystemTextJsonInputFormatter>())
+        {
+            json.SupportedMediaTypes.Remove("text/json");
+            json.SupportedMediaTypes.Remove("application/*+json");
+        }
+        foreach (var json in options.OutputFormatters.OfType<SystemTextJsonOutputFormatter>())
+        {
+            json.SupportedMediaTypes.Remove("text/json");
+        }
+    })
+    .AddJsonOptions(options => JsonDefaults.Apply(options.JsonSerializerOptions))
+    .ConfigureApiBehaviorOptions(options => options.InvalidModelStateResponseFactory = GameExceptionHandler.InvalidModelState)
+    .ConfigureApplicationPartManager(parts =>
+    {
+        if (!devToolsEnabled)
+        {
+            parts.FeatureProviders.Add(new WithoutController<DevController>());
+        }
+    });
 builder.Services.AddSignalR().AddJsonProtocol(options => JsonDefaults.Apply(options.PayloadSerializerOptions));
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GameExceptionHandler>();
@@ -106,20 +138,13 @@ app.MapScalarApiReference(options => options
     .EnablePersistentAuthentication()); // /scalar
 app.MapGet("/", () => Results.Redirect("/scalar")).ExcludeFromDescription();
 
-app.MapDiagnosticsEndpoints();
-app.MapContentEndpoints();
-app.MapLevelEndpoints();
-app.MapSessionEndpoints();
-app.MapGameplayEndpoints();
-app.MapRealtimeEndpoints();
-app.MapPatternEndpoints();
+app.MapControllers();
 if (app.Services.GetRequiredService<IOptions<DevToolsOptions>>().Value.Enabled)
 {
-    app.MapDevEndpoints();
     app.UseStaticFiles(); // wwwroot holds only the playground, a dev tool
     app.MapGet("/playground", () => Results.Redirect("/playground/index.html")).ExcludeFromDescription();
 }
-app.MapHub<GameHub>(RealtimeEndpoints.HubPath);
+app.MapHub<GameHub>(RealtimeController.HubPath);
 
 app.Run();
 
@@ -130,3 +155,10 @@ static void AddValidatedOptions<TOptions>(IServiceCollection services, string se
         .BindConfiguration(section)
         .ValidateDataAnnotations()
         .ValidateOnStart();
+
+/// <summary>Removes one controller from the app, as if it did not exist.</summary>
+sealed class WithoutController<TController> : IApplicationFeatureProvider<ControllerFeature>
+{
+    public void PopulateFeature(IEnumerable<ApplicationPart> parts, ControllerFeature feature) =>
+        feature.Controllers.Remove(typeof(TController).GetTypeInfo());
+}

@@ -35,7 +35,7 @@ GET http://localhost:5035/api/levels/6/preview?seed=42
 generated. The seed decides the layout; the theme comes from `levels.json`, not from the seed.
 
 ```text
-LevelEndpoints.Preview                      (server, HTTP)
+LevelsController.Preview                    (server, HTTP)
   └─ LevelPreviewer.Preview                 (finds level 6, converts the result to JSON data)
        └─ LevelProvider.Generate            (client of both patterns)
             ├─ ThemeFactories.For(Crypt)    → new CryptThemeFactory(...)        Abstract Factory
@@ -50,7 +50,7 @@ LevelEndpoints.Preview                      (server, HTTP)
 
 ### Step 1 The endpoint
 
-[LevelEndpoints.cs](../src/CastleEscape.Server/Endpoints/LevelEndpoints.cs), method `Preview`, only
+[LevelsController.cs](../src/CastleEscape.Server/Controllers/LevelsController.cs), method `Preview`, only
 forwards the numbers: `levels.Preview(index, seed ?? 1, preset)`.
 
 ### Step 2 The previewer
@@ -153,7 +153,7 @@ the same director, but a `PresetLevelBuilder` that reads the map from `content/p
 
 | Order | Code | What happens |
 |---|---|---|
-| 1 | [SessionEndpoints](../src/CastleEscape.Server/Endpoints/SessionEndpoints.cs), `PUT /api/sessions/{sessionId}/players/me/character` | A player picks a character. |
+| 1 | [SessionsController](../src/CastleEscape.Server/Controllers/SessionsController.cs), `PUT /api/sessions/{sessionId}/players/me/character` | A player picks a character. |
 | 2 | [GameFacade.SelectCharacter](../src/CastleEscape.Game/Sessions/GameFacade.cs) | Forwards to the session. |
 | 3 | [GameSession.SelectCharacter](../src/CastleEscape.Game/Sessions/GameSession.cs) | When both players are ready, the phase becomes `LoadingLevel`. |
 | 4 | `GameSession.LoadLevel` (next tick) | Calls `_levels.CreateLevel(index, seed)`. |

@@ -6,6 +6,596 @@
     "version": "v1"
   },
   "paths": {
+    "/api/content": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Content summary",
+        "description": "Counts of every content type and a hash that changes whenever a content file changes.",
+        "operationId": "GetContentSummary",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/characters": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Playable characters",
+        "description": "At least 3 characters that differ in lives, move speed and jump parameter (PLR-1).",
+        "operationId": "GetCharacters",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CharacterDefinition"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/consumables": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Item types",
+        "description": "Health (\u002Blives), Reward (\u002Bscore) and Power (temporary power) items (ITM-1). The \u0060type\u0060 field tells the kind; Power items carry a \u0060grant\u0060.",
+        "operationId": "GetConsumables",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Consumable"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/powers": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Base powers and super powers",
+        "description": "Jump, Sprint and Swim with their duration and the items that grant them; JumpDash and FastSwim with the base powers they need (PWR-1, PWR-2).",
+        "operationId": "GetPowers",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PowerSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/combos": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Super-power combos",
+        "description": "Two different active base powers create a super power (PWR-2).",
+        "operationId": "GetCombos",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PowerCombo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/obstacles": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Obstacle types",
+        "description": "Wall (never passable), Water (needs Swim), Pit (needs Jump) (MOV-2).",
+        "operationId": "GetObstacles",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Obstacle"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/zombies": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Zombie types",
+        "description": "Speed, contact damage and the default movement strategy of each zombie type.",
+        "operationId": "GetZombies",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ZombieDefinition"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/levels": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "Level definitions",
+        "description": "The fixed sequence of 10 levels: theme, obstacle/zombie/item counts and spawn tables.",
+        "operationId": "GetLevelDefinitions",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LevelDefinition"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/content/levels/{index}": {
+      "get": {
+        "tags": [
+          "Content"
+        ],
+        "summary": "One level definition",
+        "description": "The level at a 1-based position in the sequence.",
+        "operationId": "GetLevelDefinition",
+        "parameters": [
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LevelDefinition"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dev/quickstart": {
+      "post": {
+        "tags": [
+          "Dev"
+        ],
+        "summary": "Two players, characters picked, level 1 starting",
+        "description": "Skips the lobby: creates a session with Ana and Ben, picks their characters and returns both player tokens and hub URLs. Open each hub URL (or the playground) in its own tab.",
+        "operationId": "DevQuickstart",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DevQuickstartRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevQuickstartResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dev/sessions/{sessionId}/undo": {
+      "post": {
+        "tags": [
+          "Dev"
+        ],
+        "summary": "Undo the last command",
+        "description": "Undoes the most recent command of the session, or of \u0060playerId\u0060 (Command pattern). Undoing a restart brings back the level as it was before it.",
+        "operationId": "DevUndoLastCommand",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "playerId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UndoResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dev/sessions/{sessionId}/zombies/strategy": {
+      "put": {
+        "tags": [
+          "Dev"
+        ],
+        "summary": "Switch every zombie\u0027s chase strategy",
+        "description": "Greedy, Bfs, AStar or Predictive, from the next tick (Strategy pattern). It is a command, so \u0060/undo\u0060 switches the zombies back. The tick state shows each zombie\u0027s \u0060strategy\u0060.",
+        "operationId": "DevSetZombieStrategy",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ZombieStrategyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dev/sessions/{sessionId}/players/{playerId}/powers": {
+      "post": {
+        "tags": [
+          "Dev"
+        ],
+        "summary": "Give a player a power",
+        "description": "Jump, Sprint or Swim, as if an item had been picked up: stacks and starts combos (Decorator pattern). Undoable.",
+        "operationId": "DevGivePower",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "playerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GivePowerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dev/sessions/{sessionId}/skip-level": {
+      "post": {
+        "tags": [
+          "Dev"
+        ],
+        "summary": "Complete the current level",
+        "description": "Ends the level as if both players had reached the exit; the next level loads after the usual pause.",
+        "operationId": "DevSkipLevel",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dev/patterns/prototype-clone-mode": {
+      "get": {
+        "tags": [
+          "Dev"
+        ],
+        "summary": "Current Prototype clone mode",
+        "operationId": "DevGetCloneMode",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloneModeDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Dev"
+        ],
+        "summary": "Switch deep/shallow level copies at runtime",
+        "description": "\u0060Deep\u0060 or \u0060Shallow\u0060 (Prototype pattern). Takes effect on the next level start or restart: with Shallow, collected items stay gone after a restart.",
+        "operationId": "DevSetCloneMode",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloneModeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloneModeDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Diagnostics"
+        ],
+        "summary": "Server health",
+        "description": "Liveness check. Returns 200 with version and uptime while the server is running.",
+        "operationId": "GetHealth",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/diagnostics/loop": {
       "get": {
         "tags": [
@@ -21,6 +611,630 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/LoopDiagnosticsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/diagnostics/sessions/{sessionId}/commands": {
+      "get": {
+        "tags": [
+          "Diagnostics"
+        ],
+        "summary": "Command history of a session",
+        "description": "The last 100 commands (inputs, steps, restarts, given powers), oldest first, with the tick each ran in and whether it was undone (Command pattern). An undone StartStep is a D7 tile conflict.",
+        "operationId": "GetCommandHistory",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CommandRecordDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/diagnostics/sessions/{sessionId}/events": {
+      "get": {
+        "tags": [
+          "Diagnostics"
+        ],
+        "summary": "Event log of a session",
+        "description": "The last 200 game events, oldest first, as recorded by the EventLogObserver (Observer pattern). Pass \u0060afterTick\u0060 to get only newer ones.",
+        "operationId": "GetEventLog",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "afterTick",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventLogEntryDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/{sessionId}/input": {
+      "post": {
+        "tags": [
+          "Gameplay"
+        ],
+        "summary": "Set the held direction",
+        "description": "Same as the hub\u0027s SetDirection. Send a direction on key down and None on key up. Applied at the start of the next tick.",
+        "operationId": "SubmitDirection",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "PlayerToken": []
+          }
+        ]
+      }
+    },
+    "/api/sessions/{sessionId}/restart": {
+      "post": {
+        "tags": [
+          "Gameplay"
+        ],
+        "summary": "Restart the current level",
+        "description": "D8: the level returns to its generated layout; both players\u0027 lives and score return to the level start.",
+        "operationId": "RestartLevel",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "PlayerToken": []
+          }
+        ]
+      }
+    },
+    "/api/sessions/{sessionId}/state": {
+      "get": {
+        "tags": [
+          "Gameplay"
+        ],
+        "summary": "Latest game state",
+        "description": "The latest per-tick state: players, zombies, items, levers, door. JSON by default; \u0060?format=xml\u0060 or \u0060Accept: application/xml\u0060 for XML (NET-2, Adapter pattern).",
+        "operationId": "GetGameState",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TickStateMessage"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/TickStateMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/{sessionId}/messages": {
+      "get": {
+        "tags": [
+          "Realtime"
+        ],
+        "summary": "Read buffered messages (polling channel)",
+        "description": "The same messages SignalR pushes, kept in a per-session buffer for clients without a hub connection (Bridge pattern: the polling channel). Pass the last \u0060seq\u0060 you saw as \u0060afterSeq\u0060. Each \u0060body\u0060 is serialized as \u0060format=json|xml\u0060. StateUpdated is buffered every \u0060Realtime:PollingStateEveryNthTick\u0060 ticks; events are never skipped.",
+        "operationId": "PollMessages",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "afterSeq",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int64"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolledMessagesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/{sessionId}/level": {
+      "get": {
+        "tags": [
+          "Gameplay"
+        ],
+        "summary": "Static layout of the current level",
+        "description": "Rows of map legend characters, plus the legend itself.",
+        "operationId": "GetLevelLayout",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LevelLayoutResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/{sessionId}/hud": {
+      "get": {
+        "tags": [
+          "Gameplay"
+        ],
+        "summary": "View game state (HUD table)",
+        "description": "Per player: lives, score, active powers with time left, combos, statistics. Plus level, levers and door status.",
+        "operationId": "GetHud",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HudResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/levels/presets": {
+      "get": {
+        "tags": [
+          "Levels"
+        ],
+        "summary": "Preset map names",
+        "description": "Hand-made maps in content/presets. Use one with \u0060preset=\u0060 on the preview, or for every level with \u0060Generation:PresetLevel\u0060.",
+        "operationId": "GetPresetNames",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/levels/{index}/preview": {
+      "get": {
+        "tags": [
+          "Levels"
+        ],
+        "summary": "Build and show a level",
+        "description": "Builds level \u0060index\u0060 (1-10) with the Builder pattern: the procedural builder for \u0060seed\u0060 (validated and retried like in a game), or the preset builder for \u0060preset\u0060. Returns the map rows, the themed obstacles and zombies (Abstract Factory, Strategy) and the validation report. Same seed, same level.",
+        "operationId": "PreviewLevel",
+        "parameters": [
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "seed",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "preset",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LevelPreviewResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns": {
+      "get": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "All P1 patterns",
+        "description": "Name, owner, the problem solved, the course requirement and how it is met, and the participants found in the code by the [DesignPattern] attribute.",
+        "operationId": "ListPatterns",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PatternDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/{pattern}": {
+      "get": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "One pattern",
+        "description": "Details and participants (type, role, source file) of one pattern, by key, e.g. \u0060decorator\u0060.",
+        "operationId": "GetPattern",
+        "parameters": [
+          {
+            "name": "pattern",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -393,21 +1607,21 @@
         }
       }
     },
-    "/health": {
+    "/api/realtime/protocol": {
       "get": {
         "tags": [
-          "Diagnostics"
+          "Realtime"
         ],
-        "summary": "Server health",
-        "description": "Liveness check. Returns 200 with version and uptime while the server is running.",
-        "operationId": "GetHealth",
+        "summary": "SignalR hub protocol",
+        "description": "Hub URL and query parameters, every server-to-client and client-to-server method with its payload and when it happens, every event type and error code, and the ordering rules.",
+        "operationId": "GetRealtimeProtocol",
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HealthResponse"
+                  "$ref": "#/components/schemas/RealtimeProtocolResponse"
                 }
               }
             }
@@ -415,432 +1629,21 @@
         }
       }
     },
-    "/api/diagnostics/sessions/{sessionId}/commands": {
+    "/api/realtime/examples": {
       "get": {
         "tags": [
-          "Diagnostics"
+          "Realtime"
         ],
-        "summary": "Command history of a session",
-        "description": "The last 100 commands (inputs, steps, restarts, given powers), oldest first, with the tick each ran in and whether it was undone (Command pattern). An undone StartStep is a D7 tile conflict.",
-        "operationId": "GetCommandHistory",
-        "parameters": [
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
+        "summary": "Example payload of every server message",
+        "description": "Captured from a short real session on a small map, keyed by client method name. This is exactly the JSON SignalR sends.",
+        "operationId": "GetRealtimeExamples",
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/CommandRecordDto"
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/diagnostics/sessions/{sessionId}/events": {
-      "get": {
-        "tags": [
-          "Diagnostics"
-        ],
-        "summary": "Event log of a session",
-        "description": "The last 200 game events, oldest first, as recorded by the EventLogObserver (Observer pattern). Pass \u0060afterTick\u0060 to get only newer ones.",
-        "operationId": "GetEventLog",
-        "parameters": [
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "afterTick",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/EventLogEntryDto"
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/content": {
-      "get": {
-        "tags": [
-          "Content"
-        ],
-        "summary": "Content summary",
-        "description": "Counts of every content type and a hash that changes whenever a content file changes.",
-        "operationId": "GetContentSummary",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ContentSummaryResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/content/characters": {
-      "get": {
-        "tags": [
-          "Content"
-        ],
-        "summary": "Playable characters",
-        "description": "At least 3 characters that differ in lives, move speed and jump parameter (PLR-1).",
-        "operationId": "GetCharacters",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/CharacterDefinition"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/content/consumables": {
-      "get": {
-        "tags": [
-          "Content"
-        ],
-        "summary": "Item types",
-        "description": "Health (\u002Blives), Reward (\u002Bscore) and Power (temporary power) items (ITM-1). The \u0060type\u0060 field tells the kind; Power items carry a \u0060grant\u0060.",
-        "operationId": "GetConsumables",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Consumable"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/content/powers": {
-      "get": {
-        "tags": [
-          "Content"
-        ],
-        "summary": "Base powers and super powers",
-        "description": "Jump, Sprint and Swim with their duration and the items that grant them; JumpDash and FastSwim with the base powers they need (PWR-1, PWR-2).",
-        "operationId": "GetPowers",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PowerSummary"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/content/combos": {
-      "get": {
-        "tags": [
-          "Content"
-        ],
-        "summary": "Super-power combos",
-        "description": "Two different active base powers create a super power (PWR-2).",
-        "operationId": "GetCombos",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PowerCombo"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/content/obstacles": {
-      "get": {
-        "tags": [
-          "Content"
-        ],
-        "summary": "Obstacle types",
-        "description": "Wall (never passable), Water (needs Swim), Pit (needs Jump) (MOV-2).",
-        "operationId": "GetObstacles",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Obstacle"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/content/zombies": {
-      "get": {
-        "tags": [
-          "Content"
-        ],
-        "summary": "Zombie types",
-        "description": "Speed, contact damage and the default movement strategy of each zombie type.",
-        "operationId": "GetZombies",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ZombieDefinition"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/content/levels": {
-      "get": {
-        "tags": [
-          "Content"
-        ],
-        "summary": "Level definitions",
-        "description": "The fixed sequence of 10 levels: theme, obstacle/zombie/item counts and spawn tables.",
-        "operationId": "GetLevelDefinitions",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/LevelDefinition"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/content/levels/{index}": {
-      "get": {
-        "tags": [
-          "Content"
-        ],
-        "summary": "One level definition",
-        "description": "The level at a 1-based position in the sequence.",
-        "operationId": "GetLevelDefinition",
-        "parameters": [
-          {
-            "name": "index",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LevelDefinition"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/levels/presets": {
-      "get": {
-        "tags": [
-          "Levels"
-        ],
-        "summary": "Preset map names",
-        "description": "Hand-made maps in content/presets. Use one with \u0060preset=\u0060 on the preview, or for every level with \u0060Generation:PresetLevel\u0060.",
-        "operationId": "GetPresetNames",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/levels/{index}/preview": {
-      "get": {
-        "tags": [
-          "Levels"
-        ],
-        "summary": "Build and show a level",
-        "description": "Builds level \u0060index\u0060 (1-10) with the Builder pattern: the procedural builder for \u0060seed\u0060 (validated and retried like in a game), or the preset builder for \u0060preset\u0060. Returns the map rows, the themed obstacles and zombies (Abstract Factory, Strategy) and the validation report. Same seed, same level.",
-        "operationId": "PreviewLevel",
-        "parameters": [
-          {
-            "name": "index",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "seed",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32"
-            }
-          },
-          {
-            "name": "preset",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LevelPreviewResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "type": "object"
                 }
               }
             }
@@ -1135,799 +1938,6 @@
             "PlayerToken": []
           }
         ]
-      }
-    },
-    "/api/sessions/{sessionId}/input": {
-      "post": {
-        "tags": [
-          "Gameplay"
-        ],
-        "summary": "Set the held direction",
-        "description": "Same as the hub\u0027s SetDirection. Send a direction on key down and None on key up. Applied at the start of the next tick.",
-        "operationId": "SubmitDirection",
-        "parameters": [
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DirectionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "202": {
-            "description": "Accepted"
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "PlayerToken": []
-          }
-        ]
-      }
-    },
-    "/api/sessions/{sessionId}/restart": {
-      "post": {
-        "tags": [
-          "Gameplay"
-        ],
-        "summary": "Restart the current level",
-        "description": "D8: the level returns to its generated layout; both players\u0027 lives and score return to the level start.",
-        "operationId": "RestartLevel",
-        "parameters": [
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "202": {
-            "description": "Accepted"
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "PlayerToken": []
-          }
-        ]
-      }
-    },
-    "/api/sessions/{sessionId}/state": {
-      "get": {
-        "tags": [
-          "Gameplay"
-        ],
-        "summary": "Latest game state",
-        "description": "The latest per-tick state: players, zombies, items, levers, door. JSON by default; \u0060?format=xml\u0060 or \u0060Accept: application/xml\u0060 for XML (NET-2, Adapter pattern).",
-        "operationId": "GetGameState",
-        "parameters": [
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "format",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TickStateMessage"
-                }
-              },
-              "application/xml": {
-                "schema": {
-                  "$ref": "#/components/schemas/TickStateMessage"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/sessions/{sessionId}/messages": {
-      "get": {
-        "tags": [
-          "Realtime"
-        ],
-        "summary": "Read buffered messages (polling channel)",
-        "description": "The same messages SignalR pushes, kept in a per-session buffer for clients without a hub connection (Bridge pattern: the polling channel). Pass the last \u0060seq\u0060 you saw as \u0060afterSeq\u0060. Each \u0060body\u0060 is serialized as \u0060format=json|xml\u0060. StateUpdated is buffered every \u0060Realtime:PollingStateEveryNthTick\u0060 ticks; events are never skipped.",
-        "operationId": "PollMessages",
-        "parameters": [
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "afterSeq",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int64"
-            }
-          },
-          {
-            "name": "format",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PolledMessagesResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/sessions/{sessionId}/level": {
-      "get": {
-        "tags": [
-          "Gameplay"
-        ],
-        "summary": "Static layout of the current level",
-        "description": "Rows of map legend characters, plus the legend itself.",
-        "operationId": "GetLevelLayout",
-        "parameters": [
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LevelLayoutResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/sessions/{sessionId}/hud": {
-      "get": {
-        "tags": [
-          "Gameplay"
-        ],
-        "summary": "View game state (HUD table)",
-        "description": "Per player: lives, score, active powers with time left, combos, statistics. Plus level, levers and door status.",
-        "operationId": "GetHud",
-        "parameters": [
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HudResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/realtime/protocol": {
-      "get": {
-        "tags": [
-          "Realtime"
-        ],
-        "summary": "SignalR hub protocol",
-        "description": "Hub URL and query parameters, every server-to-client and client-to-server method with its payload and when it happens, every event type and error code, and the ordering rules.",
-        "operationId": "GetRealtimeProtocol",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RealtimeProtocolResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/realtime/examples": {
-      "get": {
-        "tags": [
-          "Realtime"
-        ],
-        "summary": "Example payload of every server message",
-        "description": "Captured from a short real session on a small map, keyed by client method name. This is exactly the JSON SignalR sends.",
-        "operationId": "GetRealtimeExamples",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns": {
-      "get": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "All P1 patterns",
-        "description": "Name, owner, the problem solved, the course requirement and how it is met, and the participants found in the code by the [DesignPattern] attribute.",
-        "operationId": "ListPatterns",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PatternDto"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/{pattern}": {
-      "get": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "One pattern",
-        "description": "Details and participants (type, role, source file) of one pattern, by key, e.g. \u0060decorator\u0060.",
-        "operationId": "GetPattern",
-        "parameters": [
-          {
-            "name": "pattern",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDto"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/dev/quickstart": {
-      "post": {
-        "tags": [
-          "Dev"
-        ],
-        "summary": "Two players, characters picked, level 1 starting",
-        "description": "Skips the lobby: creates a session with Ana and Ben, picks their characters and returns both player tokens and hub URLs. Open each hub URL (or the playground) in its own tab.",
-        "operationId": "DevQuickstart",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "oneOf": [
-                  {
-                    "type": "null"
-                  },
-                  {
-                    "$ref": "#/components/schemas/DevQuickstartRequest"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DevQuickstartResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/dev/patterns/prototype-clone-mode": {
-      "get": {
-        "tags": [
-          "Dev"
-        ],
-        "summary": "Current Prototype clone mode",
-        "operationId": "DevGetCloneMode",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CloneModeDto"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "Dev"
-        ],
-        "summary": "Switch deep/shallow level copies at runtime",
-        "description": "\u0060Deep\u0060 or \u0060Shallow\u0060 (Prototype pattern). Takes effect on the next level start or restart: with Shallow, collected items stay gone after a restart.",
-        "operationId": "DevSetCloneMode",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CloneModeDto"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CloneModeDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/dev/sessions/{sessionId}/undo": {
-      "post": {
-        "tags": [
-          "Dev"
-        ],
-        "summary": "Undo the last command",
-        "description": "Undoes the most recent command of the session, or of \u0060playerId\u0060 (Command pattern). Undoing a restart brings back the level as it was before it.",
-        "operationId": "DevUndoLastCommand",
-        "parameters": [
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "playerId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UndoResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/dev/sessions/{sessionId}/zombies/strategy": {
-      "put": {
-        "tags": [
-          "Dev"
-        ],
-        "summary": "Switch every zombie\u0027s chase strategy",
-        "description": "Greedy, Bfs, AStar or Predictive, from the next tick (Strategy pattern). It is a command, so \u0060/undo\u0060 switches the zombies back. The tick state shows each zombie\u0027s \u0060strategy\u0060.",
-        "operationId": "DevSetZombieStrategy",
-        "parameters": [
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ZombieStrategyRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "202": {
-            "description": "Accepted"
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/dev/sessions/{sessionId}/players/{playerId}/powers": {
-      "post": {
-        "tags": [
-          "Dev"
-        ],
-        "summary": "Give a player a power",
-        "description": "Jump, Sprint or Swim, as if an item had been picked up: stacks and starts combos (Decorator pattern). Undoable.",
-        "operationId": "DevGivePower",
-        "parameters": [
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "playerId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GivePowerRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "202": {
-            "description": "Accepted"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/dev/sessions/{sessionId}/skip-level": {
-      "post": {
-        "tags": [
-          "Dev"
-        ],
-        "summary": "Complete the current level",
-        "description": "Ends the level as if both players had reached the exit; the next level loads after the usual pause.",
-        "operationId": "DevSkipLevel",
-        "parameters": [
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
       }
     }
   },

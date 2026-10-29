@@ -2,7 +2,7 @@ namespace CastleEscape.Server.OpenApi;
 
 /// <summary>
 /// Every OpenAPI tag and the Scalar sidebar group it belongs to (<c>x-tagGroups</c>).
-/// Endpoints use these constants in <c>.WithTags(...)</c> so names never drift.
+/// Controllers use these constants in <c>[Tags(...)]</c> so names never drift.
 /// </summary>
 public static class ApiTags
 {
