@@ -3,24 +3,27 @@ using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Generation.Themes;
 using CastleEscape.Game.Items;
-using CastleEscape.Game.Patterns;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Generation;
 
 /// <summary>
-/// Builds a random level from a <see cref="LevelDefinition"/> with a seeded RNG. Same seed, same level.
+/// Concrete builder: a random level from a <see cref="LevelDefinition"/> with a seeded RNG. Same seed, same level.
 /// The exit is in an alcove on the top or bottom border; the players start on the opposite side.
+/// Walls, water, pits and zombies come from the theme factory it is given (Abstract Factory).
 /// </summary>
-[DesignPattern("Builder", "ConcreteBuilder")]
-public sealed class ProceduralLevelBuilder(ContentCatalog catalog, GameOptions game, GenerationOptions generation) : ILevelBuilder
+public sealed class ProceduralLevelBuilder : ILevelBuilder
 {
-    private LevelDefinition _definition = null!;
-    private IThemeFactory _theme = null!;
-    private Random _rng = null!;
-    private Grid _grid = null!;
-    private LevelState _level = null!;
-    private Wall _wall = null!;
+    private readonly ContentCatalog _catalog;
+    private readonly LevelDefinition _definition;
+    private readonly IThemeFactory _theme;
+    private readonly int _minZombieDistanceFromStart;
+    private readonly Random _rng;
+    private readonly Grid _grid;
+    private readonly LevelState _level;
+    private readonly Wall _wall;
+
+    // Tiles that must stay free (door entry, start tiles, levers) and tiles already used by an entity.
     private readonly HashSet<GridPos> _reserved = [];
     private readonly HashSet<GridPos> _occupied = [];
 
@@ -30,19 +33,17 @@ public sealed class ProceduralLevelBuilder(ContentCatalog catalog, GameOptions g
     private GridPos _start1, _start2;
     private readonly List<GridPos> _levers = [];
 
-    public bool IsRandom => true;
-
-    public void Reset(LevelDefinition definition, int seed, IThemeFactory theme)
+    public ProceduralLevelBuilder(ContentCatalog catalog, LevelDefinition definition, IThemeFactory theme, int seed,
+        GameOptions game, GenerationOptions generation)
     {
+        _catalog = catalog;
         _definition = definition;
         _theme = theme;
+        _minZombieDistanceFromStart = generation.MinZombieDistanceFromStart;
         _rng = new Random(seed);
         _grid = new Grid(definition.RoomSize?.Width ?? game.GridWidth, definition.RoomSize?.Height ?? game.GridHeight);
         _level = new LevelState(definition, seed, _grid);
         _wall = theme.CreateWall();
-        _reserved.Clear();
-        _occupied.Clear();
-        _levers.Clear();
     }
 
     private int Width => _grid.Width;
@@ -164,12 +165,23 @@ public sealed class ProceduralLevelBuilder(ContentCatalog catalog, GameOptions g
         var placed = 0;
         for (var tries = 0; tries < _definition.ObstacleCount * 10 && placed < _definition.ObstacleCount; tries++)
         {
-            var obstacle = _theme.CreateObstacle(PickWeighted(_definition.ObstacleTable, id => catalog.GetObstacle(id)).Kind);
-            if (obstacle.Kind == ObstacleKind.Wall)
+            var kind = PickWeighted(_definition.ObstacleTable, _catalog.GetObstacle).Kind;
+            Obstacle obstacle;
+            TerrainKind terrain;
+            switch (kind)
             {
-                continue;
+                case ObstacleKind.Water:
+                    obstacle = _theme.CreateWater();
+                    terrain = TerrainKind.Water;
+                    break;
+                case ObstacleKind.Pit:
+                    obstacle = _theme.CreatePit();
+                    terrain = TerrainKind.Pit;
+                    break;
+                default:
+                    continue; // walls are placed by BuildTerrain
             }
-            var terrain = obstacle.Kind == ObstacleKind.Water ? TerrainKind.Water : TerrainKind.Pit;
+
             var patch = GrowPatch(_rng.Next(obstacle.MinSize, obstacle.MaxSize + 1));
             if (patch.Count == 0)
             {
@@ -201,7 +213,7 @@ public sealed class ProceduralLevelBuilder(ContentCatalog catalog, GameOptions g
         _occupied.UnionWith(_reserved);
         for (var i = 0; i < _definition.PickupCount; i++)
         {
-            var consumable = PickWeighted(_definition.ConsumableTable, id => catalog.GetConsumable(id));
+            var consumable = PickWeighted(_definition.ConsumableTable, _catalog.GetConsumable);
             var area = consumable.Kind == ConsumableKind.Power ? reachNoPower : reachAnyPower;
             var spots = area.Keys.Where(p => _grid.GetTerrain(p) == TerrainKind.Floor && !_occupied.Contains(p)).ToList();
             if (spots.Count == 0)
@@ -219,8 +231,8 @@ public sealed class ProceduralLevelBuilder(ContentCatalog catalog, GameOptions g
         var fromStart1 = PathFinder.Distances(_grid, _start1, Walkable);
         var fromStart2 = PathFinder.Distances(_grid, _start2, Walkable);
         var spots = fromStart1
-            .Where(kv => kv.Value >= generation.MinZombieDistanceFromStart
-                         && fromStart2.GetValueOrDefault(kv.Key, int.MaxValue) >= generation.MinZombieDistanceFromStart
+            .Where(kv => kv.Value >= _minZombieDistanceFromStart
+                         && fromStart2.GetValueOrDefault(kv.Key, int.MaxValue) >= _minZombieDistanceFromStart
                          && _grid.GetTerrain(kv.Key) == TerrainKind.Floor && !_occupied.Contains(kv.Key))
             .Select(kv => kv.Key)
             .ToList();
@@ -233,7 +245,7 @@ public sealed class ProceduralLevelBuilder(ContentCatalog catalog, GameOptions g
             var spot = spots[_rng.Next(spots.Count)];
             spots.Remove(spot);
             _occupied.Add(spot);
-            var type = PickWeighted(_definition.ZombieTable, id => catalog.GetZombie(id));
+            var type = PickWeighted(_definition.ZombieTable, _catalog.GetZombie);
             _level.AddZombie(_theme.CreateZombie(_level.NextEntityId("zombie"), type, spot));
         }
     }
@@ -264,6 +276,7 @@ public sealed class ProceduralLevelBuilder(ContentCatalog catalog, GameOptions g
         return patch;
     }
 
+    /// <summary>A random entry of a spawn table, more likely the higher its weight.</summary>
     private T PickWeighted<T>(IReadOnlyList<SpawnTableEntry> table, Func<string, T> resolve)
     {
         var roll = _rng.NextDouble() * table.Sum(e => e.Weight);

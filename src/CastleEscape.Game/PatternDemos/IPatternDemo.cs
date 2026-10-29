@@ -75,7 +75,10 @@ public sealed class DemoTrace(string pattern)
     public PatternDemoResponse Done(string summary) => new(pattern, summary, _lines.ToArray(), _evidence);
 }
 
-/// <summary>All demos, in the order the console runs them. Add a new demo here.</summary>
+/// <summary>
+/// All demos, in the order the console runs them. Add a new demo here.
+/// Abstract Factory and Builder are not here: they are plain console demos in <c>CastleEscape.PatternDemos</c>.
+/// </summary>
 public static class PatternDemoCatalog
 {
     public static IReadOnlyList<IPatternDemo> All { get; } =
@@ -83,8 +86,6 @@ public static class PatternDemoCatalog
         new SingletonDemo(),
         new AdapterDemo(),
         new FactoryMethodDemo(),
-        new AbstractFactoryDemo(),
-        new BuilderDemo(),
         new PrototypeDemo(),
         new StrategyDemo(),
         new DecoratorDemo(),

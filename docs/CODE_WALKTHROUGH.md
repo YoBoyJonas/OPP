@@ -43,7 +43,7 @@ Starting the backend starts the host and timer. A playable game starts through t
 1. `POST /api/sessions` creates a `GameSession` and the first player in `WaitingForPlayers`.
 2. `POST /api/sessions/join` adds the second player using the join code. The phase becomes `CharacterSelect`.
 3. Both players choose characters. `GameSession.SelectCharacter` sets `LoadingLevel`.
-4. The next tick calls `LoadLevel`. [LevelProvider](../src/CastleEscape.Game/Generation/LevelProvider.cs) selects a builder and [LevelDirector](../src/CastleEscape.Game/Generation/LevelDirector.cs) constructs and validates the map.
+4. The next tick calls `LoadLevel`. [LevelProvider](../src/CastleEscape.Game/Generation/LevelProvider.cs) picks the theme factory and a builder, [LevelDirector](../src/CastleEscape.Game/Generation/LevelDirector.cs) runs the build steps, and the provider validates the map (retrying with a new seed).
 5. [GameWorld.BeginLevel](../src/CastleEscape.Game/Sessions/GameWorld.cs) saves the pristine level and starts on a clone. The session changes to `Playing` and queues `LevelStarted`.
 
 No separate start call or SignalR connection is required. You can do all of this through Scalar.

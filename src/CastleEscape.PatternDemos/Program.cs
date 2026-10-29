@@ -1,18 +1,37 @@
 using CastleEscape.Game.PatternDemos;
+using CastleEscape.PatternDemos;
 
 // Runs every design pattern demo, or one by key with options:
 //   dotnet run --project src/CastleEscape.PatternDemos
 //   dotnet run --project src/CastleEscape.PatternDemos -- prototype --mode Shallow
+//   dotnet run --project src/CastleEscape.PatternDemos -- abstract-factory
 var demos = PatternDemoCatalog.All;
 var key = args.FirstOrDefault(a => !a.StartsWith("--", StringComparison.Ordinal));
 var options = DemoOptions.FromArgs(args.Skip(key is null ? 0 : 1));
+
+// Abstract Factory and Builder are plain console demos, not part of the demo catalog.
+if (key is null or "abstract-factory")
+{
+    Console.WriteLine("=== Abstract Factory ===");
+    AbstractFactoryDemo.Run();
+    Console.WriteLine();
+}
+if (key is null or "builder")
+{
+    Console.WriteLine("=== Builder ===");
+    BuilderDemo.Run();
+}
+if (key is "abstract-factory" or "builder")
+{
+    return 0;
+}
 
 if (key is not null)
 {
     demos = demos.Where(d => d.Key.Equals(key, StringComparison.OrdinalIgnoreCase)).ToList();
     if (demos.Count == 0)
     {
-        Console.WriteLine($"Unknown demo '{key}'. Available: {string.Join(", ", PatternDemoCatalog.All.Select(d => d.Key))}");
+        Console.WriteLine($"Unknown demo '{key}'. Available: abstract-factory, builder, {string.Join(", ", PatternDemoCatalog.All.Select(d => d.Key))}");
         return 1;
     }
 }

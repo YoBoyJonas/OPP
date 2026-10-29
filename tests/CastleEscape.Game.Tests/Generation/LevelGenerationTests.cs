@@ -10,13 +10,11 @@ namespace CastleEscape.Game.Tests.Generation;
 public class LevelGenerationTests
 {
     private static readonly GenerationOptions Generation = new();
-    private static readonly LevelDirector Director = new(TestGame.Catalog, Generation);
+    private static readonly LevelProvider Levels = new(TestGame.Catalog, new GameOptions(), Generation);
 
-    private static LevelState Generate(LevelDefinition definition, int seed) =>
-        Director.Construct(new ProceduralLevelBuilder(TestGame.Catalog, new GameOptions(), Generation), definition, seed);
+    private static LevelState Generate(LevelDefinition definition, int seed) => Levels.Generate(definition, seed);
 
-    private static LevelState Preset(string[] rows) =>
-        Director.Assemble(new PresetLevelBuilder(TestGame.Catalog, rows), TestGame.Catalog.GetLevel(1), seed: 0);
+    private static LevelState Preset(string[] rows) => new RowsLevelProvider(TestGame.Catalog, rows).CreateLevel(1, seed: 0);
 
     public static TheoryData<int> LevelIndexes => new(Enumerable.Range(1, 10));
 

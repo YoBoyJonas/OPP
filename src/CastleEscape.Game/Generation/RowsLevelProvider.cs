@@ -1,5 +1,5 @@
-using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
+using CastleEscape.Game.Generation.Themes;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Generation;
@@ -16,7 +16,8 @@ public sealed class RowsLevelProvider(ContentCatalog catalog, params string[][] 
     public LevelState CreateLevel(int levelIndex, int seed)
     {
         var rows = levels[Math.Min(levelIndex, levels.Length) - 1];
-        return new LevelDirector(catalog, new GenerationOptions())
-            .Assemble(new PresetLevelBuilder(catalog, rows), catalog.GetLevel(DefinitionIndex ?? levelIndex), seed);
+        var definition = catalog.GetLevel(DefinitionIndex ?? levelIndex);
+        var builder = new PresetLevelBuilder(catalog, definition, ThemeFactories.For(definition.Theme, catalog), rows, seed);
+        return new LevelDirector().Construct(builder);
     }
 }

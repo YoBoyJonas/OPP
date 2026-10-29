@@ -14,12 +14,7 @@ public static class DemoWorld
     public static ContentCatalog Catalog => ContentCatalog.Instance;
 
     public static LevelState TutorialLevel() =>
-        new LevelDirector(Catalog, new GenerationOptions()).Construct(PresetLevelBuilder.FromPreset(Catalog, "tutorial"), Catalog.GetLevel(1), seed: 42);
-
-    /// <summary>A randomly generated level with the default options.</summary>
-    public static LevelState Generate(LevelDefinition definition, int seed) =>
-        new LevelDirector(Catalog, new GenerationOptions())
-            .Construct(new ProceduralLevelBuilder(Catalog, new GameOptions(), new GenerationOptions()), definition, seed);
+        new LevelProvider(Catalog, new GameOptions(), new GenerationOptions()).BuildPreset(Catalog.GetLevel(1), "tutorial", seed: 42);
 
     public static (PlayerSlot P1, PlayerSlot P2) TwoPlayers(LevelState level)
     {

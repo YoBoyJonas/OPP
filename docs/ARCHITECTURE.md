@@ -94,10 +94,10 @@ players). Arrival on a tile can start the next step in the same tick, so movemen
 
 ## Levels
 
-`LevelProvider` asks `LevelDirector` (Builder) to build level *n* with a new builder:
-`ProceduralLevelBuilder` normally, `PresetLevelBuilder` when `Generation:PresetLevel` is set. The
-director picks the theme factory (Abstract Factory), runs the seven steps, validates (GEN-1..3,
-LVL-3, D5) and retries with a new seed. Items are placed through spawners (Factory Method). The
+`LevelProvider` picks the level's theme factory (Abstract Factory) and creates a builder with it:
+`ProceduralLevelBuilder` normally, `PresetLevelBuilder` when `Generation:PresetLevel` is set.
+`LevelDirector` (Builder) runs the seven steps; the provider then validates the level (GEN-1..3,
+LVL-3, D5) and retries with a new seed and a new builder. Items are placed through spawners (Factory Method). The
 session keeps the built level as a prototype and plays on a deep clone; restart is another
 clone (Prototype).
 
