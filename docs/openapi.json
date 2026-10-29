@@ -6,622 +6,6 @@
     "version": "v1"
   },
   "paths": {
-    "/api/diagnostics/loop": {
-      "get": {
-        "tags": [
-          "Diagnostics"
-        ],
-        "summary": "Game loop timings",
-        "description": "Tick rate, session counts, and the average and slowest time to tick all sessions once.",
-        "operationId": "GetLoopDiagnostics",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoopDiagnosticsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/singleton/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Singleton: thread safety",
-        "description": "Starts \u0060threads\u0060 threads through a Barrier; all read ContentCatalog.Instance at once. Reports distinct instances (1) and creations (1). With \u0060naive=true\u0060 the same race against a lock-free holder makes several.",
-        "operationId": "DemoSingleton",
-        "parameters": [
-          {
-            "name": "threads",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 64
-            }
-          },
-          {
-            "name": "naive",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": true
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/adapter/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Adapter: JSON / XML serializers",
-        "description": "Serializes a real tick state through IMessageSerializer (\u0060format=json|xml\u0060), round-trips it, and counts the members of the 3-member target against the adaptees JsonSerializer and DataContractSerializer.",
-        "operationId": "DemoAdapter",
-        "parameters": [
-          {
-            "name": "format",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": "xml"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/factory-method/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Factory Method: item spawners",
-        "description": "Spawns items on the tutorial level through ItemSpawners.For(consumable) (\u0060kind=health|reward|power|all\u0060), applies each to a player, and lists the product family (HealthItem, RewardItem, PowerItem).",
-        "operationId": "DemoFactoryMethod",
-        "parameters": [
-          {
-            "name": "kind",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": "all"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/abstract-factory/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Abstract Factory: level themes",
-        "description": "Creates the product family of each theme factory (\u0060theme=dungeon|crypt|both\u0060): wall, water, pit and zombie with their gameplay values. Then generates a real level of that theme and checks every placed part comes from the same family.",
-        "operationId": "DemoAbstractFactory",
-        "parameters": [
-          {
-            "name": "theme",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": "both"
-            }
-          },
-          {
-            "name": "seed",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 7
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/builder/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Builder: level construction",
-        "description": "LevelDirector builds level \u0060level\u0060 with ProceduralLevelBuilder (random, \u0060seed\u0060) and PresetLevelBuilder (the \u0060preset\u0060 map: tutorial or arena), using the same step order. Returns both results as map rows.",
-        "operationId": "DemoBuilder",
-        "parameters": [
-          {
-            "name": "level",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 1
-            }
-          },
-          {
-            "name": "seed",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 7
-            }
-          },
-          {
-            "name": "preset",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": "tutorial"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/prototype/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Prototype: deep vs shallow level copies",
-        "description": "Clones the tutorial level (\u0060mode=Deep|Shallow|both\u0060) and reports, for the level and its parts, the memory address and identity hash in the original and the clone. Then plays on the clone and restarts from the pristine level: deep restores it, shallow does not. The game itself uses \u0060Patterns:PrototypeCloneMode\u0060.",
-        "operationId": "DemoPrototype",
-        "parameters": [
-          {
-            "name": "mode",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": "both"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/strategy/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Strategy: zombie chase algorithms",
-        "description": "Puts the same zombie behind a wall and swaps its strategy (\u0060strategy=Greedy|Bfs|AStar|Predictive|all\u0060), running up to \u0060steps\u0060 steps with each. Greedy gets stuck, BFS and A* go around, Predictive aims where the player is heading. Also compares BFS and A* search cost.",
-        "operationId": "DemoStrategy",
-        "parameters": [
-          {
-            "name": "strategy",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": "all"
-            }
-          },
-          {
-            "name": "steps",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 12
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/decorator/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Decorator: power stacking",
-        "description": "Gives a character (\u0060character=warrior|scout|swimmer\u0060) \u0060sprints\u0060 Sprint pickups, then Jump and Swim. After each pickup it prints the decorator chain, its depth and the floor/water/pit speeds. The combos JumpDash and FastSwim are added as decorators too. Then all timers expire and the chain unwinds.",
-        "operationId": "DemoDecorator",
-        "parameters": [
-          {
-            "name": "character",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": "scout"
-            }
-          },
-          {
-            "name": "sprints",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 2
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/command/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Command: inputs with undo",
-        "description": "Plays a scripted two-player session. Both players step into the same tile, and the later StartStep command is undone (D7). One player collects a coin, the other restarts the level, and UndoLastCommand() (\u0060undoRestart\u0060) puts the pre-restart level, score and positions back. Returns the command history.",
-        "operationId": "DemoCommand",
-        "parameters": [
-          {
-            "name": "undoRestart",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": true
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/observer/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Observer: game events",
-        "description": "Plays a scripted session with an extra Recorder observer attached: a coin pickup and a zombie hit. Shows what each observer did (client messages, HUD statistics, event log, sound cues), then detaches the Recorder and shows it no longer receives events.",
-        "operationId": "DemoObserver",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/bridge/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Bridge: notifiers over channels",
-        "description": "Runs a real session for \u0060ticks\u0060 ticks and dispatches its messages through a StateNotifier and an EventNotifier on each of two channels: the polling buffer (states every \u0060pollingEvery\u0060 ticks) and a counting channel written for the demo. Shows what each pair sent and one polled message in \u0060format\u0060.",
-        "operationId": "DemoBridge",
-        "parameters": [
-          {
-            "name": "ticks",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 40
-            }
-          },
-          {
-            "name": "pollingEvery",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 5
-            }
-          },
-          {
-            "name": "format",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": "xml"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/patterns/facade/demo": {
-      "post": {
-        "tags": [
-          "Patterns"
-        ],
-        "summary": "Facade: a whole game through GameFacade",
-        "description": "Builds the subsystems once (registry, loop scheduler, content), then plays a full one-level game using only GameFacade: create, join, pick characters, walk both players onto the levers, through the door and onto the exits, to Victory. The same facade serves the hub and the REST endpoints.",
-        "operationId": "DemoFacade",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatternDemoResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/health": {
-      "get": {
-        "tags": [
-          "Diagnostics"
-        ],
-        "summary": "Server health",
-        "description": "Liveness check. Returns 200 with version and uptime while the server is running.",
-        "operationId": "GetHealth",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HealthResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/diagnostics/sessions/{sessionId}/commands": {
-      "get": {
-        "tags": [
-          "Diagnostics"
-        ],
-        "summary": "Command history of a session",
-        "description": "The last 100 commands (inputs, steps, restarts, given powers), oldest first, with the tick each ran in and whether it was undone (Command pattern). An undone StartStep is a D7 tile conflict.",
-        "operationId": "GetCommandHistory",
-        "parameters": [
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/CommandRecordDto"
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/diagnostics/sessions/{sessionId}/events": {
-      "get": {
-        "tags": [
-          "Diagnostics"
-        ],
-        "summary": "Event log of a session",
-        "description": "The last 200 game events, oldest first, as recorded by the EventLogObserver (Observer pattern). Pass \u0060afterTick\u0060 to get only newer ones.",
-        "operationId": "GetEventLog",
-        "parameters": [
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "afterTick",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/EventLogEntryDto"
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/content": {
       "get": {
         "tags": [
@@ -849,28 +233,13 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/api/levels/presets": {
-      "get": {
-        "tags": [
-          "Levels"
-        ],
-        "summary": "Preset map names",
-        "description": "Hand-made maps in content/presets. Use one with \u0060preset=\u0060 on the preview, or for every level with \u0060Generation:PresetLevel\u0060.",
-        "operationId": "GetPresetNames",
-        "responses": {
-          "200": {
-            "description": "OK",
+          },
+          "404": {
+            "description": "Not Found",
             "content": {
-              "application/json": {
+              "application/problem\u002Bjson": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -878,42 +247,78 @@
         }
       }
     },
-    "/api/levels/{index}/preview": {
-      "get": {
+    "/api/dev/quickstart": {
+      "post": {
         "tags": [
-          "Levels"
+          "Dev"
         ],
-        "summary": "Build and show a level",
-        "description": "Builds level \u0060index\u0060 (1-10) with the Builder pattern: the procedural builder for \u0060seed\u0060 (validated and retried like in a game), or the preset builder for \u0060preset\u0060. Returns the map rows, the themed obstacles and zombies (Abstract Factory, Strategy) and the validation report. Same seed, same level.",
-        "operationId": "PreviewLevel",
+        "summary": "Two players, characters picked, level 1 starting",
+        "description": "Skips the lobby: creates a session with Ana and Ben, picks their characters and returns both player tokens and hub URLs. Open each hub URL (or the playground) in its own tab.",
+        "operationId": "DevQuickstart",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DevQuickstartRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevQuickstartResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dev/sessions/{sessionId}/undo": {
+      "post": {
+        "tags": [
+          "Dev"
+        ],
+        "summary": "Undo the last command",
+        "description": "Undoes the most recent command of the session, or of \u0060playerId\u0060 (Command pattern). Undoing a restart brings back the level as it was before it.",
+        "operationId": "DevUndoLastCommand",
         "parameters": [
           {
-            "name": "index",
+            "name": "sessionId",
             "in": "path",
             "required": true,
             "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int32"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
-            "name": "seed",
+            "name": "playerId",
             "in": "query",
             "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32"
-            }
-          },
-          {
-            "name": "preset",
-            "in": "query",
-            "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -923,134 +328,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LevelPreviewResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/sessions": {
-      "post": {
-        "tags": [
-          "Sessions"
-        ],
-        "summary": "Create a session",
-        "description": "Creates a two-player session with you as player 1. Share the joinCode with player 2. Keep the playerToken: send it as X-Player-Token and as the hub\u0027s playerToken.",
-        "operationId": "CreateSession",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateSessionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateSessionResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "Sessions"
-        ],
-        "summary": "List sessions",
-        "description": "Every session on this server with its phase and player count.",
-        "operationId": "ListSessions",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SessionSummary"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/sessions/join": {
-      "post": {
-        "tags": [
-          "Sessions"
-        ],
-        "summary": "Join a session by code",
-        "description": "Joins as player 2. The session then waits for both players to pick a character.",
-        "operationId": "JoinSession",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/JoinSessionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/JoinSessionResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/UndoResponse"
                 }
               }
             }
@@ -1078,57 +356,14 @@
         }
       }
     },
-    "/api/sessions/{sessionId}": {
-      "get": {
-        "tags": [
-          "Sessions"
-        ],
-        "summary": "Get a session",
-        "description": "Phase, players, chosen characters and current level.",
-        "operationId": "GetSession",
-        "parameters": [
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SessionDto"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/sessions/{sessionId}/players/me/character": {
+    "/api/dev/sessions/{sessionId}/zombies/strategy": {
       "put": {
         "tags": [
-          "Sessions"
+          "Dev"
         ],
-        "summary": "Pick your character",
-        "description": "PLR-1. Allowed until the game starts. When both players have picked, the first level loads.",
-        "operationId": "SelectCharacter",
+        "summary": "Switch every zombie\u0027s chase strategy",
+        "description": "Greedy, Bfs, AStar or Predictive, from the next tick (Strategy pattern). It is a command, so \u0060/undo\u0060 switches the zombies back. The tick state shows each zombie\u0027s \u0060strategy\u0060.",
+        "operationId": "DevSetZombieStrategy",
         "parameters": [
           {
             "name": "sessionId",
@@ -1144,22 +379,70 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SelectCharacterRequest"
+                "$ref": "#/components/schemas/ZombieStrategyRequest"
               }
             }
           },
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK",
+          "202": {
+            "description": "Accepted"
+          },
+          "404": {
+            "description": "Not Found",
             "content": {
-              "application/json": {
+              "application/problem\u002Bjson": {
                 "schema": {
-                  "$ref": "#/components/schemas/SessionDto"
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/dev/sessions/{sessionId}/players/{playerId}/powers": {
+      "post": {
+        "tags": [
+          "Dev"
+        ],
+        "summary": "Give a player a power",
+        "description": "Jump, Sprint or Swim, as if an item had been picked up: stacks and starts combos (Decorator pattern). Undoable.",
+        "operationId": "DevGivePower",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "playerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GivePowerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted"
           },
           "400": {
             "description": "Bad Request",
@@ -1171,18 +454,8 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
@@ -1191,22 +464,17 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "PlayerToken": []
-          }
-        ]
+        }
       }
     },
-    "/api/sessions/{sessionId}/players/me": {
-      "delete": {
+    "/api/dev/sessions/{sessionId}/skip-level": {
+      "post": {
         "tags": [
-          "Sessions"
+          "Dev"
         ],
-        "summary": "Leave the session",
-        "description": "Ends the session for both players (phase Aborted); the other player is notified.",
-        "operationId": "LeaveSession",
+        "summary": "Complete the current level",
+        "description": "Ends the level as if both players had reached the exit; the next level loads after the usual pause.",
+        "operationId": "DevSkipLevel",
         "parameters": [
           {
             "name": "sessionId",
@@ -1222,8 +490,18 @@
           "204": {
             "description": "No Content"
           },
-          "401": {
-            "description": "Unauthorized",
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
@@ -1232,12 +510,216 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "PlayerToken": []
+        }
+      }
+    },
+    "/api/dev/patterns/prototype-clone-mode": {
+      "get": {
+        "tags": [
+          "Dev"
+        ],
+        "summary": "Current Prototype clone mode",
+        "operationId": "DevGetCloneMode",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloneModeDto"
+                }
+              }
+            }
           }
-        ]
+        }
+      },
+      "put": {
+        "tags": [
+          "Dev"
+        ],
+        "summary": "Switch deep/shallow level copies at runtime",
+        "description": "\u0060Deep\u0060 or \u0060Shallow\u0060 (Prototype pattern). Takes effect on the next level start or restart: with Shallow, collected items stay gone after a restart.",
+        "operationId": "DevSetCloneMode",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloneModeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloneModeDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Diagnostics"
+        ],
+        "summary": "Server health",
+        "description": "Liveness check. Returns 200 with version and uptime while the server is running.",
+        "operationId": "GetHealth",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/diagnostics/loop": {
+      "get": {
+        "tags": [
+          "Diagnostics"
+        ],
+        "summary": "Game loop timings",
+        "description": "Tick rate, session counts, and the average and slowest time to tick all sessions once.",
+        "operationId": "GetLoopDiagnostics",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoopDiagnosticsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/diagnostics/sessions/{sessionId}/commands": {
+      "get": {
+        "tags": [
+          "Diagnostics"
+        ],
+        "summary": "Command history of a session",
+        "description": "The last 100 commands (inputs, steps, restarts, given powers), oldest first, with the tick each ran in and whether it was undone (Command pattern). An undone StartStep is a D7 tile conflict.",
+        "operationId": "GetCommandHistory",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CommandRecordDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/diagnostics/sessions/{sessionId}/events": {
+      "get": {
+        "tags": [
+          "Diagnostics"
+        ],
+        "summary": "Event log of a session",
+        "description": "The last 200 game events, oldest first, as recorded by the EventLogObserver (Observer pattern). Pass \u0060afterTick\u0060 to get only newer ones.",
+        "operationId": "GetEventLog",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "afterTick",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventLogEntryDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/sessions/{sessionId}/input": {
@@ -1595,21 +1077,24 @@
         }
       }
     },
-    "/api/realtime/protocol": {
+    "/api/levels/presets": {
       "get": {
         "tags": [
-          "Realtime"
+          "Levels"
         ],
-        "summary": "SignalR hub protocol",
-        "description": "Hub URL and query parameters, every server-to-client and client-to-server method with its payload and when it happens, every event type and error code, and the ordering rules.",
-        "operationId": "GetRealtimeProtocol",
+        "summary": "Preset map names",
+        "description": "Hand-made maps in content/presets. Use one with \u0060preset=\u0060 on the preview, or for every level with \u0060Generation:PresetLevel\u0060.",
+        "operationId": "GetPresetNames",
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RealtimeProtocolResponse"
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 }
               }
             }
@@ -1617,21 +1102,72 @@
         }
       }
     },
-    "/api/realtime/examples": {
+    "/api/levels/{index}/preview": {
       "get": {
         "tags": [
-          "Realtime"
+          "Levels"
         ],
-        "summary": "Example payload of every server message",
-        "description": "Captured from a short real session on a small map, keyed by client method name. This is exactly the JSON SignalR sends.",
-        "operationId": "GetRealtimeExamples",
+        "summary": "Build and show a level",
+        "description": "Builds level \u0060index\u0060 (1-10) with the Builder pattern: the procedural builder for \u0060seed\u0060 (validated and retried like in a game), or the preset builder for \u0060preset\u0060. Returns the map rows, the themed obstacles and zombies (Abstract Factory, Strategy) and the validation report. Same seed, same level.",
+        "operationId": "PreviewLevel",
+        "parameters": [
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "seed",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "preset",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/LevelPreviewResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -1706,37 +1242,440 @@
         }
       }
     },
-    "/api/dev/quickstart": {
+    "/api/patterns/singleton/demo": {
       "post": {
         "tags": [
-          "Dev"
+          "Patterns"
         ],
-        "summary": "Two players, characters picked, level 1 starting",
-        "description": "Skips the lobby: creates a session with Ana and Ben, picks their characters and returns both player tokens and hub URLs. Open each hub URL (or the playground) in its own tab.",
-        "operationId": "DevQuickstart",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "oneOf": [
-                  {
-                    "type": "null"
-                  },
-                  {
-                    "$ref": "#/components/schemas/DevQuickstartRequest"
-                  }
-                ]
-              }
+        "summary": "Singleton: thread safety",
+        "description": "Starts \u0060threads\u0060 threads through a Barrier; all read ContentCatalog.Instance at once. Reports distinct instances (1) and creations (1). With \u0060naive=true\u0060 the same race against a lock-free holder makes several.",
+        "operationId": "DemoSingleton",
+        "parameters": [
+          {
+            "name": "threads",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 64
+            }
+          },
+          {
+            "name": "naive",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
             }
           }
-        },
+        ],
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DevQuickstartResponse"
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/adapter/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Adapter: JSON / XML serializers",
+        "description": "Serializes a real tick state through IMessageSerializer (\u0060format=json|xml\u0060), round-trips it, and counts the members of the 3-member target against the adaptees JsonSerializer and DataContractSerializer.",
+        "operationId": "DemoAdapter",
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "xml"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/factory-method/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Factory Method: item spawners",
+        "description": "Spawns items on the tutorial level through ItemSpawners.For(consumable) (\u0060kind=health|reward|power|all\u0060), applies each to a player, and lists the product family (HealthItem, RewardItem, PowerItem).",
+        "operationId": "DemoFactoryMethod",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "all"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/prototype/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Prototype: deep vs shallow level copies",
+        "description": "Clones the tutorial level (\u0060mode=Deep|Shallow|both\u0060) and reports, for the level and its parts, the memory address and identity hash in the original and the clone. Then plays on the clone and restarts from the pristine level: deep restores it, shallow does not. The game itself uses \u0060Patterns:PrototypeCloneMode\u0060.",
+        "operationId": "DemoPrototype",
+        "parameters": [
+          {
+            "name": "mode",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "both"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/strategy/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Strategy: zombie chase algorithms",
+        "description": "Puts the same zombie behind a wall and swaps its strategy (\u0060strategy=Greedy|Bfs|AStar|Predictive|all\u0060), running up to \u0060steps\u0060 steps with each. Greedy gets stuck, BFS and A* go around, Predictive aims where the player is heading. Also compares BFS and A* search cost.",
+        "operationId": "DemoStrategy",
+        "parameters": [
+          {
+            "name": "strategy",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "all"
+            }
+          },
+          {
+            "name": "steps",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 12
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/decorator/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Decorator: power stacking",
+        "description": "Gives a character (\u0060character=warrior|scout|swimmer\u0060) \u0060sprints\u0060 Sprint pickups, then Jump and Swim. After each pickup it prints the decorator chain, its depth and the floor/water/pit speeds. The combos JumpDash and FastSwim are added as decorators too. Then all timers expire and the chain unwinds.",
+        "operationId": "DemoDecorator",
+        "parameters": [
+          {
+            "name": "character",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "scout"
+            }
+          },
+          {
+            "name": "sprints",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 2
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/command/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Command: inputs with undo",
+        "description": "Plays a scripted two-player session. Both players step into the same tile, and the later StartStep command is undone (D7). One player collects a coin, the other restarts the level, and UndoLastCommand() (\u0060undoRestart\u0060) puts the pre-restart level, score and positions back. Returns the command history.",
+        "operationId": "DemoCommand",
+        "parameters": [
+          {
+            "name": "undoRestart",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/observer/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Observer: game events",
+        "description": "Plays a scripted session with an extra Recorder observer attached: a coin pickup and a zombie hit. Shows what each observer did (client messages, HUD statistics, event log, sound cues), then detaches the Recorder and shows it no longer receives events.",
+        "operationId": "DemoObserver",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/bridge/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Bridge: notifiers over channels",
+        "description": "Runs a real session for \u0060ticks\u0060 ticks and dispatches its messages through a StateNotifier and an EventNotifier on each of two channels: the polling buffer (states every \u0060pollingEvery\u0060 ticks) and a counting channel written for the demo. Shows what each pair sent and one polled message in \u0060format\u0060.",
+        "operationId": "DemoBridge",
+        "parameters": [
+          {
+            "name": "ticks",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 40
+            }
+          },
+          {
+            "name": "pollingEvery",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 5
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "xml"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/patterns/facade/demo": {
+      "post": {
+        "tags": [
+          "Patterns"
+        ],
+        "summary": "Facade: a whole game through GameFacade",
+        "description": "Builds the subsystems once (registry, loop scheduler, content), then plays a full one-level game using only GameFacade: create, join, pick characters, walk both players onto the levers, through the door and onto the exits, to Victory. The same facade serves the hub and the REST endpoints.",
+        "operationId": "DemoFacade",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatternDemoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/realtime/protocol": {
+      "get": {
+        "tags": [
+          "Realtime"
+        ],
+        "summary": "SignalR hub protocol",
+        "description": "Hub URL and query parameters, every server-to-client and client-to-server method with its payload and when it happens, every event type and error code, and the ordering rules.",
+        "operationId": "GetRealtimeProtocol",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RealtimeProtocolResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/realtime/examples": {
+      "get": {
+        "tags": [
+          "Realtime"
+        ],
+        "summary": "Example payload of every server message",
+        "description": "Captured from a short real session on a small map, keyed by client method name. This is exactly the JSON SignalR sends.",
+        "operationId": "GetRealtimeExamples",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Create a session",
+        "description": "Creates a two-player session with you as player 1. Share the joinCode with player 2. Keep the playerToken: send it as X-Player-Token and as the hub\u0027s playerToken.",
+        "operationId": "CreateSession",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSessionResponse"
                 }
               }
             }
@@ -1752,40 +1691,44 @@
             }
           }
         }
-      }
-    },
-    "/api/dev/patterns/prototype-clone-mode": {
+      },
       "get": {
         "tags": [
-          "Dev"
+          "Sessions"
         ],
-        "summary": "Current Prototype clone mode",
-        "operationId": "DevGetCloneMode",
+        "summary": "List sessions",
+        "description": "Every session on this server with its phase and player count.",
+        "operationId": "ListSessions",
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CloneModeDto"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SessionSummary"
+                  }
                 }
               }
             }
           }
         }
-      },
-      "put": {
+      }
+    },
+    "/api/sessions/join": {
+      "post": {
         "tags": [
-          "Dev"
+          "Sessions"
         ],
-        "summary": "Switch deep/shallow level copies at runtime",
-        "description": "\u0060Deep\u0060 or \u0060Shallow\u0060 (Prototype pattern). Takes effect on the next level start or restart: with Shallow, collected items stay gone after a restart.",
-        "operationId": "DevSetCloneMode",
+        "summary": "Join a session by code",
+        "description": "Joins as player 2. The session then waits for both players to pick a character.",
+        "operationId": "JoinSession",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CloneModeDto"
+                "$ref": "#/components/schemas/JoinSessionRequest"
               }
             }
           },
@@ -1797,7 +1740,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CloneModeDto"
+                  "$ref": "#/components/schemas/JoinSessionResponse"
                 }
               }
             }
@@ -1808,47 +1751,6 @@
               "application/problem\u002Bjson": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/dev/sessions/{sessionId}/undo": {
-      "post": {
-        "tags": [
-          "Dev"
-        ],
-        "summary": "Undo the last command",
-        "description": "Undoes the most recent command of the session, or of \u0060playerId\u0060 (Command pattern). Undoing a restart brings back the level as it was before it.",
-        "operationId": "DevUndoLastCommand",
-        "parameters": [
-          {
-            "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "playerId",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UndoResponse"
                 }
               }
             }
@@ -1876,14 +1778,14 @@
         }
       }
     },
-    "/api/dev/sessions/{sessionId}/zombies/strategy": {
-      "put": {
+    "/api/sessions/{sessionId}": {
+      "get": {
         "tags": [
-          "Dev"
+          "Sessions"
         ],
-        "summary": "Switch every zombie\u0027s chase strategy",
-        "description": "Greedy, Bfs, AStar or Predictive, from the next tick (Strategy pattern). It is a command, so \u0060/undo\u0060 switches the zombies back. The tick state shows each zombie\u0027s \u0060strategy\u0060.",
-        "operationId": "DevSetZombieStrategy",
+        "summary": "Get a session",
+        "description": "Phase, players, chosen characters and current level.",
+        "operationId": "GetSession",
         "parameters": [
           {
             "name": "sessionId",
@@ -1895,19 +1797,16 @@
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ZombieStrategyRequest"
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionDto"
+                }
               }
             }
-          },
-          "required": true
-        },
-        "responses": {
-          "202": {
-            "description": "Accepted"
           },
           "404": {
             "description": "Not Found",
@@ -1922,26 +1821,17 @@
         }
       }
     },
-    "/api/dev/sessions/{sessionId}/players/{playerId}/powers": {
-      "post": {
+    "/api/sessions/{sessionId}/players/me/character": {
+      "put": {
         "tags": [
-          "Dev"
+          "Sessions"
         ],
-        "summary": "Give a player a power",
-        "description": "Jump, Sprint or Swim, as if an item had been picked up: stacks and starts combos (Decorator pattern). Undoable.",
-        "operationId": "DevGivePower",
+        "summary": "Pick your character",
+        "description": "PLR-1. Allowed until the game starts. When both players have picked, the first level loads.",
+        "operationId": "SelectCharacter",
         "parameters": [
           {
             "name": "sessionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "playerId",
             "in": "path",
             "required": true,
             "schema": {
@@ -1954,15 +1844,22 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/GivePowerRequest"
+                "$ref": "#/components/schemas/SelectCharacterRequest"
               }
             }
           },
           "required": true
         },
         "responses": {
-          "202": {
-            "description": "Accepted"
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request",
@@ -1974,8 +1871,18 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found",
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem\u002Bjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
@@ -1984,17 +1891,22 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "PlayerToken": []
+          }
+        ]
       }
     },
-    "/api/dev/sessions/{sessionId}/skip-level": {
-      "post": {
+    "/api/sessions/{sessionId}/players/me": {
+      "delete": {
         "tags": [
-          "Dev"
+          "Sessions"
         ],
-        "summary": "Complete the current level",
-        "description": "Ends the level as if both players had reached the exit; the next level loads after the usual pause.",
-        "operationId": "DevSkipLevel",
+        "summary": "Leave the session",
+        "description": "Ends the session for both players (phase Aborted); the other player is notified.",
+        "operationId": "LeaveSession",
         "parameters": [
           {
             "name": "sessionId",
@@ -2010,18 +1922,8 @@
           "204": {
             "description": "No Content"
           },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem\u002Bjson": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/problem\u002Bjson": {
                 "schema": {
@@ -2030,7 +1932,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "PlayerToken": []
+          }
+        ]
       }
     }
   },

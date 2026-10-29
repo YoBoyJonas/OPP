@@ -1,24 +1,15 @@
-using CastleEscape.Game.Content;
-using CastleEscape.Game.Generation.Themes;
-using CastleEscape.Game.Patterns;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Generation;
 
 /// <summary>
-/// Builds a level step by step. <see cref="LevelDirector"/> calls the steps in a fixed order; each
-/// builder decides how to do them (random generation, or a hand-made map).
+/// Builder. Builds one level step by step; <see cref="LevelDirector"/> calls the steps in a fixed order.
+/// Each concrete builder decides how to do each step (random generation, or reading a hand-made map).
+/// A builder makes one level: create a new one for every level.
 /// A step that can't be done throws <see cref="LevelBuildException"/>.
 /// </summary>
-[DesignPattern("Builder", "Builder")]
 public interface ILevelBuilder
 {
-    /// <summary>True if the result depends on the seed, so a failed attempt is worth retrying with another one.</summary>
-    bool IsRandom { get; }
-
-    /// <summary>Starts a new level. The theme factory makes the walls, water, pits and zombies (Abstract Factory).</summary>
-    void Reset(LevelDefinition definition, int seed, IThemeFactory theme);
-
     /// <summary>Grid, outer walls and inner walls.</summary>
     void BuildTerrain();
 
@@ -40,6 +31,7 @@ public interface ILevelBuilder
     /// <summary>Zombies, away from the start tiles.</summary>
     void PlaceZombies();
 
+    /// <summary>The finished level.</summary>
     LevelState GetResult();
 }
 

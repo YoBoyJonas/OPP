@@ -2,7 +2,7 @@ using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Generation;
 using CastleEscape.Game.Generation.Themes;
-using CastleEscape.Game.PatternDemos;
+using CastleEscape.Game.Sessions;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Tests.Patterns;
@@ -11,39 +11,20 @@ public class BuilderTests
 {
     private static ContentCatalog Catalog => ContentCatalog.Instance;
     private static readonly GenerationOptions Generation = new();
-    private static readonly LevelDirector Director = new(Catalog, Generation);
+    private static readonly LevelProvider Levels = new(Catalog, new GameOptions(), Generation);
 
-    /// <summary>Records the calls it gets; wraps the tutorial preset so the result is a valid level.</summary>
-    private sealed class RecordingBuilder(bool isRandom, int failures = 0) : ILevelBuilder
+    /// <summary>Records the calls it gets; wraps the tutorial preset so the result is a real level.</summary>
+    private sealed class RecordingBuilder : ILevelBuilder
     {
-        private readonly PresetLevelBuilder _inner = PresetLevelBuilder.FromPreset(Catalog, "tutorial");
-        private int _failuresLeft = failures;
+        private readonly PresetLevelBuilder _inner = new(Catalog, Catalog.GetLevel(1),
+            ThemeFactories.For(Catalog.GetLevel(1).Theme, Catalog), PresetMaps.ReadRows("tutorial"));
 
         public List<string> Calls { get; } = [];
-        public List<int> Seeds { get; } = [];
-        public bool IsRandom => isRandom;
-
-        public void Reset(LevelDefinition definition, int seed, IThemeFactory theme)
-        {
-            Calls.Add(nameof(Reset));
-            Seeds.Add(seed);
-            _inner.Reset(definition, seed, theme);
-        }
 
         public void BuildTerrain() { Calls.Add(nameof(BuildTerrain)); _inner.BuildTerrain(); }
         public void PlaceExitAndDoor() { Calls.Add(nameof(PlaceExitAndDoor)); _inner.PlaceExitAndDoor(); }
         public void PlaceStartTiles() { Calls.Add(nameof(PlaceStartTiles)); _inner.PlaceStartTiles(); }
-
-        public void PlaceLevers()
-        {
-            Calls.Add(nameof(PlaceLevers));
-            if (_failuresLeft-- > 0)
-            {
-                throw new LevelBuildException("no room for two levers");
-            }
-            _inner.PlaceLevers();
-        }
-
+        public void PlaceLevers() { Calls.Add(nameof(PlaceLevers)); _inner.PlaceLevers(); }
         public void PlacePowerObstacles() { Calls.Add(nameof(PlacePowerObstacles)); _inner.PlacePowerObstacles(); }
         public void PlaceItems() { Calls.Add(nameof(PlaceItems)); _inner.PlaceItems(); }
         public void PlaceZombies() { Calls.Add(nameof(PlaceZombies)); _inner.PlaceZombies(); }
@@ -56,86 +37,79 @@ public class BuilderTests
     }
 
     [Fact]
-    public void AtLeastTwoConcreteBuilders()
-    {
-        var builders = typeof(ILevelBuilder).Assembly.GetTypes()
-            .Where(t => typeof(ILevelBuilder).IsAssignableFrom(t) && !t.IsAbstract && !t.IsInterface)
-            .ToList();
-
-        Assert.Contains(typeof(ProceduralLevelBuilder), builders);
-        Assert.Contains(typeof(PresetLevelBuilder), builders);
-    }
-
-    [Fact]
     public void Director_CallsTheStepsInOrder()
     {
-        var builder = new RecordingBuilder(isRandom: false);
+        var builder = new RecordingBuilder();
 
-        Director.Construct(builder, Catalog.GetLevel(1), seed: 5);
+        new LevelDirector().Construct(builder);
 
-        Assert.Equal(["Reset", .. LevelDirector.Steps, "GetResult"], builder.Calls);
-    }
-
-    [Fact]
-    public void Director_RetriesRandomBuildersWithNewSeeds()
-    {
-        var builder = new RecordingBuilder(isRandom: true, failures: 2);
-
-        Director.Construct(builder, Catalog.GetLevel(1), seed: 5);
-
-        Assert.Equal([5, 5 + 7919, 5 + 2 * 7919], builder.Seeds);
-    }
-
-    [Fact]
-    public void Director_TriesDeterministicBuildersOnce()
-    {
-        var builder = new RecordingBuilder(isRandom: false, failures: 1);
-
-        var ex = Assert.Throws<LevelGenerationException>(() => Director.Construct(builder, Catalog.GetLevel(1), seed: 5));
-
-        Assert.Single(builder.Seeds);
-        Assert.Contains("no room for two levers", ex.Errors);
-    }
-
-    [Fact]
-    public void Director_RejectsInvalidPresets()
-    {
-        var builder = new PresetLevelBuilder(Catalog,
+        Assert.Equal(
         [
-            "#########",
-            "#1....L.#",
-            "#~~~~~~~#",
-            "#.L....2#",
-            "####D####",
-            "###.EE.##",
-            "#########",
-        ]);
-
-        var ex = Assert.Throws<LevelGenerationException>(() => Director.Construct(builder, Catalog.GetLevel(1), seed: 0));
-
-        Assert.Contains(ex.Errors, e => e.StartsWith("D5"));
+            "BuildTerrain", "PlaceExitAndDoor", "PlaceStartTiles", "PlaceLevers",
+            "PlacePowerObstacles", "PlaceItems", "PlaceZombies", "GetResult",
+        ], builder.Calls);
     }
 
     [Theory]
     [InlineData(1)]
     [InlineData(8)]
-    public void BothBuilders_MakeValidLevelsOfTheLevelsTheme(int index)
+    public void TwoConcreteBuilders_SameDirector_ValidLevelsOfTheLevelsTheme(int index)
     {
         var definition = Catalog.GetLevel(index);
+        var theme = ThemeFactories.For(definition.Theme, Catalog);
+        var seed = Levels.Generate(definition, seed: 11).Seed; // a seed that the provider found valid
         ILevelBuilder[] builders =
         [
-            new ProceduralLevelBuilder(Catalog, new GameOptions(), Generation),
-            PresetLevelBuilder.FromPreset(Catalog, "arena"),
+            new ProceduralLevelBuilder(Catalog, definition, theme, seed, new GameOptions(), Generation),
+            new PresetLevelBuilder(Catalog, definition, theme, PresetMaps.ReadRows("arena")),
         ];
 
-        foreach (var builder in builders)
-        {
-            var level = Director.Construct(builder, definition, seed: 11);
+        var levels = builders.Select(b => new LevelDirector().Construct(b)).ToList();
 
+        Assert.All(levels, level =>
+        {
             Assert.Empty(LevelValidator.Validate(level, Generation.MinZombieDistanceFromStart));
             Assert.Equal(definition.Theme, level.Theme);
-            Assert.All(level.Zombies, z => Assert.Equal(ThemeFactories.For(definition, Catalog).CreateZombie("x", z.Definition, z.Tile).GetType(), z.GetType()));
+        });
+        Assert.NotEqual(SnapshotMapper.ToRows(levels[0]), SnapshotMapper.ToRows(levels[1]));
+    }
+
+    [Fact]
+    public void Provider_RetriesWithNewSeeds_UntilTheLevelIsValid()
+    {
+        for (var seed = 0; seed < 20; seed++)
+        {
+            var level = Levels.Generate(Catalog.GetLevel(5), seed);
+
+            Assert.Equal(0, (level.Seed - seed) % 7919); // the seed of the attempt that worked
+            Assert.Empty(LevelValidator.Validate(level, Generation.MinZombieDistanceFromStart));
         }
+    }
+
+    [Fact]
+    public void Provider_GivesUpAfterMaxAttempts()
+    {
+        var level1 = Catalog.GetLevel(1);
+        var impossible = new LevelDefinition
+        {
+            Index = 1, Theme = level1.Theme, ObstacleCount = level1.ObstacleCount, ObstacleTable = level1.ObstacleTable,
+            ZombieCount = 1000, ZombieTable = level1.ZombieTable,
+        };
+        var provider = new LevelProvider(Catalog, new GameOptions(), new GenerationOptions { MaxAttempts = 3 });
+
+        var ex = Assert.Throws<LevelGenerationException>(() => provider.Generate(impossible, seed: 1));
+
+        Assert.Contains("no room for zombies", ex.Errors);
+    }
+
+    [Fact]
+    public void Provider_PlaysThePresetFromSettings()
+    {
+        var provider = new LevelProvider(Catalog, new GameOptions(), new GenerationOptions { PresetLevel = "tutorial" });
+
+        var level = provider.CreateLevel(3, seed: 0);
+
+        Assert.Equal(PresetMaps.ReadRows("tutorial"), SnapshotMapper.ToRows(level));
     }
 
     [Fact]
@@ -146,15 +120,5 @@ public class BuilderTests
         var ex = Assert.Throws<LevelGenerationException>(() => provider.CreateLevel(1, 0));
 
         Assert.Contains("Preset 'nope' not found", ex.Message);
-    }
-
-    [Fact]
-    public void Demo_BuildsTwoValidLevels()
-    {
-        var result = new BuilderDemo().Run(DemoOptions.None);
-
-        var builders = Assert.IsType<Dictionary<string, object?>>(result.Evidence["builders"]);
-        Assert.Equal(2, builders.Count);
-        Assert.All(builders.Values, b => Assert.Equal(0, ((Dictionary<string, object?>)b!)["validationErrors"]));
     }
 }

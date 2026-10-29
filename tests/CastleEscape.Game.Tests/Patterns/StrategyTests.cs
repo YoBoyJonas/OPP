@@ -1,6 +1,5 @@
 using CastleEscape.Contracts;
 using CastleEscape.Game.AI;
-using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Generation;
 using CastleEscape.Game.Generation.Themes;
@@ -15,7 +14,7 @@ public class StrategyTests
     private static ContentCatalog Catalog => ContentCatalog.Instance;
 
     private static LevelState Level(string[] rows) =>
-        new LevelDirector(Catalog, new GenerationOptions()).Assemble(new PresetLevelBuilder(Catalog, rows), Catalog.GetLevel(1), seed: 0);
+        new RowsLevelProvider(Catalog, rows).CreateLevel(1, seed: 0);
 
     private static (ZombieEntity Zombie, PlayerEntity Player, WorldView World) Setup(string[] rows)
     {

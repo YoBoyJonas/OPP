@@ -3,7 +3,6 @@ using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Generation;
 using CastleEscape.Game.Generation.Themes;
-using CastleEscape.Game.PatternDemos;
 using CastleEscape.Game.Sessions;
 using CastleEscape.Game.World;
 
@@ -15,20 +14,41 @@ public class AbstractFactoryTests
 
     private static ZombieDefinition Greedy => Catalog.Zombies.First(z => z.MovementStrategy == MovementStrategyKind.Greedy);
 
+    private static readonly LevelProvider Levels = new(Catalog, new GameOptions(), new GenerationOptions());
+
+    /// <summary>The classes of one of every product the factory makes.</summary>
+    private static Type[] Family(IThemeFactory factory) =>
+    [
+        factory.CreateWall().GetType(),
+        factory.CreateWater().GetType(),
+        factory.CreatePit().GetType(),
+        factory.CreateZombie("z", Greedy, new GridPos(1, 1)).GetType(),
+    ];
+
+    /// <summary>The classes of the obstacles and zombies actually placed in a level.</summary>
+    private static Type[] PartsIn(LevelState level) =>
+        level.Grid.Positions().Select(p => level.Grid.GetTile(p).Obstacle).OfType<object>()
+            .Concat(level.Zombies)
+            .Select(o => o.GetType())
+            .Distinct()
+            .ToArray();
+
     [Fact]
-    public void AtLeastTwoConcreteFactories_WithAtLeastThreeProductsEach()
+    public void EachThemeHasItsOwnFactory()
     {
-        var factories = typeof(IThemeFactory).Assembly.GetTypes()
-            .Where(t => typeof(IThemeFactory).IsAssignableFrom(t) && !t.IsAbstract && !t.IsInterface)
-            .ToList();
-        Assert.True(factories.Count >= 2);
+        Assert.IsType<DungeonThemeFactory>(ThemeFactories.For(LevelTheme.Dungeon, Catalog));
+        Assert.IsType<CryptThemeFactory>(ThemeFactories.For(LevelTheme.Crypt, Catalog));
+    }
 
-        var families = Enum.GetValues<LevelTheme>()
-            .Select(theme => AbstractFactoryDemo.Family(ThemeFactories.For(theme, Catalog), Greedy).Select(p => p.GetType()).ToArray())
-            .ToList();
+    [Fact]
+    public void TwoConcreteFactories_WithFourProductsEach()
+    {
+        var dungeon = Family(ThemeFactories.For(LevelTheme.Dungeon, Catalog));
+        var crypt = Family(ThemeFactories.For(LevelTheme.Crypt, Catalog));
 
-        Assert.All(families, f => Assert.True(f.Distinct().Count() >= 3));
-        Assert.Empty(families[0].Intersect(families[1])); // no class is shared between families
+        Assert.Equal([typeof(StoneWall), typeof(MurkyWater), typeof(SpikePit), typeof(DungeonZombie)], dungeon);
+        Assert.Equal([typeof(BoneWall), typeof(PoisonWater), typeof(AbyssPit), typeof(CryptZombie)], crypt);
+        Assert.Empty(dungeon.Intersect(crypt)); // no class is shared between families
     }
 
     [Fact]
@@ -74,33 +94,32 @@ public class AbstractFactoryTests
     {
         foreach (var definition in Catalog.Levels)
         {
-            var family = AbstractFactoryDemo.Family(ThemeFactories.For(definition, Catalog), Greedy)
-                .Select(p => p.GetType().Name).ToHashSet();
+            var family = Family(ThemeFactories.For(definition.Theme, Catalog));
             for (var seed = 1; seed <= 5; seed++)
             {
-                var level = DemoWorld.Generate(definition, seed);
-                Assert.All(AbstractFactoryDemo.PartsIn(level), part => Assert.Contains(part, family));
+                var level = Levels.Generate(definition, seed);
+                Assert.All(PartsIn(level), part => Assert.Contains(part, family));
             }
         }
     }
 
     [Fact]
+    public void PresetLevels_UseTheLevelsFamilyToo()
+    {
+        var level = Levels.BuildPreset(Catalog.GetLevel(7), "arena");
+
+        Assert.All(PartsIn(level), part => Assert.Contains(part, Family(ThemeFactories.For(LevelTheme.Crypt, Catalog))));
+    }
+
+    [Fact]
     public void LevelLayout_ListsTheThemedObstacles()
     {
-        var level = DemoWorld.Generate(Catalog.GetLevel(8), seed: 3);
+        var level = Levels.Generate(Catalog.GetLevel(8), seed: 3);
 
         var layout = SnapshotMapper.ToLayout(Guid.NewGuid(), level);
 
         Assert.Equal(LevelTheme.Crypt, layout.Theme);
         Assert.Contains(layout.Obstacles, o => o.Variant == nameof(BoneWall));
         Assert.DoesNotContain(layout.Obstacles, o => o.Variant == nameof(StoneWall));
-    }
-
-    [Fact]
-    public void Demo_ReportsNoMixedParts()
-    {
-        var result = new AbstractFactoryDemo().Run(DemoOptions.None);
-
-        Assert.Equal(0, result.Evidence["mixedParts"]);
     }
 }

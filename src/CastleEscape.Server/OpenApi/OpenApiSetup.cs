@@ -4,9 +4,6 @@ using Microsoft.OpenApi;
 
 namespace CastleEscape.Server.OpenApi;
 
-/// <summary>Marks an endpoint that acts as a player and needs the <c>X-Player-Token</c> header.</summary>
-public sealed class PlayerTokenRequiredMetadata;
-
 public static class OpenApiSetup
 {
     public const string PlayerTokenScheme = "PlayerToken";
@@ -18,11 +15,6 @@ public static class OpenApiSetup
             options.AddDocumentTransformer(DescribeDocument);
             options.AddOperationTransformer(AddPlayerTokenRequirement);
         });
-
-    /// <summary>Documents the endpoint as needing the player token, so Scalar sends the header.</summary>
-    public static TBuilder RequirePlayerToken<TBuilder>(this TBuilder builder)
-        where TBuilder : IEndpointConventionBuilder =>
-        builder.WithMetadata(new PlayerTokenRequiredMetadata());
 
     private static Task DescribeDocument(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken ct)
     {

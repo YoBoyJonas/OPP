@@ -84,8 +84,7 @@ public sealed class StrategyDemo : IPatternDemo
     private static (LevelState Level, PlayerEntity Player) Setup()
     {
         var catalog = DemoWorld.Catalog;
-        var level = new LevelDirector(catalog, new GenerationOptions())
-            .Assemble(new PresetLevelBuilder(catalog, Map), catalog.GetLevel(1), seed: 0);
+        var level = new RowsLevelProvider(catalog, Map).CreateLevel(1, seed: 0);
         var player = new PlayerEntity(Guid.NewGuid(), "Ana", catalog.GetCharacter("scout"), level.StartTiles[0]);
         player.BeginStep(Direction.Down); // walking towards the gap: the predictive zombie aims ahead of her
         return (level, player);

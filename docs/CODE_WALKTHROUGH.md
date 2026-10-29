@@ -17,7 +17,7 @@ The Server and Game projects execute in **one backend process**. The backend dec
 
 ```mermaid
 flowchart TB
-    Scalar["Scalar or another API caller"] -->|HTTP| Endpoints["Server/Endpoints"]
+    Scalar["Scalar or another API caller"] -->|HTTP| Endpoints["Server/Controllers"]
     Client["Playground or game client"] -->|SignalR| Hub["Server/Hubs/GameHub"]
     Endpoints --> Registry["SessionRegistry: locate and authenticate"]
     Hub --> Registry
@@ -30,11 +30,11 @@ flowchart TB
 ## Reading order
 
 1. **[Program.cs](../src/CastleEscape.Server/Program.cs)** — startup. Read the service registrations, `AddHostedService<GameLoopService>()`, `MapScalarApiReference`, endpoint mappings and `MapHub<GameHub>`. `app.Run()` starts the host. ASP.NET Core creates services and supplies them to constructors or endpoint parameters using dependency injection.
-2. **[SessionEndpoints.cs](../src/CastleEscape.Server/Endpoints/SessionEndpoints.cs)** — HTTP routes for create, join and character selection. `Create` calls the registry and returns IDs and a player token.
+2. **[SessionsController.cs](../src/CastleEscape.Server/Controllers/SessionsController.cs)** — HTTP routes for create, join and character selection. `Create` calls the registry and returns IDs and a player token.
 3. **[SessionRegistry.cs](../src/CastleEscape.Game/Sessions/SessionRegistry.cs)** — stores games in a dictionary. `Create` makes a session; `Authenticate` checks the player token. Everything is in memory, so restarting the backend loses sessions.
 4. **[GameSession.cs](../src/CastleEscape.Game/Sessions/GameSession.cs)** — one two-player game. Read `SelectCharacter` → `Tick` → `LoadLevel`, then `TickPlaying`. Follow helpers from `TickPlaying` when you want to understand a particular rule.
 5. **[GameLoopService.cs](../src/CastleEscape.Server/Realtime/GameLoopService.cs)** — the clock. `ExecuteAsync` calls [GameLoopScheduler.TickAll](../src/CastleEscape.Game/Sessions/GameLoopScheduler.cs) on each timer tick and sends the resulting messages.
-6. **[GameplayEndpoints.cs](../src/CastleEscape.Server/Endpoints/GameplayEndpoints.cs)** — input, restart, state, layout, HUD and polling. Read alongside [GameHub.cs](../src/CastleEscape.Server/Hubs/GameHub.cs) to see two network entry points calling the same session methods.
+6. **[GameplayController.cs](../src/CastleEscape.Server/Controllers/GameplayController.cs)** — input, restart, state, layout, HUD and polling. Read alongside [GameHub.cs](../src/CastleEscape.Server/Hubs/GameHub.cs) to see two network entry points calling the same session methods.
 
 ## Starting a game
 
@@ -43,7 +43,7 @@ Starting the backend starts the host and timer. A playable game starts through t
 1. `POST /api/sessions` creates a `GameSession` and the first player in `WaitingForPlayers`.
 2. `POST /api/sessions/join` adds the second player using the join code. The phase becomes `CharacterSelect`.
 3. Both players choose characters. `GameSession.SelectCharacter` sets `LoadingLevel`.
-4. The next tick calls `LoadLevel`. [LevelProvider](../src/CastleEscape.Game/Generation/LevelProvider.cs) selects a builder and [LevelDirector](../src/CastleEscape.Game/Generation/LevelDirector.cs) constructs and validates the map.
+4. The next tick calls `LoadLevel`. [LevelProvider](../src/CastleEscape.Game/Generation/LevelProvider.cs) picks the theme factory and a builder, [LevelDirector](../src/CastleEscape.Game/Generation/LevelDirector.cs) runs the build steps, and the provider validates the map (retrying with a new seed).
 5. [GameWorld.BeginLevel](../src/CastleEscape.Game/Sessions/GameWorld.cs) saves the pristine level and starts on a clone. The session changes to `Playing` and queues `LevelStarted`.
 
 No separate start call or SignalR connection is required. You can do all of this through Scalar.
@@ -52,7 +52,7 @@ No separate start call or SignalR connection is required. You can do all of this
 
 Suppose you send `{"direction":"Right"}` to `POST /api/sessions/{sessionId}/input`.
 
-1. `GameplayEndpoints.SubmitInput` reads the body and `X-Player-Token` header. It calls `SessionRegistry.Authenticate`, then `GameSession.SubmitDirection`.
+1. `GameplayController.SubmitInput` reads the body and `X-Player-Token` header. It calls `SessionRegistry.Authenticate`, then `GameSession.SubmitDirection`.
 2. The session adds input data to its queue under a lock. The HTTP response is `202 Accepted`: movement has not necessarily happened yet.
 3. The background timer calls `GameLoopScheduler.TickAll`, which calls `GameSession.Tick`. During `Playing`, this runs `TickPlaying`.
 4. `ApplyInputs` updates the player's held direction. [PlayerMovement.Move](../src/CastleEscape.Game/Sessions/PlayerMovement.cs) checks [MovementRules.CanPlayerEnter](../src/CastleEscape.Game/World/MovementRules.cs), starts a permitted step and advances the position at the player's calculated speed.
@@ -97,7 +97,7 @@ Open `http://localhost:5035/scalar`. Replace `{sessionId}` with the returned ID.
 | 6 | `POST /api/sessions/{sessionId}/input` | Switch to Ana's token; body `{"direction":"Right"}`. |
 | 7 | Same input endpoint | Send `{"direction":"None"}`, then read `/state` again. |
 
-Set breakpoints in `GameplayEndpoints.SubmitInput`, `GameSession.ApplyInputs` and `PlayerMovement.Move`. The first runs during the request; the others run during the background tick. Disable the movement breakpoint after inspecting it because it runs repeatedly.
+Set breakpoints in `GameplayController.SubmitInput`, `GameSession.ApplyInputs` and `PlayerMovement.Move`. The first runs during the request; the others run during the background tick. Disable the movement breakpoint after inspecting it because it runs repeatedly.
 
 For manually controlled time, read [GameRulesTests](../tests/CastleEscape.Game.Tests/Sessions/GameRulesTests.cs) and [TestGame](../tests/CastleEscape.Game.Tests/Sessions/TestGame.cs), whose `Tick` helper calls `Session.Tick(0.05)` directly.
 

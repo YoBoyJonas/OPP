@@ -2,7 +2,7 @@
 
 **Owner:** Student D · **Category:** Structural · **Code:** `src/CastleEscape.Game/Sessions/GameFacade.cs`, `Sessions/GameLoopScheduler.cs`
 **Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- facade` · `POST /api/patterns/facade/demo`
-**Used by:** `GameHub` (all hub methods), `SessionEndpoints` and `GameplayEndpoints` (all lobby and gameplay REST), `GameLoopService` (`Tick`), and `FacadeDemo`, which plays a whole game in-process.
+**Used by:** `GameHub` (all hub methods), `SessionsController` and `GameplayController` (all lobby and gameplay REST), `GameLoopService` (`Tick`), and `FacadeDemo`, which plays a whole game in-process.
 
 ## Problem in this game
 
@@ -33,15 +33,15 @@ diagnostics endpoint use them directly. A facade simplifies; it doesn't lock any
 |---|---|
 | Facade | `GameFacade` (lobby: `CreateSession`, `JoinSession`, `SelectCharacter`, `LeaveSession`, `ListSessions`, `GetSession`, `CharacterIds`; input: `SubmitDirection`, `RequestRestart`; reads: `GetState`, `GetLevelLayout`, `GetHud`; hub: `Connect`, `Disconnect`, `Ping`; loop: `Tick`) |
 | Subsystems | `SessionRegistry` (lookup, join codes, tokens), `GameSession` (and behind it `CommandProcessor`, `GameWorld`, `GameEventPublisher`), `GameLoopScheduler` (new: ticks all sessions, isolates failures, drains outboxes), `ContentCatalog`; level creation runs through `ILevelProvider` → `LevelDirector` |
-| Clients | `GameHub`, `SessionEndpoints`, `GameplayEndpoints`, `GameLoopService`, `FacadeDemo` |
+| Clients | `GameHub`, `SessionsController`, `GameplayController`, `GameLoopService`, `FacadeDemo` |
 
 ## Before (tag `p1-prototype-before-patterns`)
 
 ```mermaid
 classDiagram
     class GameHub
-    class SessionEndpoints
-    class GameplayEndpoints
+    class SessionsController
+    class GameplayController
     class GameLoopService
     class SessionRegistry {
         +Create(name)
@@ -61,13 +61,13 @@ classDiagram
     GameHub --> SessionRegistry
     GameHub --> GameSession
     GameHub --> PlayerSlot
-    SessionEndpoints --> SessionRegistry
-    SessionEndpoints --> GameSession
-    GameplayEndpoints --> SessionRegistry
-    GameplayEndpoints --> GameSession
+    SessionsController --> SessionRegistry
+    SessionsController --> GameSession
+    GameplayController --> SessionRegistry
+    GameplayController --> GameSession
     GameLoopService --> SessionRegistry
     GameLoopService --> GameSession
-    note for GameplayEndpoints "Each handler: Authenticate, then\nsession.X(player.PlayerId), then map to DTO"
+    note for GameplayController "Each handler: Authenticate, then\nsession.X(player.PlayerId), then map to DTO"
 ```
 
 ## After
@@ -101,13 +101,13 @@ classDiagram
     }
     class ContentCatalog { <<Subsystem>> }
     class GameHub
-    class SessionEndpoints
-    class GameplayEndpoints
+    class SessionsController
+    class GameplayController
     class GameLoopService
     class FacadeDemo
     GameHub --> GameFacade
-    SessionEndpoints --> GameFacade
-    GameplayEndpoints --> GameFacade
+    SessionsController --> GameFacade
+    GameplayController --> GameFacade
     GameLoopService --> GameFacade : Tick
     FacadeDemo --> GameFacade
     GameFacade --> SessionRegistry
@@ -149,7 +149,7 @@ var sends = game.Tick(tickSeconds)                                              
 
 ## Requirement: "at least 2 client classes, at least 3 subsystem classes"
 
-- **Clients (5):** `GameHub`, `SessionEndpoints`, `GameplayEndpoints`, `GameLoopService` (server) and `FacadeDemo` (console).
+- **Clients (5):** `GameHub`, `SessionsController`, `GameplayController`, `GameLoopService` (server) and `FacadeDemo` (console).
 - **Subsystems (4, plus what they own):** `SessionRegistry`, `GameSession` (with `CommandProcessor`, `GameWorld`,
   `GameEventPublisher`), `GameLoopScheduler`, `ContentCatalog`.
 

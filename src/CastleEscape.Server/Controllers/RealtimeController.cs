@@ -3,35 +3,32 @@ using CastleEscape.Contracts.Realtime;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Messaging;
 using CastleEscape.Server.OpenApi;
+using Microsoft.AspNetCore.Mvc;
 
-namespace CastleEscape.Server.Endpoints;
+namespace CastleEscape.Server.Controllers;
 
 /// <summary>
 /// The SignalR protocol, described for frontend developers (OpenAPI can't describe hubs), with a real example of
 /// every message.
 /// </summary>
-public static class RealtimeEndpoints
+[ApiController]
+[Route("api/realtime")]
+[Tags(ApiTags.Realtime)]
+public sealed class RealtimeController(ContentCatalog catalog) : ControllerBase
 {
     public const string HubPath = "/hubs/game";
 
-    public static IEndpointRouteBuilder MapRealtimeEndpoints(this IEndpointRouteBuilder app)
+    [HttpGet("protocol", Name = "GetRealtimeProtocol")]
+    public ActionResult<RealtimeProtocolResponse> GetProtocol()
     {
-        var group = app.MapGroup("/api/realtime").WithTags(ApiTags.Realtime);
+        return Ok(Protocol);
+    }
 
-        group.MapGet("/protocol", () => TypedResults.Ok(Protocol))
-            .WithName("GetRealtimeProtocol")
-            .WithSummary("SignalR hub protocol")
-            .WithDescription("Hub URL and query parameters, every server-to-client and client-to-server method with its payload "
-                             + "and when it happens, every event type and error code, and the ordering rules.");
-
-        group.MapGet("/examples", (ContentCatalog catalog) => TypedResults.Ok(
-                RealtimeExamples.Capture(catalog).ToDictionary(kv => kv.Key, kv => (object)kv.Value)))
-            .WithName("GetRealtimeExamples")
-            .WithSummary("Example payload of every server message")
-            .WithDescription("Captured from a short real session on a small map, keyed by client method name. This is exactly "
-                             + "the JSON SignalR sends.");
-
-        return app;
+    [HttpGet("examples", Name = "GetRealtimeExamples")]
+    public ActionResult<Dictionary<string, object>> GetExamples()
+    {
+        var examples = RealtimeExamples.Capture(catalog).ToDictionary(kv => kv.Key, kv => (object)kv.Value);
+        return Ok(examples);
     }
 
     public static readonly RealtimeProtocolResponse Protocol = new(

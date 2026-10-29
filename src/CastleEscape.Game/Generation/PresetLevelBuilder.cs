@@ -1,62 +1,52 @@
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Generation.Themes;
 using CastleEscape.Game.Items;
-using CastleEscape.Game.Patterns;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Generation;
 
 /// <summary>
-/// Builds a level from a hand-made ASCII map (<c>content/presets/*.txt</c>, legend in <see cref="MapLegend"/>).
+/// Concrete builder: a level from a hand-made ASCII map (<c>content/presets/*.txt</c>, legend in <see cref="MapLegend"/>).
 /// The same steps as the procedural builder, but each one reads its objects from the map.
-/// The seed is ignored, so one attempt is enough.
+/// Walls, water, pits and zombies come from the theme factory it is given (Abstract Factory).
 /// </summary>
-[DesignPattern("Builder", "ConcreteBuilder")]
 public sealed class PresetLevelBuilder : ILevelBuilder
 {
     private readonly ContentCatalog _catalog;
+    private readonly LevelDefinition _definition;
+    private readonly IThemeFactory _theme;
     private readonly IReadOnlyList<string> _rows;
-    private LevelDefinition _definition = null!;
-    private IThemeFactory _theme = null!;
-    private LevelState _level = null!;
+    private readonly LevelState _level;
 
-    public PresetLevelBuilder(ContentCatalog catalog, IReadOnlyList<string> rows)
+    public PresetLevelBuilder(ContentCatalog catalog, LevelDefinition definition, IThemeFactory theme, IReadOnlyList<string> rows, int seed = 0)
     {
         if (rows.Count == 0 || rows.Any(r => r.Length != rows[0].Length))
         {
             throw new LevelBuildException("Preset rows must be non-empty and all the same length.");
         }
         _catalog = catalog;
-        _rows = rows;
-    }
-
-    /// <summary>A builder for <c>content/presets/{name}.txt</c>.</summary>
-    public static PresetLevelBuilder FromPreset(ContentCatalog catalog, string name) => new(catalog, PresetMaps.ReadRows(name));
-
-    public bool IsRandom => false;
-
-    public void Reset(LevelDefinition definition, int seed, IThemeFactory theme)
-    {
         _definition = definition;
         _theme = theme;
-        _level = new LevelState(definition, seed, new Grid(_rows[0].Length, _rows.Count));
+        _rows = rows;
+        _level = new LevelState(definition, seed, new Grid(rows[0].Length, rows.Count));
     }
 
-    /// <summary>Every tile of the map with its legend character.</summary>
-    private IEnumerable<(GridPos Pos, char Char)> Cells() => _level.Grid.Positions().Select(p => (p, _rows[p.Y][p.X]));
+    /// <summary>The positions of every map tile showing one of <paramref name="chars"/>.</summary>
+    private IEnumerable<GridPos> Find(params char[] chars) =>
+        _level.Grid.Positions().Where(p => chars.Contains(CharAt(p)));
 
-    private IEnumerable<GridPos> Find(params char[] chars) => Cells().Where(c => chars.Contains(c.Char)).Select(c => c.Pos);
+    private char CharAt(GridPos pos) => _rows[pos.Y][pos.X];
 
     public void BuildTerrain()
     {
         // Walls here; water, pits, the door and exits in their own steps. Everything else is floor.
         var wall = _theme.CreateWall();
-        foreach (var (pos, c) in Cells())
+        foreach (var pos in _level.Grid.Positions())
         {
             TerrainKind terrain;
             try
             {
-                terrain = MapLegend.TerrainOf(c);
+                terrain = MapLegend.TerrainOf(CharAt(pos));
             }
             catch (FormatException ex)
             {
@@ -119,8 +109,9 @@ public sealed class PresetLevelBuilder : ILevelBuilder
 
     public void PlaceItems()
     {
-        foreach (var (pos, c) in Cells())
+        foreach (var pos in _level.Grid.Positions())
         {
+            var c = CharAt(pos);
             Consumable? item = c switch
             {
                 MapLegend.HealthItem => _catalog.Consumables.First(i => i.Kind == ConsumableKind.Health),
@@ -147,26 +138,4 @@ public sealed class PresetLevelBuilder : ILevelBuilder
     }
 
     public LevelState GetResult() => _level;
-}
-
-/// <summary>The preset map files in <c>content/presets</c>.</summary>
-public static class PresetMaps
-{
-    public static string Directory => Path.Combine(ContentLoader.DefaultDirectory, "presets");
-
-    /// <summary>Names of the available presets (file names without .txt).</summary>
-    public static IReadOnlyList<string> Available() =>
-        System.IO.Directory.Exists(Directory)
-            ? System.IO.Directory.GetFiles(Directory, "*.txt").Select(Path.GetFileNameWithoutExtension).OfType<string>().Order().ToList()
-            : [];
-
-    public static string[] ReadRows(string name)
-    {
-        var path = Path.Combine(Directory, name + ".txt");
-        if (!File.Exists(path))
-        {
-            throw new LevelBuildException($"Preset '{name}' not found. Available: {string.Join(", ", Available())}");
-        }
-        return File.ReadAllLines(path).Where(r => r.Length > 0).ToArray();
-    }
 }
