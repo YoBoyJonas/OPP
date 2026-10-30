@@ -3,10 +3,7 @@ using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Generation.Themes;
 
-/// <summary>
-/// Abstract Factory. Creates one family of level parts for a theme: a wall, water, a pit and zombies.
-/// A level is built with exactly one factory, so a Dungeon level can never get a Crypt pit.
-/// </summary>
+/// <summary>Abstract Factory: one family of level parts per theme.</summary>
 public interface IThemeFactory
 {
     Wall CreateWall();

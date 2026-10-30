@@ -7,16 +7,11 @@ using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Generation;
 
-/// <summary>Builds levels outside any session so they can be looked at (content design, tests, the defence).</summary>
+/// <summary>Builds levels outside a session for the preview endpoint.</summary>
 public sealed class LevelPreviewer(ContentCatalog catalog, GameOptions game, GenerationOptions generation)
 {
     private readonly LevelProvider _levels = new(catalog, game, generation);
 
-    /// <summary>
-    /// Level <paramref name="index"/> generated from <paramref name="seed"/> (validated, retried), or the
-    /// <paramref name="preset"/> map (built as drawn and then checked, so a broken preset shows its errors).
-    /// </summary>
-    /// <exception cref="GameException">Unknown level or preset, or no valid level could be generated.</exception>
     public LevelPreviewResponse Preview(int index, int seed, string? preset = null)
     {
         var definition = catalog.Levels.FirstOrDefault(l => l.Index == index)

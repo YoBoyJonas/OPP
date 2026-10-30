@@ -5,10 +5,6 @@ using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.PatternDemos;
 
-/// <summary>
-/// Prototype requirement: compare deep and shallow copies and report memory addresses;
-/// the implementation can be switched (<c>Patterns:PrototypeCloneMode</c>, or <c>mode</c> here).
-/// </summary>
 public sealed class PrototypeDemo : IPatternDemo
 {
     public string Key => "prototype";
@@ -35,11 +31,10 @@ public sealed class PrototypeDemo : IPatternDemo
                            + $"(hash {row.CloneHash,9})  {(row.SameObject ? "SAME object" : "different object")}");
             }
 
-            // Play on the clone, then restart from the pristine level the way the session does.
             var itemsBefore = pristine.Items.Count;
             var item = clone.Items[0];
-            clone.RemoveItem(item);                       // a player picks up an item
-            clone.Levers[0].IsActive = true;              // stands on a lever
+            clone.RemoveItem(item);
+            clone.Levers[0].IsActive = true;
             clone.Zombies.FirstOrDefault()?.TeleportTo(new GridPos(2, 2));
             var restarted = pristine.Clone(mode);
             var restoredOk = restarted.Items.Count == itemsBefore && !restarted.Levers[0].IsActive;
@@ -62,10 +57,8 @@ public sealed class PrototypeDemo : IPatternDemo
                           + "grid, lists and entities are shared, so playing corrupts the pristine copy.");
     }
 
-    /// <summary>One compared part of the level.</summary>
     public sealed record PartComparison(string Part, string OriginalAddress, string CloneAddress, int OriginalHash, int CloneHash, bool SameObject);
 
-    /// <summary>Addresses and identity hashes of the level and its parts in the original and the clone.</summary>
     public static PartComparison[] Compare(LevelState original, LevelState clone)
     {
         (string, object, object)[] parts =

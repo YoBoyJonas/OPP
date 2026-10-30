@@ -5,10 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CastleEscape.Server.Controllers;
 
-/// <summary>
-/// Developer and defence shortcuts under <c>/api/dev</c>. Registered only when <c>DevTools:Enabled</c> is true
-/// (Development by default), so they don't exist at all on a public deployment (see Program.cs).
-/// </summary>
+/// <summary>Registered only when <c>DevTools:Enabled</c> is true (see Program.cs).</summary>
 [ApiController]
 [Route("api/dev")]
 [Tags(ApiTags.Dev)]

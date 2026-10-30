@@ -77,7 +77,6 @@ public class GameSession
     public double TickSeconds => 1.0 / _options.TickRate;
     public bool IsFinished => Phase is SessionPhase.Victory or SessionPhase.Defeat or SessionPhase.Aborted;
 
-    // ---------------------------------------------------------------- lobby
 
     /// <summary>Adds a player (create or join). The second player moves the session to character select.</summary>
     public PlayerSlot AddPlayer(string name)
@@ -185,7 +184,6 @@ public class GameSession
         }
     }
 
-    // ---------------------------------------------------------------- input (commands, queued)
 
     public void SubmitDirection(Guid playerId, Direction direction) =>
         _commands.Enqueue(new SetDirectionCommand(_commands.NextSequence(), playerId, direction));
@@ -292,7 +290,6 @@ public class GameSession
         }
     }
 
-    // ---------------------------------------------------------------- tick
 
     /// <summary>Advances the session by one fixed step. All phase behaviour goes through this switch (seam for P2 State).</summary>
     public void Tick(double seconds)
@@ -390,7 +387,6 @@ public class GameSession
         return true;
     }
 
-    // ---------------------------------------------------------------- levels
 
     private void LoadLevel(int index)
     {
@@ -444,7 +440,6 @@ public class GameSession
         SetPhase(SessionPhase.LoadingLevel);
     }
 
-    // ---------------------------------------------------------------- output
 
     private void SetPhase(SessionPhase phase)
     {
