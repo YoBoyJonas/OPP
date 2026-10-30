@@ -7,7 +7,6 @@ using CastleEscape.Game.World;
 
 namespace CastleEscape.PatternDemos;
 
-/// <summary>Abstract Factory requirement: at least 2 concrete factories, at least 3 classes per family.</summary>
 public static class AbstractFactoryDemo
 {
     public static void Run()
@@ -15,7 +14,6 @@ public static class AbstractFactoryDemo
         var catalog = ContentCatalog.Instance;
         var zombieType = catalog.Zombies.First(z => z.MovementStrategy == MovementStrategyKind.Greedy);
 
-        // 1. Each concrete factory makes its own family of 4 products.
         IThemeFactory[] factories =
         [
             ThemeFactories.For(LevelTheme.Dungeon, catalog),
@@ -27,7 +25,6 @@ public static class AbstractFactoryDemo
             PrintFamily(factory, zombieType);
         }
 
-        // 2. In the game, the level's theme picks the factory, and the whole level is built with that one factory.
         Console.WriteLine();
         var levels = new LevelProvider(catalog, new GameOptions(), new GenerationOptions());
         foreach (var index in new[] { 1, 6 })
@@ -42,7 +39,6 @@ public static class AbstractFactoryDemo
         }
     }
 
-    /// <summary>Client code: it only knows <see cref="IThemeFactory"/> and the abstract products.</summary>
     private static void PrintFamily(IThemeFactory factory, ZombieDefinition zombieType)
     {
         Wall wall = factory.CreateWall();
