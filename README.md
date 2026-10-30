@@ -19,7 +19,7 @@ dotnet run --project src/CastleEscape.Server        # http://localhost:5035
 | Open | What |
 |---|---|
 | http://localhost:5035/scalar | API reference; try every endpoint (Course → Patterns runs the pattern demos) |
-| http://localhost:5035/playground | Browser playground: **Quickstart** gives two links, open each in its own tab and play with arrows/WASD (Development only) |
+| http://localhost:5035/playground | Browser playground: **Quickstart** gives two links, open each in its own tab and play with arrows/WASD (also on the deployed site) |
 | http://localhost:5035/openapi/v1.json | OpenAPI document (also exported to [docs/openapi.json](docs/openapi.json)) |
 | ws://localhost:5035/hubs/game | SignalR hub, see [FRONTEND_INTEGRATION](docs/FRONTEND_INTEGRATION.md) |
 
@@ -100,7 +100,7 @@ Settings live in `src/CastleEscape.Server/appsettings.json` and are validated at
 | `Generation:PresetLevel` | — | play a preset map (`tutorial`, `arena`) on every level |
 | `Patterns:PrototypeCloneMode` | `Deep` | `Shallow` shows the shallow-copy restart bug (also switchable at runtime in dev tools) |
 | `Realtime:EnabledChannels` | `SignalR, Polling` | delivery channels (Bridge) |
-| `DevTools:Enabled` | `true` in Development only | `/api/dev/*` and `/playground` |
+| `DevTools:Enabled` | `true` (set `DevTools__Enabled=false` in Azure to hide them) | `/api/dev/*` and `/playground` |
 | `Cors:AllowedOrigins` | localhost dev ports | browser origins allowed to call the API and hub |
 
 ## Deployment
