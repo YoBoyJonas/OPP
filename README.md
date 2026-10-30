@@ -100,11 +100,11 @@ Settings live in `src/CastleEscape.Server/appsettings.json` and are validated at
 | `Generation:PresetLevel` | — | play a preset map (`tutorial`, `arena`) on every level |
 | `Patterns:PrototypeCloneMode` | `Deep` | `Shallow` shows the shallow-copy restart bug (also switchable at runtime in dev tools) |
 | `Realtime:EnabledChannels` | `SignalR, Polling` | delivery channels (Bridge) |
-| `DevTools:Enabled` | `true` in Development only | `/api/dev/*` and `/playground` |
+| `DevTools:Enabled` | `true` (set `false` to hide them) | `/api/dev/*` and `/playground` |
 | `Cors:AllowedOrigins` | localhost dev ports | browser origins allowed to call the API and hub |
 
 ## Deployment
 
 CI (`.github/workflows/main_castleescapeserver.yml`) builds the solution, runs the tests, and
-publishes `src/CastleEscape.Server` to Azure on pushes to `main`. Dev tools are off outside
-Development.
+publishes `src/CastleEscape.Server` to Azure on pushes to `main`. Dev tools (and so `/playground`)
+are on in the deployment too; set the app setting `DevTools__Enabled=false` in Azure to turn them off.
