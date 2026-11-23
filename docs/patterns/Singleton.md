@@ -90,9 +90,6 @@ time together, both can see `null` and both build a catalog. The server avoids t
 once in `Program.cs` (`_ = ContentCatalog.Instance;`). That read runs on the main thread before
 `app.Run()`, so the catalog already exists before any request, hub or game-loop thread starts.
 
-`SingletonDemo` shows that every read returns the same object (`sameInstance: true`) and that
-`ContentCatalog` has no public constructor (`publicConstructors: 0`).
-Tests: `tests/CastleEscape.Game.Tests/Patterns/SingletonTests.cs`.
 
 ## Likely live-change requests
 

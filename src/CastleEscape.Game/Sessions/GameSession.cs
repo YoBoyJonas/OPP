@@ -6,6 +6,7 @@ using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Events;
 using CastleEscape.Game.Generation;
+using CastleEscape.Game.Patterns;
 using CastleEscape.Game.Powers;
 using CastleEscape.Game.World;
 
@@ -16,6 +17,7 @@ namespace CastleEscape.Game.Sessions;
 /// which only <see cref="Tick"/> changes. Player inputs become commands, queued from any thread and
 /// run at the start of the next tick. After every tick an immutable <see cref="Snapshot"/> is published for readers.
 /// </summary>
+[DesignPattern("Facade", "Subsystem")]
 public class GameSession
 {
     private readonly object _gate = new();
@@ -55,7 +57,7 @@ public class GameSession
         _events.Attach(new ClientNotificationObserver(e =>
             Send(ClientMethods.GameEvent, new GameEventMessage(Id, NextSeq(), _tick, e.Type, e.PlayerId, e.Message, e.Data()))));
         _events.Attach(new SessionStatisticsObserver(_slots));
-        _interaction = new InteractionSettings(options.PowerDurationSeconds, options.MaxPowerStackLevel);
+        _interaction = new InteractionSettings(options.PowerDurationSeconds, options.MaxPowerStackLevel, options.RespawnPlayerOnHit);
         _snapshot = BuildSnapshot();
     }
 
@@ -71,7 +73,6 @@ public class GameSession
     public double TickSeconds => 1.0 / _options.TickRate;
     public bool IsFinished => Phase is SessionPhase.Victory or SessionPhase.Defeat or SessionPhase.Aborted;
 
-    // ---------------------------------------------------------------- lobby
 
     /// <summary>Adds a player (create or join). The second player moves the session to character select.</summary>
     public PlayerSlot AddPlayer(string name)
@@ -179,7 +180,6 @@ public class GameSession
         }
     }
 
-    // ---------------------------------------------------------------- input (commands, queued)
 
     public void SubmitDirection(Guid playerId, Direction direction) =>
         _commands.Enqueue(new SetDirectionCommand(_commands.NextSequence(), playerId, direction));
@@ -277,7 +277,6 @@ public class GameSession
         }
     }
 
-    // ---------------------------------------------------------------- tick
 
     /// <summary>Advances the session by one fixed step. All phase behaviour goes through this switch (seam for P2 State).</summary>
     public void Tick(double seconds)
@@ -375,7 +374,6 @@ public class GameSession
         return true;
     }
 
-    // ---------------------------------------------------------------- levels
 
     private void LoadLevel(int index)
     {
@@ -429,7 +427,6 @@ public class GameSession
         SetPhase(SessionPhase.LoadingLevel);
     }
 
-    // ---------------------------------------------------------------- output
 
     private void SetPhase(SessionPhase phase)
     {

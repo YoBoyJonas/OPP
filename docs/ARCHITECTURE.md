@@ -20,7 +20,7 @@ flowchart LR
 - **Game** has no ASP.NET Core dependency (decision P7). It contains the whole game and every
   pattern, so the console demos and tests can run a real game in-process.
 - **Server** is a thin host: dependency injection, configuration, endpoints, the SignalR hub,
-  the timer that drives the loop.
+  the timer that drives the loop, and the playground page.
 
 ## Inside the Game project
 
@@ -36,7 +36,8 @@ flowchart LR
 | `Commands/` | `IGameCommand`, the commands, `CommandProcessor` | Command |
 | `Events/` | `GameEvent` records, `GameEventPublisher`, observers | Observer |
 | `Messaging/` | serializer adapters, client notifiers and channels, realtime examples | Adapter, Bridge |
-| `Sessions/` | `GameSession`, `GameWorld`, `PlayerMovement`, `SessionRegistry`, `GameLoopScheduler`, `GameFacade`, `SnapshotMapper` | Facade |
+| `Sessions/` | `GameSession`, `GameWorld`, `PlayerMovement`, `SessionRegistry`, `GameLoopScheduler`, `GameFacade`, `DevActions`, `SnapshotMapper` | Facade |
+| `Patterns/`, `PatternDemos/` | `[DesignPattern]` attribute, the pattern catalog, one demo per pattern | |
 
 ## The tick
 
@@ -93,10 +94,10 @@ players). Arrival on a tile can start the next step in the same tick, so movemen
 
 ## Levels
 
-`LevelProvider` asks `LevelDirector` (Builder) to build level *n* with a new builder:
-`ProceduralLevelBuilder` normally, `PresetLevelBuilder` when `Generation:PresetLevel` is set. The
-director picks the theme factory (Abstract Factory), runs the seven steps, validates (GEN-1..3,
-LVL-3, D5) and retries with a new seed. Items are placed through spawners (Factory Method). The
+`LevelProvider` picks the level's theme factory (Abstract Factory) and creates a builder with it:
+`ProceduralLevelBuilder` normally, `PresetLevelBuilder` when `Generation:PresetLevel` is set.
+`LevelDirector` (Builder) runs the seven steps; the provider then validates the level (GEN-1..3,
+LVL-3, D5) and retries with a new seed and a new builder. Items are placed through spawners (Factory Method). The
 session keeps the built level as a prototype and plays on a deep clone; restart is another
 clone (Prototype).
 

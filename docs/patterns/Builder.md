@@ -1,43 +1,44 @@
 # Builder — level construction
 
 **Owner:** Student A · **Category:** Creational · **Code:** `src/CastleEscape.Game/Generation/` (`ILevelBuilder`, `LevelDirector`, `ProceduralLevelBuilder`, `PresetLevelBuilder`)
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- builder --level 7 --seed 3 --preset arena` · `POST /api/patterns/builder/demo?level=1&seed=7&preset=tutorial`
-**Used by:** `LevelProvider` (every level a session plays), `DemoWorld`, the test maps (`TestGame.RowsLevelProvider`).
+**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- builder` (plain console code: `src/CastleEscape.PatternDemos/BuilderDemo.cs`)
+**Used by:** `LevelProvider` (every level a session plays), `RowsLevelProvider` (test and demo maps), `LevelPreviewer` (`GET /api/levels/{index}/preview`).
 
 ## Problem in this game
 
 A level is built in many ordered steps with constraints between them. The door must exist before
 the start tiles can be checked for a path to it; the levers before the power obstacles, which must
-not cut the critical path (D5); items before zombies, which must not share tiles. Then the whole
-level must pass validation (GEN-1..3, LVL-3), and a failure means another try with a new seed
-(start-level activity diagram). There are also two very different ways to make a level: random
-generation, and hand-made ASCII maps for tests, demos and the tutorial.
+not cut the critical path (D5); items before zombies, which must not share tiles. There are also two
+very different ways to make a level: random generation, and hand-made ASCII maps for tests, demos
+and the tutorial.
 
 In the prototype this was a 250-line `LevelGenerator.TryBuild` doing all steps inline, plus a
-separate `PresetLevelParser` that repeated the object placement in a character switch. The
-validate-and-retry loop only worked for the generator.
+separate `PresetLevelParser` that repeated the object placement in a character switch.
 
 ## Why Builder
 
-Builder separates *how a complex object is assembled* (the step order, validation, retries: the
-director) from *how each part is made* (the concrete builders). Both level sources now run
-through the same director and the same rules. Each step is a small method with one job, and a
-third source (e.g. a level loaded from a database, or an editor) is one more builder. The result
-(`LevelState`) is only handed out by `GetResult()` once all steps have run.
+Builder separates *the order of the construction steps* (the director) from *how each step is
+done* (the concrete builders). Both level sources run through the same director. Each step is a
+small method with one job, and a third source (e.g. a level loaded from a database) is one more
+builder. The result (`LevelState`) is handed out by `GetResult()` once all steps have run.
+
+The implementation is plain C#: an interface, two classes that implement it, and a director class
+whose only method calls the steps in order. No framework, attributes or reflection.
 
 ## Participants
 
 | Role | Class |
 |---|---|
-| Builder | `ILevelBuilder` (`Reset`, 7 steps, `GetResult`, `IsRandom`) |
+| Builder | `ILevelBuilder` (7 steps + `GetResult`) |
 | ConcreteBuilder | `ProceduralLevelBuilder` (seeded random), `PresetLevelBuilder` (ASCII map) |
-| Director | `LevelDirector` (`Construct`: steps + validation + retries; `Assemble`: steps only) |
+| Director | `LevelDirector` (`Construct(builder)`: the step order, nothing else) |
 | Product | `LevelState` |
-| Client | `LevelProvider` (chooses the builder from `Generation:PresetLevel`) |
+| Client | `LevelProvider`: creates the builder, asks the director to build, then validates the level and retries with a new seed if it is not valid |
 
-The director also passes the level's theme factory ([Abstract Factory](AbstractFactory.md)) to
-`Reset`, and the item steps use the item spawners ([Factory Method](FactoryMethod.md)). The three
-creational patterns work together: the factories make the parts and the builder puts them in place.
+A builder is created for one level and gets everything it needs in its constructor: the level
+definition, the theme factory ([Abstract Factory](AbstractFactory.md)) and the seed or the map rows.
+The item steps use the item spawners ([Factory Method](FactoryMethod.md)). The creational patterns
+work together: the factories make the parts and the builder puts them in place.
 
 ## Before (tag `p1-prototype-before-patterns`)
 
@@ -71,9 +72,7 @@ classDiagram
 ```mermaid
 classDiagram
     class ILevelBuilder {
-        <<interface, Builder>>
-        +IsRandom bool
-        +Reset(definition, seed, theme)
+        <<interface>>
         +BuildTerrain()
         +PlaceExitAndDoor()
         +PlaceStartTiles()
@@ -85,64 +84,79 @@ classDiagram
     }
     class ProceduralLevelBuilder {
         -_rng Random
-        -_reserved HashSet~GridPos~
+        -_theme IThemeFactory
+        +ProceduralLevelBuilder(catalog, definition, theme, seed, game, generation)
     }
     class PresetLevelBuilder {
         -_rows string[]
-        +FromPreset(catalog, name)$
+        -_theme IThemeFactory
+        +PresetLevelBuilder(catalog, definition, theme, rows, seed)
     }
     class LevelDirector {
-        <<Director>>
-        +Steps string[]$
-        +Construct(builder, definition, seed) LevelState
-        +Assemble(builder, definition, seed) LevelState
+        +Construct(builder) LevelState
     }
-    class LevelState { <<Product>> }
+    class LevelState
     class LevelValidator {
         +Validate(level, minZombieDistance)$
     }
     class LevelProvider {
         +CreateLevel(index, seed) LevelState
+        +Generate(definition, seed) LevelState
+        +BuildPreset(definition, presetName, seed) LevelState
     }
     ILevelBuilder <|.. ProceduralLevelBuilder
     ILevelBuilder <|.. PresetLevelBuilder
     LevelDirector --> ILevelBuilder : runs the steps
-    LevelDirector ..> LevelValidator
     ILevelBuilder ..> LevelState : builds
     LevelProvider --> LevelDirector
-    LevelProvider ..> ILevelBuilder : new builder per level
+    LevelProvider ..> ProceduralLevelBuilder : new builder per attempt
+    LevelProvider ..> PresetLevelBuilder
+    LevelProvider ..> LevelValidator
 ```
 
 ## Key code
 
 ```csharp
-public LevelState Construct(ILevelBuilder builder, LevelDefinition definition, int seed)   // LevelDirector
+public sealed class LevelDirector
 {
-    var attempts = builder.IsRandom ? generation.MaxAttempts : 1;
-    for (var attempt = 0; attempt < attempts; attempt++)
+    public LevelState Construct(ILevelBuilder builder)
     {
+        builder.BuildTerrain();
+        builder.PlaceExitAndDoor();
+        builder.PlaceStartTiles();
+        builder.PlaceLevers();
+        builder.PlacePowerObstacles();
+        builder.PlaceItems();
+        builder.PlaceZombies();
+        return builder.GetResult();
+    }
+}
+```
+
+```csharp
+public LevelState Generate(LevelDefinition definition, int seed)   // LevelProvider, the client
+{
+    IThemeFactory theme = ThemeFactories.For(definition.Theme, catalog);
+    List<string> errors = [];
+    for (var attempt = 0; attempt < generation.MaxAttempts; attempt++)
+    {
+        var attemptSeed = unchecked(seed + attempt * 7919);
+        var builder = new ProceduralLevelBuilder(catalog, definition, theme, attemptSeed, game, generation);
         try
         {
-            var level = Assemble(builder, definition, seed + attempt * 7919);
+            var level = _director.Construct(builder);
             errors = LevelValidator.Validate(level, generation.MinZombieDistanceFromStart);
-            if (errors.Count == 0) return level;
+            if (errors.Count == 0)
+            {
+                return level;
+            }
         }
-        catch (LevelBuildException ex) { errors = [ex.Message]; }   // a step found no room
+        catch (LevelBuildException ex) // a step found no room; try another seed
+        {
+            errors = [ex.Message];
+        }
     }
     throw new LevelGenerationException(definition.Index, errors);
-}
-
-public LevelState Assemble(ILevelBuilder builder, LevelDefinition definition, int seed)
-{
-    builder.Reset(definition, seed, ThemeFactories.For(definition, catalog));
-    builder.BuildTerrain();
-    builder.PlaceExitAndDoor();
-    builder.PlaceStartTiles();
-    builder.PlaceLevers();
-    builder.PlacePowerObstacles();
-    builder.PlaceItems();
-    builder.PlaceZombies();
-    return builder.GetResult();
 }
 ```
 
@@ -151,19 +165,19 @@ public LevelState Assemble(ILevelBuilder builder, LevelDefinition definition, in
 `ProceduralLevelBuilder` and `PresetLevelBuilder` implement every step differently. For example,
 `PlaceLevers` picks two random reachable tiles at least 6 apart in one, and reads the `L`
 characters in the other. `BuilderTests` checks:
-- both builders exist and make valid levels of the right theme;
 - the director calls the steps in order (with a recording builder);
-- random builders are retried with new seeds, and preset builders are tried once;
-- invalid presets are rejected.
+- the same director builds valid levels of the right theme with both builders;
+- the provider retries with new seeds until a level is valid, and gives up after `MaxAttempts`;
+- the preset from `Generation:PresetLevel` is played, and an unknown preset is reported.
 
-The demo builds the same level definition with both and returns both maps as rows.
+The console demo builds level 1 with both builders through one director and prints both maps.
 
 ## Likely live-change requests
 
 | Request | Where to edit |
 |---|---|
-| "Add a third builder (e.g. a maze, or levels from a database)" | A new `ILevelBuilder`; choose it in `LevelProvider.CreateBuilder`. Director and validation stay the same. |
-| "Place levers before the exit" / "add a step (e.g. traps)" | `LevelDirector.Assemble` (the order) and a new method on `ILevelBuilder` with an implementation in each builder. |
+| "Add a third builder (e.g. a maze, or levels from a database)" | A new class implementing `ILevelBuilder`; create it in `LevelProvider`. The director doesn't change. |
+| "Place levers before the exit" / "add a step (e.g. traps)" | `LevelDirector.Construct` (the order) and a new method on `ILevelBuilder` with an implementation in each builder. |
 | "Three levers instead of two" | `ProceduralLevelBuilder.PlaceLevers` (`_levers.Count < 2`); presets just add another `L`. The door logic already handles any number. |
 | "More retries" | `Generation:MaxAttempts` in appsettings. |
 | "Play a preset instead of random levels" | `Generation:PresetLevel = tutorial` (or `arena`). |

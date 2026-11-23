@@ -27,13 +27,13 @@ an existing, incompatible API adapted to the interface the client expects.
 | Target | `IMessageSerializer` (`ContentType`, `Serialize<T>`, `Deserialize<T>`) |
 | Adapter | `JsonMessageSerializerAdapter`, `XmlMessageSerializerAdapter` |
 | Adaptee | `System.Text.Json.JsonSerializer`, `System.Runtime.Serialization.DataContractSerializer` |
-| Client | `GameplayEndpoints.GetState` (and the polling channel, Bridge) via `MessageSerializers.Choose` |
+| Client | `GameplayController.GetState` (and the polling channel, Bridge) via `MessageSerializers.Choose` |
 
 ## Before (tag `p1-prototype-before-patterns`)
 
 ```mermaid
 classDiagram
-    class GameplayEndpoints {
+    class GameplayController {
         GetState(sessionId) Ok~TickStateMessage~
     }
     class JsonSerializer {
@@ -43,8 +43,8 @@ classDiagram
         +SerializeAsync(stream, value) Task$
         +…100+ overloads$
     }
-    GameplayEndpoints ..> JsonSerializer : JSON only (framework)
-    note for GameplayEndpoints "XML (NET-2) impossible without\nwriting DataContractSerializer code here"
+    GameplayController ..> JsonSerializer : JSON only (framework)
+    note for GameplayController "XML (NET-2) impossible without\nwriting DataContractSerializer code here"
 ```
 
 ## After
@@ -86,7 +86,7 @@ classDiagram
         +Xml IMessageSerializer$
         +Choose(format, accept) IMessageSerializer$
     }
-    class GameplayEndpoints {
+    class GameplayController {
         GetState(sessionId, format) IResult
     }
     IMessageSerializer <|.. JsonMessageSerializerAdapter
@@ -94,8 +94,8 @@ classDiagram
     JsonMessageSerializerAdapter ..> JsonSerializer : delegates
     XmlMessageSerializerAdapter --> DataContractSerializer : delegates
     MessageSerializers ..> IMessageSerializer
-    GameplayEndpoints ..> MessageSerializers
-    GameplayEndpoints ..> IMessageSerializer
+    GameplayController ..> MessageSerializers
+    GameplayController ..> IMessageSerializer
 ```
 
 ## Key code

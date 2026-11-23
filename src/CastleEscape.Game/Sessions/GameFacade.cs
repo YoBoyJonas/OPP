@@ -3,6 +3,8 @@ using CastleEscape.Contracts.Diagnostics;
 using CastleEscape.Contracts.Gameplay;
 using CastleEscape.Contracts.Realtime;
 using CastleEscape.Contracts.Sessions;
+using CastleEscape.Game.Content;
+using CastleEscape.Game.Patterns;
 
 namespace CastleEscape.Game.Sessions;
 
@@ -12,10 +14,11 @@ public sealed record ConnectResult(Guid SessionId, Guid PlayerId, SessionUpdated
 /// <summary>
 /// The one entry point to the game for every client: the SignalR hub, the REST endpoints and the console
 /// demo. Each operation is one call here; behind it are the session registry (lookup, tokens), the
-/// sessions and their command queues, and the loop scheduler.
+/// sessions and their command queues, the loop scheduler, and the content catalog.
 /// Callers never see a <see cref="GameSession"/> or a <see cref="PlayerSlot"/>; they get contract DTOs.
 /// </summary>
-public sealed class GameFacade(SessionRegistry registry, GameLoopScheduler scheduler)
+[DesignPattern("Facade", "Facade")]
+public sealed class GameFacade(SessionRegistry registry, GameLoopScheduler scheduler, ContentCatalog catalog)
 {
     // ---------------------------------------------------------------- lobby
 
@@ -48,6 +51,9 @@ public sealed class GameFacade(SessionRegistry registry, GameLoopScheduler sched
         registry.All.Select(s => new SessionSummary(s.Id, s.JoinCode, s.Phase, s.Snapshot.Session.Players.Length)).ToList();
 
     public SessionDto GetSession(Guid sessionId) => registry.Get(sessionId).Snapshot.Session;
+
+    /// <summary>The characters a player can pick (PLR-1).</summary>
+    public IReadOnlyList<string> CharacterIds => catalog.Data.Characters.Select(c => c.Id).ToList();
 
     // ---------------------------------------------------------------- input (queued as commands)
 

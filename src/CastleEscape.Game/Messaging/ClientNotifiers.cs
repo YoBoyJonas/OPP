@@ -1,4 +1,5 @@
 using CastleEscape.Contracts.Realtime;
+using CastleEscape.Game.Patterns;
 using CastleEscape.Game.Sessions;
 
 namespace CastleEscape.Game.Messaging;
@@ -7,6 +8,7 @@ namespace CastleEscape.Game.Messaging;
 /// Decides which of a session's outgoing messages to send and how often, then hands them to its channel.
 /// Notifiers and channels vary independently: any notifier works over any channel.
 /// </summary>
+[DesignPattern("Bridge", "Abstraction")]
 public abstract class ClientNotifier(IClientChannel channel)
 {
     public IClientChannel Channel { get; } = channel;
@@ -30,6 +32,7 @@ public abstract class ClientNotifier(IClientChannel channel)
 /// The world as it looks: <c>LevelStarted</c> always, <c>StateUpdated</c> every <paramref name="everyNthTick"/>th tick.
 /// States replace each other, so a slow channel can safely skip some.
 /// </summary>
+[DesignPattern("Bridge", "RefinedAbstraction")]
 public sealed class StateNotifier(IClientChannel channel, int everyNthTick = 1) : ClientNotifier(channel)
 {
     private static readonly HashSet<string> StateMethods = [ClientMethods.LevelStarted, ClientMethods.StateUpdated];
@@ -45,6 +48,7 @@ public sealed class StateNotifier(IClientChannel channel, int everyNthTick = 1) 
 /// <summary>
 /// What happened: game events, lobby changes and errors. Every one is sent; skipping an event would lose it.
 /// </summary>
+[DesignPattern("Bridge", "RefinedAbstraction")]
 public sealed class EventNotifier(IClientChannel channel) : ClientNotifier(channel)
 {
     private static readonly HashSet<string> EventMethods = [ClientMethods.GameEvent, ClientMethods.SessionUpdated, ClientMethods.Error];

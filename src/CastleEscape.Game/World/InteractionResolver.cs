@@ -5,7 +5,7 @@ using CastleEscape.Game.Events;
 namespace CastleEscape.Game.World;
 
 /// <summary>Settings the interaction rules need.</summary>
-public sealed record InteractionSettings(double DefaultPowerDurationSeconds, int MaxPowerStackLevel);
+public sealed record InteractionSettings(double DefaultPowerDurationSeconds, int MaxPowerStackLevel, bool RespawnPlayerOnHit);
 
 /// <summary>
 /// Item pickup (COL-2, ITM-2) and zombie contact (COL-3, ZMB-2, ZMB-3), all in one place.
@@ -63,6 +63,10 @@ public static class InteractionResolver
 
             victim.LoseLives(zombie.Definition.ContactDamage);
             zombie.ResetToSpawn();
+            if (settings.RespawnPlayerOnHit)
+            {
+                victim.PlaceAt(victim.StartTile);
+            }
 
             events.Add(new LifeLost(victim.PlayerId, $"{zombie.Definition.Name} caught {victim.Name}! {victim.Lives} lives left.",
                 zombie.Id, victim.Lives));
