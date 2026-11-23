@@ -49,7 +49,7 @@ public static class PatternCatalog
         new("observer", "Observer", "Behavioral", D,
             "Clients, statistics, logs and sound cues all react to the same gameplay facts; the simulation must not know about them.",
             "Show how it works with a sequence diagram.",
-            "GameEventPublisher notifies ClientNotificationObserver, SessionStatisticsObserver, EventLogObserver and SoundCueObserver. Sequence diagram in docs/patterns/Observer.md."),
+            "GameEventPublisher notifies ClientNotificationObserver and SessionStatisticsObserver. Sequence diagram in docs/patterns/Observer.md."),
         new("facade", "Facade", "Structural", D,
             "The hub, REST endpoints and the console demo would each have to orchestrate registry, generation, loop and commands themselves.",
             "At least 2 client classes and at least 3 subsystem classes.",

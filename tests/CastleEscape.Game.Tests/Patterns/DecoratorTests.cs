@@ -14,8 +14,8 @@ public class DecoratorTests
     private static readonly Tile Water = new(TerrainKind.Water, ThemeFactories.For(LevelTheme.Dungeon, Catalog).CreateWater());
     private static readonly Tile Pit = new(TerrainKind.Pit, ThemeFactories.For(LevelTheme.Dungeon, Catalog).CreatePit());
 
-    private static PowerGrant Grant(PowerType type) => Catalog.Consumables.First(c => c.Grant?.Power == type).Grant!;
-    private static PowerCombo Combo(PowerType type) => Catalog.Combos.Single(c => c.Granted == type);
+    private static PowerGrant Grant(PowerType type) => Catalog.Data.Consumables.First(c => c.Grant?.Power == type).Grant!;
+    private static PowerCombo Combo(PowerType type) => Catalog.Data.Combos.Single(c => c.Granted == type);
 
     private static PowerManager Powers(string character, params PowerType[] pickups)
     {
@@ -23,7 +23,7 @@ public class DecoratorTests
         foreach (var pickup in pickups)
         {
             powers.Gain(Grant(pickup), 10, maxLevel: 3);
-            powers.RefreshCombos(Catalog.Combos);
+            powers.RefreshCombos(Catalog.Data.Combos);
         }
         return powers;
     }
@@ -114,7 +114,7 @@ public class DecoratorTests
         Assert.Equal(3, AbilityChain.Depth(powers.Abilities));
 
         powers.Tick(11);
-        powers.RefreshCombos(Catalog.Combos);
+        powers.RefreshCombos(Catalog.Data.Combos);
 
         Assert.Equal(0, AbilityChain.Depth(powers.Abilities));
         Assert.False(powers.Abilities.CanEnter(TerrainKind.Pit));

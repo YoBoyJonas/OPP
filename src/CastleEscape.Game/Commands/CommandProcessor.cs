@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using CastleEscape.Game.Events;
-using CastleEscape.Game.Patterns;
 using CastleEscape.Game.Sessions;
 
 namespace CastleEscape.Game.Commands;
@@ -10,7 +9,6 @@ namespace CastleEscape.Game.Commands;
 /// the tick runs them in sequence order (<see cref="ExecutePending"/>). The last <see cref="HistoryLimit"/>
 /// executed commands are kept so they can be listed and undone.
 /// </summary>
-[DesignPattern("Command", "Invoker")]
 public sealed class CommandProcessor
 {
     public const int HistoryLimit = 100;

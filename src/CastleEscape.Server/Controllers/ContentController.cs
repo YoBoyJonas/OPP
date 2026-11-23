@@ -17,31 +17,30 @@ public sealed class ContentController(ContentCatalog catalog, IOptions<GameOptio
     public ActionResult<ContentSummaryResponse> GetSummary()
     {
         return Ok(new ContentSummaryResponse(
-            catalog.ComputeContentHash(),
-            catalog.Characters.Count,
-            catalog.Consumables.Count,
-            catalog.Combos.Count,
-            catalog.Obstacles.Count,
-            catalog.Zombies.Count,
-            catalog.Levels.Count));
+            catalog.Data.Characters.Count,
+            catalog.Data.Consumables.Count,
+            catalog.Data.Combos.Count,
+            catalog.Data.Obstacles.Count,
+            catalog.Data.Zombies.Count,
+            catalog.Data.Levels.Count));
     }
 
     [HttpGet("characters", Name = "GetCharacters")]
     public ActionResult<IReadOnlyList<CharacterDefinition>> GetCharacters()
     {
-        return Ok(catalog.Characters);
+        return Ok(catalog.Data.Characters);
     }
 
     [HttpGet("consumables", Name = "GetConsumables")]
     public ActionResult<IReadOnlyList<Consumable>> GetConsumables()
     {
-        return Ok(catalog.Consumables);
+        return Ok(catalog.Data.Consumables);
     }
 
     [HttpGet("powers", Name = "GetPowers")]
     public ActionResult<List<PowerSummary>> GetPowers()
     {
-        var basePowers = catalog.Consumables
+        var basePowers = catalog.Data.Consumables
             .Where(c => c.Grant is not null)
             .GroupBy(c => c.Grant!.Power)
             .OrderBy(g => g.Key)
@@ -52,7 +51,7 @@ public sealed class ContentController(ContentCatalog catalog, IOptions<GameOptio
                 g.Select(c => c.Id).ToArray(),
                 []));
 
-        var superPowers = catalog.Combos.Select(combo => new PowerSummary(
+        var superPowers = catalog.Data.Combos.Select(combo => new PowerSummary(
             combo.Granted, IsSuperPower: true, DurationSeconds: null, [], combo.RequiredPowers.ToArray()));
 
         return Ok(basePowers.Concat(superPowers).ToList());
@@ -61,34 +60,34 @@ public sealed class ContentController(ContentCatalog catalog, IOptions<GameOptio
     [HttpGet("combos", Name = "GetCombos")]
     public ActionResult<IReadOnlyList<PowerCombo>> GetCombos()
     {
-        return Ok(catalog.Combos);
+        return Ok(catalog.Data.Combos);
     }
 
     [HttpGet("obstacles", Name = "GetObstacles")]
     public ActionResult<IReadOnlyList<Obstacle>> GetObstacles()
     {
-        return Ok(catalog.Obstacles);
+        return Ok(catalog.Data.Obstacles);
     }
 
     [HttpGet("zombies", Name = "GetZombies")]
     public ActionResult<IReadOnlyList<ZombieDefinition>> GetZombies()
     {
-        return Ok(catalog.Zombies);
+        return Ok(catalog.Data.Zombies);
     }
 
     [HttpGet("levels", Name = "GetLevelDefinitions")]
     public ActionResult<IReadOnlyList<LevelDefinition>> GetLevels()
     {
-        return Ok(catalog.Levels);
+        return Ok(catalog.Data.Levels);
     }
 
     [HttpGet("levels/{index:int}", Name = "GetLevelDefinition")]
     public ActionResult<LevelDefinition> GetLevel([FromRoute] int index)
     {
-        var level = catalog.Levels.FirstOrDefault(l => l.Index == index);
+        var level = catalog.Data.Levels.FirstOrDefault(l => l.Index == index);
         if (level is null)
         {
-            return Problem($"There is no level {index}; levels run 1..{catalog.Levels.Count}.",
+            return Problem($"There is no level {index}; levels run 1..{catalog.Data.Levels.Count}.",
                 statusCode: StatusCodes.Status404NotFound, title: "Level not found");
         }
         return Ok(level);

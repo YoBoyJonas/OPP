@@ -45,7 +45,7 @@ public sealed class RealtimeController(ContentCatalog catalog) : ControllerBase
             new(ClientMethods.StateUpdated, nameof(TickStateMessage),
                 "Every tick (20 Hz) while playing: players, zombies, items, levers, door. Interpolate x/y for smooth movement."),
             new(ClientMethods.GameEvent, nameof(GameEventMessage),
-                "Whenever something happens (see eventTypes). SoundCue events name a sound to play."),
+                "Whenever something happens (see eventTypes)."),
             new(ClientMethods.Error, nameof(ErrorMessage), "A rejected connection, or a session stopped by a server error."),
             new(ClientMethods.Pong, nameof(PongMessage), "The answer to Ping, to the caller only."),
         ],

@@ -54,11 +54,4 @@ public sealed class DiagnosticsController(
         var commands = game.GetCommandHistory(sessionId);
         return Ok(commands);
     }
-
-    [HttpGet("/api/diagnostics/sessions/{sessionId:guid}/events", Name = "GetEventLog")]
-    public ActionResult<IReadOnlyList<EventLogEntryDto>> GetEventLog([FromRoute] Guid sessionId, [FromQuery] long? afterTick)
-    {
-        var events = game.GetEventLog(sessionId, afterTick ?? -1);
-        return Ok(events);
-    }
 }

@@ -12,7 +12,7 @@ public static class AbstractFactoryDemo
     public static void Run()
     {
         var catalog = ContentCatalog.Instance;
-        var zombieType = catalog.Zombies.First(z => z.MovementStrategy == MovementStrategyKind.Greedy);
+        var zombieType = catalog.Data.Zombies.First(z => z.MovementStrategy == MovementStrategyKind.Greedy);
 
         IThemeFactory[] factories =
         [

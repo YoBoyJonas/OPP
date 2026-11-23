@@ -114,10 +114,8 @@ current `strategy`; `items[]`; `levers[]` (`isActive`); `doorOpen`; `phase`; `le
 **Events** (`GameEvent.type`): `ItemCollected`, `PowerGained`, `PowerExpired`, `ComboActivated`,
 `LifeLost`, `LeverChanged`, `DoorOpened`, `DoorClosed`, `PlayerReachedExit`, `LevelStarted`,
 `LevelRestarted`, `LevelCompleted`, `GameWon`, `GameLost`, `PlayerJoined`, `PlayerLeft`,
-`PhaseChanged`, `CommandUndone`, and `SoundCue`. `data` holds the event's fields as strings, e.g.
-`LifeLost` → `{ "zombieId": "zombie-1", "lives": "2" }`. **`SoundCue`** events name a sound in
-`data.cue` (`pickup`, `power_up`, `combo`, `life_lost`, `door_open`, `level_complete`, `victory`,
-`game_over`); map these names to your sound files.
+`PhaseChanged` and `CommandUndone`. `data` holds the event's fields as strings, e.g.
+`LifeLost` → `{ "zombieId": "zombie-1", "lives": "2" }`.
 
 ## 4. Sending input
 
@@ -156,7 +154,7 @@ events are never dropped. Each `body` is the serialized message; `latestSeq` is 
 
 `/api/dev/*` (see Scalar → Ops → Dev): quickstart, undo the last command, switch every zombie's
 strategy, give a power, skip the level, flip the Prototype clone mode. `/api/diagnostics/sessions/{id}/commands`
-and `/events` show what the server did.
+shows what the server did.
 
 ## Migration from the first prototype protocol
 
