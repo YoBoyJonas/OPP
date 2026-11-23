@@ -4,13 +4,9 @@ using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Generation;
 
-/// <summary>
-/// Serves hand-written ASCII maps as levels, one per level index (the last map repeats). Not validated,
-/// so maps can be tiny. For tests and pattern demos; the server uses <see cref="LevelProvider"/>.
-/// </summary>
+/// <summary>Hand-written maps as levels, for tests and demos.</summary>
 public sealed class RowsLevelProvider(ContentCatalog catalog, params string[][] levels) : ILevelProvider
 {
-    /// <summary>Use this level definition (theme, first zombie type) instead of the level being loaded.</summary>
     public int? DefinitionIndex { get; init; }
 
     public LevelState CreateLevel(int levelIndex, int seed)

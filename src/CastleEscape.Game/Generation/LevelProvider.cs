@@ -5,11 +5,7 @@ using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Generation;
 
-/// <summary>
-/// Where a session's levels come from, and the client of both creational patterns:
-/// it picks the theme factory (Abstract Factory) and the builder (Builder), and lets the director build.
-/// Normally levels are generated; with <c>Generation:PresetLevel</c> set, every level is that preset map.
-/// </summary>
+/// <summary>Picks the theme factory and the builder for a level and lets the director build it.</summary>
 public class LevelProvider(ContentCatalog catalog, GameOptions game, GenerationOptions generation) : ILevelProvider
 {
     private readonly LevelDirector _director = new();
@@ -32,18 +28,13 @@ public class LevelProvider(ContentCatalog catalog, GameOptions game, GenerationO
                 return level;
             }
         }
-        catch (LevelBuildException ex) // a bad preset name or map
+        catch (LevelBuildException ex)
         {
             errors = [ex.Message];
         }
         throw new LevelGenerationException(levelIndex, errors);
     }
 
-    /// <summary>
-    /// A random level that passes validation. A failed attempt is retried with another seed
-    /// (start-level activity diagram: generate, validate, retry).
-    /// </summary>
-    /// <exception cref="LevelGenerationException">No valid level after <c>Generation:MaxAttempts</c> attempts.</exception>
     public LevelState Generate(LevelDefinition definition, int seed)
     {
         IThemeFactory theme = ThemeFactories.For(definition.Theme, catalog);
@@ -61,7 +52,7 @@ public class LevelProvider(ContentCatalog catalog, GameOptions game, GenerationO
                     return level;
                 }
             }
-            catch (LevelBuildException ex) // a step found no room; try another seed
+            catch (LevelBuildException ex)
             {
                 errors = [ex.Message];
             }
@@ -69,8 +60,6 @@ public class LevelProvider(ContentCatalog catalog, GameOptions game, GenerationO
         throw new LevelGenerationException(definition.Index, errors);
     }
 
-    /// <summary>The preset map <c>content/presets/{name}.txt</c>, built exactly as drawn (not validated).</summary>
-    /// <exception cref="LevelBuildException">Unknown preset, or the map is broken.</exception>
     public LevelState BuildPreset(LevelDefinition definition, string presetName, int seed = 0)
     {
         IThemeFactory theme = ThemeFactories.For(definition.Theme, catalog);

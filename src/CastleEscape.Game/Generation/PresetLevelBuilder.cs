@@ -5,11 +5,7 @@ using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Generation;
 
-/// <summary>
-/// Concrete builder: a level from a hand-made ASCII map (<c>content/presets/*.txt</c>, legend in <see cref="MapLegend"/>).
-/// The same steps as the procedural builder, but each one reads its objects from the map.
-/// Walls, water, pits and zombies come from the theme factory it is given (Abstract Factory).
-/// </summary>
+/// <summary>Concrete builder: a level from a hand-made map in <c>content/presets</c>.</summary>
 public sealed class PresetLevelBuilder : ILevelBuilder
 {
     private readonly ContentCatalog _catalog;
@@ -31,7 +27,6 @@ public sealed class PresetLevelBuilder : ILevelBuilder
         _level = new LevelState(definition, seed, new Grid(rows[0].Length, rows.Count));
     }
 
-    /// <summary>The positions of every map tile showing one of <paramref name="chars"/>.</summary>
     private IEnumerable<GridPos> Find(params char[] chars) =>
         _level.Grid.Positions().Where(p => chars.Contains(CharAt(p)));
 
@@ -39,7 +34,6 @@ public sealed class PresetLevelBuilder : ILevelBuilder
 
     public void BuildTerrain()
     {
-        // Walls here; water, pits, the door and exits in their own steps. Everything else is floor.
         var wall = _theme.CreateWall();
         foreach (var pos in _level.Grid.Positions())
         {
@@ -129,7 +123,6 @@ public sealed class PresetLevelBuilder : ILevelBuilder
 
     public void PlaceZombies()
     {
-        // Every 'Z' is the level's first zombie type.
         var type = _definition.ZombieTable.Count > 0 ? _catalog.GetZombie(_definition.ZombieTable[0].Id) : _catalog.Zombies[0];
         foreach (var pos in Find(MapLegend.ZombieSpawn))
         {

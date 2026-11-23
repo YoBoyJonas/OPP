@@ -7,7 +7,6 @@ using CastleEscape.Game.World;
 
 namespace CastleEscape.PatternDemos;
 
-/// <summary>Builder requirement: at least 2 concrete builders.</summary>
 public static class BuilderDemo
 {
     public static void Run()
@@ -16,7 +15,6 @@ public static class BuilderDemo
         var definition = catalog.GetLevel(1);
         var theme = ThemeFactories.For(definition.Theme, catalog);
 
-        // The same director builds a level with two different builders.
         var director = new LevelDirector();
         ILevelBuilder[] builders =
         [

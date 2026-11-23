@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CastleEscape.Server.Controllers;
 
-/// <summary>Look at levels without playing them: generated ones by seed, and the preset maps.</summary>
 [ApiController]
 [Route("api/levels")]
 [Tags(ApiTags.Levels)]

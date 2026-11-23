@@ -7,11 +7,7 @@ using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Generation;
 
-/// <summary>
-/// Concrete builder: a random level from a <see cref="LevelDefinition"/> with a seeded RNG. Same seed, same level.
-/// The exit is in an alcove on the top or bottom border; the players start on the opposite side.
-/// Walls, water, pits and zombies come from the theme factory it is given (Abstract Factory).
-/// </summary>
+/// <summary>Concrete builder: a random level from a seed. Same seed, same level.</summary>
 public sealed class ProceduralLevelBuilder : ILevelBuilder
 {
     private readonly ContentCatalog _catalog;
@@ -22,8 +18,6 @@ public sealed class ProceduralLevelBuilder : ILevelBuilder
     private readonly Grid _grid;
     private readonly LevelState _level;
     private readonly Wall _wall;
-
-    // Tiles that must stay free (door entry, start tiles, levers) and tiles already used by an entity.
     private readonly HashSet<GridPos> _reserved = [];
     private readonly HashSet<GridPos> _occupied = [];
 
@@ -58,7 +52,6 @@ public sealed class ProceduralLevelBuilder : ILevelBuilder
             _grid.SetTile(pos, TerrainKind.Wall, _wall);
         }
 
-        // Decide where the exit goes now, so inner walls keep the way to the door free.
         _exitAtBottom = _rng.Next(2) == 0;
         _exitY = _exitAtBottom ? Height - 2 : 1;
         _inward = _exitAtBottom ? -1 : 1;
@@ -88,7 +81,6 @@ public sealed class ProceduralLevelBuilder : ILevelBuilder
 
     public void PlaceExitAndDoor()
     {
-        // An alcove against the border: two exit tiles, walled in, reachable only through the door.
         foreach (var x in new[] { _exitX - 1, _exitX + 2 })
         {
             _grid.SetTile(new GridPos(x, _exitY), TerrainKind.Wall, _wall);
@@ -110,7 +102,6 @@ public sealed class ProceduralLevelBuilder : ILevelBuilder
 
     public void PlaceStartTiles()
     {
-        // On the side away from the exit, both in the open area that leads to the door.
         var farRows = _exitAtBottom ? Enumerable.Range(1, 3) : Enumerable.Range(Height - 4, 3);
         var candidates = _grid.Positions().Where(p => farRows.Contains(p.Y) && _grid.GetTerrain(p) == TerrainKind.Floor).ToList();
         if (candidates.Count < 2)
@@ -132,7 +123,6 @@ public sealed class ProceduralLevelBuilder : ILevelBuilder
 
     public void PlaceLevers()
     {
-        // Two levers, apart from each other and from the starts, reachable without powers.
         var reach = PathFinder.Distances(_grid, _start1, Walkable);
         var candidates = reach.Keys
             .Where(p => _grid.GetTerrain(p) == TerrainKind.Floor && !_reserved.Contains(p)
@@ -159,7 +149,6 @@ public sealed class ProceduralLevelBuilder : ILevelBuilder
 
     public void PlacePowerObstacles()
     {
-        // Each patch is kept only if the critical path stays walkable without powers (D5).
         var critical = new List<GridPos> { _start2, _doorEntry };
         critical.AddRange(_levers);
         var placed = 0;
@@ -179,7 +168,7 @@ public sealed class ProceduralLevelBuilder : ILevelBuilder
                     terrain = TerrainKind.Pit;
                     break;
                 default:
-                    continue; // walls are placed by BuildTerrain
+                    continue;
             }
 
             var patch = GrowPatch(_rng.Next(obstacle.MinSize, obstacle.MaxSize + 1));
@@ -207,7 +196,6 @@ public sealed class ProceduralLevelBuilder : ILevelBuilder
 
     public void PlaceItems()
     {
-        // Power items only where no power is needed to get them; the others anywhere reachable.
         var reachNoPower = PathFinder.Distances(_grid, _start1, Walkable);
         var reachAnyPower = PathFinder.Distances(_grid, _start1, p => _grid.GetTerrain(p) is not (TerrainKind.Wall or TerrainKind.Door));
         _occupied.UnionWith(_reserved);
@@ -276,7 +264,6 @@ public sealed class ProceduralLevelBuilder : ILevelBuilder
         return patch;
     }
 
-    /// <summary>A random entry of a spawn table, more likely the higher its weight.</summary>
     private T PickWeighted<T>(IReadOnlyList<SpawnTableEntry> table, Func<string, T> resolve)
     {
         var roll = _rng.NextDouble() * table.Sum(e => e.Weight);

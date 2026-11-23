@@ -4,7 +4,7 @@ using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Generation.Themes;
 
-/// <summary>Concrete factory for levels 6-10, the harder part: slower water and pits, faster and smarter zombies.</summary>
+/// <summary>Concrete factory for levels 6-10.</summary>
 public sealed class CryptThemeFactory(Wall wallTemplate, Water waterTemplate, Pit pitTemplate) : IThemeFactory
 {
     public Wall CreateWall() => new BoneWall(wallTemplate);
@@ -22,7 +22,6 @@ public sealed class BoneWall : Wall
     }
 }
 
-/// <summary>Thick poisoned water: swimming is slower than in the Dungeon.</summary>
 public sealed class PoisonWater : Water
 {
     public const double SpeedMultiplier = 0.45;
@@ -35,7 +34,6 @@ public sealed class PoisonWater : Water
     }
 }
 
-/// <summary>A wider gap: jumping across takes longer.</summary>
 public sealed class AbyssPit : Pit
 {
     public const double SpeedMultiplier = 0.8;
@@ -48,7 +46,6 @@ public sealed class AbyssPit : Pit
     }
 }
 
-/// <summary>A faster zombie; simple Greedy chasers become path-finding (BFS) ones.</summary>
 public sealed class CryptZombie(string id, ZombieDefinition definition, GridPos spawn) : ZombieEntity(id, definition, spawn)
 {
     public const double SpeedBonus = 1.2;

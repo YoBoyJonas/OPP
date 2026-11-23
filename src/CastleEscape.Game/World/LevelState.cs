@@ -5,12 +5,6 @@ using CastleEscape.Game.Patterns;
 
 namespace CastleEscape.Game.World;
 
-/// <summary>
-/// One generated level: terrain plus everything placed on it. Players are not part of it;
-/// they belong to the session and move from level to level.
-/// Collections are private and changed only through methods (seam for P2 Iterator/Composite/Visitor).
-/// A freshly built level is kept as the prototype: every play and restart runs on a clone of it.
-/// </summary>
 [DesignPattern("Prototype", "ConcretePrototype")]
 public class LevelState(LevelDefinition definition, int seed, Grid grid) : ILevelPrototype<LevelState>
 {
@@ -34,10 +28,8 @@ public class LevelState(LevelDefinition definition, int seed, Grid grid) : ILeve
     public IReadOnlyList<Lever> Levers => _levers;
     public IReadOnlyList<GridPos> ExitTiles => _exitTiles;
 
-    /// <summary>Player 1's and player 2's start tiles, in that order.</summary>
     public IReadOnlyList<GridPos> StartTiles => _startTiles;
 
-    /// <summary>A new entity id unique in this level, e.g. "item-3".</summary>
     public string NextEntityId(string prefix)
     {
         var next = _idCounters.GetValueOrDefault(prefix) + 1;
@@ -59,20 +51,12 @@ public class LevelState(LevelDefinition definition, int seed, Grid grid) : ILeve
     public void AddExitTile(GridPos pos) => _exitTiles.Add(pos);
     public bool IsExitTile(GridPos pos) => _exitTiles.Contains(pos);
 
-    // ---------------------------------------------------------------- Prototype
-
     public LevelState Clone(CloneMode mode) => mode == CloneMode.Deep ? DeepClone() : ShallowClone();
 
-    /// <summary>
-    /// Copies only this object: the grid, the lists and the entities in them are shared with the original.
-    /// Playing on it changes the original too (collected items stay collected after a restart).
-    /// </summary>
+    /// <summary>Shares the grid, lists and entities with the original.</summary>
     public LevelState ShallowClone() => (LevelState)MemberwiseClone();
 
-    /// <summary>
-    /// A fully independent level: its own grid array, lists and entity objects. Shared: the immutable
-    /// tiles and content definitions, which nothing changes during play.
-    /// </summary>
+    /// <summary>Own grid, lists and entities; only immutable tiles and definitions are shared.</summary>
     public LevelState DeepClone()
     {
         var copy = new LevelState(Definition, Seed, Grid.Copy());
