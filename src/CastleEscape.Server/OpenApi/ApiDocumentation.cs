@@ -184,10 +184,6 @@ public static class ApiDocumentation
             "The last 100 commands (inputs, steps, restarts, given powers), oldest first, with the tick each ran "
                 + "in and whether it was undone (Command pattern). An undone StartStep is a D7 tile conflict.",
             Errors: [Status404NotFound]),
-        ["GetEventLog"] = new("Event log of a session",
-            "The last 200 game events, oldest first, as recorded by the EventLogObserver (Observer pattern). "
-                + "Pass `afterTick` to get only newer ones.",
-            Errors: [Status404NotFound]),
 
         // DevController
         ["DevQuickstart"] = new("Two players, characters picked, level 1 starting",

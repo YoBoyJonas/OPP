@@ -83,14 +83,11 @@ public static class PatternDemoCatalog
 {
     public static IReadOnlyList<IPatternDemo> All { get; } =
     [
-        new SingletonDemo(),
         new AdapterDemo(),
         new FactoryMethodDemo(),
         new PrototypeDemo(),
         new StrategyDemo(),
         new DecoratorDemo(),
-        new CommandDemo(),
-        new ObserverDemo(),
         new BridgeDemo(),
         new FacadeDemo(),
     ];

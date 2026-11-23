@@ -108,10 +108,10 @@ public sealed class PresetLevelBuilder : ILevelBuilder
             var c = CharAt(pos);
             Consumable? item = c switch
             {
-                MapLegend.HealthItem => _catalog.Consumables.First(i => i.Kind == ConsumableKind.Health),
-                MapLegend.RewardItem => _catalog.Consumables.First(i => i.Kind == ConsumableKind.Reward),
+                MapLegend.HealthItem => _catalog.Data.Consumables.First(i => i.Kind == ConsumableKind.Health),
+                MapLegend.RewardItem => _catalog.Data.Consumables.First(i => i.Kind == ConsumableKind.Reward),
                 MapLegend.JumpItem or MapLegend.SprintItem or MapLegend.SwimItem =>
-                    _catalog.Consumables.First(i => i.Grant?.Power == MapLegend.PowerOf(c)),
+                    _catalog.Data.Consumables.First(i => i.Grant?.Power == MapLegend.PowerOf(c)),
                 _ => null,
             };
             if (item is not null)
@@ -123,7 +123,7 @@ public sealed class PresetLevelBuilder : ILevelBuilder
 
     public void PlaceZombies()
     {
-        var type = _definition.ZombieTable.Count > 0 ? _catalog.GetZombie(_definition.ZombieTable[0].Id) : _catalog.Zombies[0];
+        var type = _definition.ZombieTable.Count > 0 ? _catalog.GetZombie(_definition.ZombieTable[0].Id) : _catalog.Data.Zombies[0];
         foreach (var pos in Find(MapLegend.ZombieSpawn))
         {
             _level.AddZombie(_theme.CreateZombie(_level.NextEntityId("zombie"), type, pos));

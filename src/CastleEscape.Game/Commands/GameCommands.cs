@@ -1,14 +1,12 @@
 using CastleEscape.Contracts;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Events;
-using CastleEscape.Game.Patterns;
 using CastleEscape.Game.Sessions;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Commands;
 
 /// <summary>MOV-3: the direction key a player holds (None = released). Undo restores the previous key.</summary>
-[DesignPattern("Command", "ConcreteCommand")]
 public sealed class SetDirectionCommand(long sequence, Guid playerId, Direction direction) : IGameCommand
 {
     private Direction _previous;
@@ -51,7 +49,6 @@ public sealed class SetDirectionCommand(long sequence, Guid playerId, Direction 
 /// MOV-1: a player starts a one-tile step. Created by the tick, not the client; carries the sequence of
 /// the direction input it came from, so when two players claim the same tile the later input is undone (D7).
 /// </summary>
-[DesignPattern("Command", "ConcreteCommand")]
 public sealed class StartStepCommand(long sequence, Guid playerId, Direction direction) : IGameCommand
 {
     public Guid? PlayerId => playerId;
@@ -79,7 +76,6 @@ public sealed class StartStepCommand(long sequence, Guid playerId, Direction dir
 /// Undo resumes the level that was being played, with every player's lives, score and tile.
 /// Active powers are not brought back: that needs a snapshot of the power timers (the P2 Memento seam).
 /// </summary>
-[DesignPattern("Command", "ConcreteCommand")]
 public sealed class RestartLevelCommand(long sequence, Guid playerId) : IGameCommand
 {
     private LevelState? _previousLevel;
@@ -125,7 +121,6 @@ public sealed class RestartLevelCommand(long sequence, Guid playerId) : IGameCom
 }
 
 /// <summary>A power given without an item (dev tools, demos). Undo puts the previous timer and level back.</summary>
-[DesignPattern("Command", "ConcreteCommand")]
 public sealed class GivePowerCommand(long sequence, Guid playerId, PowerGrant grant, double durationSeconds, int maxLevel,
     IReadOnlyList<PowerCombo> combos) : IGameCommand
 {
@@ -158,7 +153,6 @@ public sealed class GivePowerCommand(long sequence, Guid playerId, PowerGrant gr
 }
 
 /// <summary>Dev tools: every zombie in the level switches to one chase strategy (Strategy pattern). Undo restores each zombie's own.</summary>
-[DesignPattern("Command", "ConcreteCommand")]
 public sealed class SetZombieStrategyCommand(long sequence, MovementStrategyKind kind) : IGameCommand
 {
     private readonly Dictionary<string, AI.IZombieMovementStrategy> _previous = [];

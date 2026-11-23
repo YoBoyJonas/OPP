@@ -106,5 +106,5 @@ Settings live in `src/CastleEscape.Server/appsettings.json` and are validated at
 ## Deployment
 
 CI (`.github/workflows/main_castleescapeserver.yml`) builds the solution, runs the tests, and
-publishes `src/CastleEscape.Server` to Azure on pushes to `main`. Dev tools are off outside
-Development.
+publishes `src/CastleEscape.Server` to Azure on pushes to `main`. Dev tools (and so `/playground`)
+are on in the deployment too; set the app setting `DevTools__Enabled=false` in Azure to turn them off.

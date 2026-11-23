@@ -11,6 +11,15 @@ public sealed class BridgeDemo : IPatternDemo
 {
     public string Key => "bridge";
 
+    /// <summary>Ana (1) and Ben (2) with a coin (r) between them.</summary>
+    private static readonly string[] Map =
+    [
+        "##########",
+        "#1.2r....#",
+        "#........#",
+        "##########",
+    ];
+
     /// <summary>A third channel, written for this demo in a few lines: it only counts what it receives.</summary>
     [DesignPattern("Bridge", "ConcreteImplementor")]
     public sealed class CountingChannel : IClientChannel
@@ -37,7 +46,7 @@ public sealed class BridgeDemo : IPatternDemo
         var notifiers = ClientNotifiers.For([counting, polling], new Dictionary<string, int> { [polling.Name] = everyNth });
         trace.Line($"Notifiers: {string.Join("; ", notifiers)}.");
 
-        var (session, ana, _) = DemoWorld.PlayingSession(CommandDemo.Map);
+        var (session, ana, _) = DemoWorld.PlayingSession(Map);
         session.SubmitDirection(ana.PlayerId, Direction.Right);
         var sent = new Dictionary<string, int>();
         for (var i = 0; i < ticks; i++)

@@ -20,7 +20,7 @@ public sealed class DevActions(SessionRegistry registry, ContentCatalog catalog,
         foreach (var id in characters.Where(id => catalog.FindCharacter(id) is null))
         {
             throw new GameException(GameErrorCode.UnknownCharacter,
-                $"Unknown character '{id}'. Choose one of: {string.Join(", ", catalog.Characters.Select(c => c.Id))}.");
+                $"Unknown character '{id}'. Choose one of: {string.Join(", ", catalog.Data.Characters.Select(c => c.Id))}.");
         }
 
         var (session, ana) = registry.Create("Ana", request.Seed);

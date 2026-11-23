@@ -7,9 +7,9 @@ public static class ThemeFactories
 {
     public static IThemeFactory For(LevelTheme theme, ContentCatalog catalog)
     {
-        var wall = catalog.Obstacles.OfType<Wall>().First();
-        var water = catalog.Obstacles.OfType<Water>().First();
-        var pit = catalog.Obstacles.OfType<Pit>().First();
+        var wall = catalog.Data.Obstacles.OfType<Wall>().First();
+        var water = catalog.Data.Obstacles.OfType<Water>().First();
+        var pit = catalog.Data.Obstacles.OfType<Pit>().First();
 
         return theme switch
         {

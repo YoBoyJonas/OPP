@@ -53,7 +53,7 @@ public sealed class GameFacade(SessionRegistry registry, GameLoopScheduler sched
     public SessionDto GetSession(Guid sessionId) => registry.Get(sessionId).Snapshot.Session;
 
     /// <summary>The characters a player can pick (PLR-1).</summary>
-    public IReadOnlyList<string> CharacterIds => catalog.Characters.Select(c => c.Id).ToList();
+    public IReadOnlyList<string> CharacterIds => catalog.Data.Characters.Select(c => c.Id).ToList();
 
     // ---------------------------------------------------------------- input (queued as commands)
 
@@ -117,13 +117,6 @@ public sealed class GameFacade(SessionRegistry registry, GameLoopScheduler sched
     /// <summary>The session's recent commands, oldest first (Command pattern history).</summary>
     public IReadOnlyList<CommandRecordDto> GetCommandHistory(Guid sessionId) =>
         registry.Get(sessionId).CommandHistory().Select(c => new CommandRecordDto(c.Sequence, c.Name, c.PlayerId, c.Tick, c.Undone)).ToList();
-
-    /// <summary>The session's recent game events, oldest first; optionally only those after <paramref name="afterTick"/>.</summary>
-    public IReadOnlyList<EventLogEntryDto> GetEventLog(Guid sessionId, long afterTick = -1) =>
-        registry.Get(sessionId).RecentEvents()
-            .Where(e => e.Tick > afterTick)
-            .Select(e => new EventLogEntryDto(e.Tick, e.At, e.Type, e.PlayerId, e.Message, new Dictionary<string, string>(e.Data)))
-            .ToList();
 
     // ---------------------------------------------------------------- loop
 

@@ -1,7 +1,6 @@
 namespace CastleEscape.Contracts.Content;
 
 /// <summary>What the server's content catalog holds, returned by <c>GET /api/content</c>.</summary>
-/// <param name="ContentHash">SHA-256 of the whole catalog; changes whenever any content file changes.</param>
 /// <param name="Characters">Number of playable characters.</param>
 /// <param name="Consumables">Number of item types (Health, Reward, Power).</param>
 /// <param name="Combos">Number of super-power combos.</param>
@@ -9,7 +8,6 @@ namespace CastleEscape.Contracts.Content;
 /// <param name="Zombies">Number of zombie types.</param>
 /// <param name="Levels">Number of levels in a run.</param>
 public sealed record ContentSummaryResponse(
-    string ContentHash,
     int Characters,
     int Consumables,
     int Combos,

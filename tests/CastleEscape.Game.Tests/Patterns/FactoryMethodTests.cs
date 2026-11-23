@@ -13,10 +13,10 @@ public class FactoryMethodTests
 
     private static LevelState EmptyLevel() => new(Catalog.GetLevel(1), seed: 1, new Grid(10, 10));
 
-    private static Consumable First(ConsumableKind kind) => Catalog.Consumables.First(c => c.Kind == kind);
+    private static Consumable First(ConsumableKind kind) => Catalog.Data.Consumables.First(c => c.Kind == kind);
 
     private static ItemEffectContext Context(List<GameEvent> events) =>
-        new(Catalog.Combos, new InteractionSettings(10, 3, false), events);
+        new(Catalog.Data.Combos, new InteractionSettings(10, 3, false), events);
 
     [Fact]
     public void ProductFamily_HasAtLeastThreeClasses()

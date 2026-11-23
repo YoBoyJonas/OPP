@@ -14,8 +14,8 @@ public sealed class LevelPreviewer(ContentCatalog catalog, GameOptions game, Gen
 
     public LevelPreviewResponse Preview(int index, int seed, string? preset = null)
     {
-        var definition = catalog.Levels.FirstOrDefault(l => l.Index == index)
-            ?? throw new GameException(GameErrorCode.InvalidRequest, $"There is no level {index}; levels are 1-{catalog.Levels.Count}.");
+        var definition = catalog.Data.Levels.FirstOrDefault(l => l.Index == index)
+            ?? throw new GameException(GameErrorCode.InvalidRequest, $"There is no level {index}; levels are 1-{catalog.Data.Levels.Count}.");
 
         string builder;
         LevelState level;

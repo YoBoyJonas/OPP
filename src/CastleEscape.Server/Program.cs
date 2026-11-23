@@ -10,6 +10,7 @@ using CastleEscape.Server.OpenApi;
 using CastleEscape.Server.Options;
 using CastleEscape.Server.Realtime;
 using System.Reflection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -122,7 +123,17 @@ if (!string.IsNullOrEmpty(port))
     builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 }
 
+// Azure terminates TLS in front of the app; trust its headers so Request.Scheme is https (quickstart hub URLs).
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 // Load and validate content now, so a broken content file stops startup instead of the first request.
 app.Services.GetRequiredService<ContentCatalog>();

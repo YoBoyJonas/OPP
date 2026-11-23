@@ -24,7 +24,7 @@ public sealed class FactoryMethodDemo : IPatternDemo
         var player = p1.Entity!;
         player.LoseLives(1); // so a health potion has something to restore
         var events = new List<GameEvent>();
-        var context = new ItemEffectContext(DemoWorld.Catalog.Combos, new InteractionSettings(10, 3, false), events);
+        var context = new ItemEffectContext(DemoWorld.Catalog.Data.Combos, new InteractionSettings(10, 3, false), events);
 
         trace.Line($"The tutorial preset already placed {level.Items.Count} items through the spawners: "
                    + string.Join(", ", level.Items.Select(i => $"{i.Id}={i.GetType().Name}")) + ".");
@@ -35,7 +35,7 @@ public sealed class FactoryMethodDemo : IPatternDemo
         var created = new List<Dictionary<string, object?>>();
         foreach (var kind in kinds)
         {
-            var definition = DemoWorld.Catalog.Consumables.First(c => c.Kind == kind);
+            var definition = DemoWorld.Catalog.Data.Consumables.First(c => c.Kind == kind);
             var spawner = ItemSpawners.For(definition);
             free.MoveNext();
             var item = spawner.Spawn(level, definition, free.Current);

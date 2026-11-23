@@ -17,7 +17,6 @@ public class ContentEndpointTests(WebApplicationFactory<Program> factory) : ICla
         var summary = await factory.CreateClient().GetFromJsonAsync<ContentSummaryResponse>("/api/content", Ct);
 
         Assert.NotNull(summary);
-        Assert.Equal(64, summary.ContentHash.Length);
         Assert.Equal((3, 6, 2, 3, 4, 10),
             (summary.Characters, summary.Consumables, summary.Combos, summary.Obstacles, summary.Zombies, summary.Levels));
     }
