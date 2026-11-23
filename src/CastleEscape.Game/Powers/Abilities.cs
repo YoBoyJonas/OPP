@@ -1,9 +1,11 @@
 using CastleEscape.Game.Content;
+using CastleEscape.Game.Patterns;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Powers;
 
 /// <summary>What a player can do right now: which terrain they may enter and how fast they move over it.</summary>
+[DesignPattern("Decorator", "Component")]
 public interface IAbilities
 {
     /// <summary>Tiles per second on floor.</summary>
@@ -20,6 +22,7 @@ public interface IAbilities
 }
 
 /// <summary>A character with no powers: floor only; water and pits are closed.</summary>
+[DesignPattern("Decorator", "ConcreteComponent")]
 public sealed class CharacterAbilities(CharacterDefinition character) : IAbilities
 {
     private StatModifiers Mods => character.BaseModifiers;
@@ -57,6 +60,7 @@ public static class AbilityChain
 }
 
 /// <summary>Wraps another <see cref="IAbilities"/> and passes everything through; subclasses change one thing.</summary>
+[DesignPattern("Decorator", "Decorator")]
 public abstract class AbilityDecorator(IAbilities inner) : IAbilities
 {
     /// <summary>The wrapped abilities (the next layer inwards).</summary>
@@ -72,6 +76,7 @@ public abstract class AbilityDecorator(IAbilities inner) : IAbilities
 }
 
 /// <summary>Jump (PWR-1): pits become passable, and faster by the item's jump multiplier.</summary>
+[DesignPattern("Decorator", "ConcreteDecorator")]
 public sealed class JumpDecorator(IAbilities inner, StatModifiers modifiers) : AbilityDecorator(inner)
 {
     protected override string Name => "Jump";
@@ -81,6 +86,7 @@ public sealed class JumpDecorator(IAbilities inner, StatModifiers modifiers) : A
 }
 
 /// <summary>Sprint: faster everywhere.</summary>
+[DesignPattern("Decorator", "ConcreteDecorator")]
 public sealed class SprintDecorator(IAbilities inner, StatModifiers modifiers) : AbilityDecorator(inner)
 {
     protected override string Name => "Sprint";
@@ -89,6 +95,7 @@ public sealed class SprintDecorator(IAbilities inner, StatModifiers modifiers) :
 }
 
 /// <summary>Swim: water becomes passable, and faster by the item's swim multiplier.</summary>
+[DesignPattern("Decorator", "ConcreteDecorator")]
 public sealed class SwimDecorator(IAbilities inner, StatModifiers modifiers) : AbilityDecorator(inner)
 {
     protected override string Name => "Swim";
@@ -98,6 +105,7 @@ public sealed class SwimDecorator(IAbilities inner, StatModifiers modifiers) : A
 }
 
 /// <summary>JumpDash combo (Jump + Sprint, PWR-2): faster everywhere, and even faster over pits.</summary>
+[DesignPattern("Decorator", "ConcreteDecorator")]
 public sealed class JumpDashDecorator(IAbilities inner, StatModifiers modifiers) : AbilityDecorator(inner)
 {
     protected override string Name => "JumpDash";
@@ -110,6 +118,7 @@ public sealed class JumpDashDecorator(IAbilities inner, StatModifiers modifiers)
 /// FastSwim combo (Sprint + Swim, PWR-2): water no longer slows the player down. Water speed is the
 /// land speed times the combo's bonus; what the inner chain says about water is replaced, not multiplied.
 /// </summary>
+[DesignPattern("Decorator", "ConcreteDecorator")]
 public sealed class FastSwimDecorator(IAbilities inner, StatModifiers modifiers) : AbilityDecorator(inner)
 {
     protected override string Name => "FastSwim";

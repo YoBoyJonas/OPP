@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CastleEscape.Game.Patterns;
 
 namespace CastleEscape.Game.Messaging;
 
@@ -6,6 +7,7 @@ namespace CastleEscape.Game.Messaging;
 /// Adapts <see cref="JsonSerializer"/> (adaptee: a static class with dozens of overloads for strings, streams,
 /// spans, nodes, type info…) to <see cref="IMessageSerializer"/>, using the game's JSON conventions.
 /// </summary>
+[DesignPattern("Adapter", "Adapter")]
 public sealed class JsonMessageSerializerAdapter : IMessageSerializer
 {
     private readonly JsonSerializerOptions _options = JsonDefaults.Create();

@@ -1,17 +1,14 @@
-using CastleEscape.Contracts;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Generation.Themes;
 
-/// <summary>Levels 1-5: stone walls, murky water, spike pits and ordinary zombies.</summary>
-public sealed class DungeonThemeFactory(ObstacleTemplates templates) : IThemeFactory
+/// <summary>Concrete factory for levels 1-5.</summary>
+public sealed class DungeonThemeFactory(Wall wallTemplate, Water waterTemplate, Pit pitTemplate) : IThemeFactory
 {
-    public LevelTheme Theme => LevelTheme.Dungeon;
-
-    public Wall CreateWall() => new StoneWall(templates.Wall);
-    public Water CreateWater() => new MurkyWater(templates.Water);
-    public Pit CreatePit() => new SpikePit(templates.Pit);
+    public Wall CreateWall() => new StoneWall(wallTemplate);
+    public Water CreateWater() => new MurkyWater(waterTemplate);
+    public Pit CreatePit() => new SpikePit(pitTemplate);
     public ZombieEntity CreateZombie(string id, ZombieDefinition definition, GridPos spawn) => new DungeonZombie(id, definition, spawn);
 }
 
@@ -24,7 +21,6 @@ public sealed class StoneWall : Wall
     }
 }
 
-/// <summary>Water with the template's slowdown (0.6).</summary>
 public sealed class MurkyWater : Water
 {
     public MurkyWater(Water template) : base(template)
@@ -34,7 +30,6 @@ public sealed class MurkyWater : Water
     }
 }
 
-/// <summary>A pit crossed at the normal jump speed.</summary>
 public sealed class SpikePit : Pit
 {
     public SpikePit(Pit template) : base(template)
@@ -44,5 +39,4 @@ public sealed class SpikePit : Pit
     }
 }
 
-/// <summary>A zombie exactly as its type defines it.</summary>
 public sealed class DungeonZombie(string id, ZombieDefinition definition, GridPos spawn) : ZombieEntity(id, definition, spawn);

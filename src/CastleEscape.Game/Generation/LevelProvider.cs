@@ -1,33 +1,69 @@
 using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
+using CastleEscape.Game.Generation.Themes;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Generation;
 
-/// <summary>
-/// Default level source: the director builds each level with the procedural builder, or with the
-/// preset builder for every level when <c>Generation:PresetLevel</c> is set (tests, demos).
-/// </summary>
-public class LevelProvider(GameOptions game, GenerationOptions generation) : ILevelProvider
+/// <summary>Picks the theme factory and the builder for a level and lets the director build it.</summary>
+public class LevelProvider(ContentCatalog catalog, GameOptions game, GenerationOptions generation) : ILevelProvider
 {
-    private readonly LevelDirector _director = new(ContentCatalog.Instance, generation);
+    private readonly LevelDirector _director = new();
 
     public LevelState CreateLevel(int levelIndex, int seed)
     {
-        var definition = ContentCatalog.Instance.GetLevel(levelIndex);
+        var definition = catalog.GetLevel(levelIndex);
+        if (string.IsNullOrWhiteSpace(generation.PresetLevel))
+        {
+            return Generate(definition, seed);
+        }
+
+        List<string> errors;
         try
         {
-            return _director.Construct(CreateBuilder(), definition, seed);
+            var level = BuildPreset(definition, generation.PresetLevel, seed);
+            errors = LevelValidator.Validate(level, generation.MinZombieDistanceFromStart);
+            if (errors.Count == 0)
+            {
+                return level;
+            }
         }
-        catch (LevelBuildException ex) // a bad preset name or map
+        catch (LevelBuildException ex)
         {
-            throw new LevelGenerationException(levelIndex, [ex.Message]);
+            errors = [ex.Message];
         }
+        throw new LevelGenerationException(levelIndex, errors);
     }
 
-    /// <summary>Builders keep per-level state, so each level gets a new one.</summary>
-    private ILevelBuilder CreateBuilder() =>
-        string.IsNullOrWhiteSpace(generation.PresetLevel)
-            ? new ProceduralLevelBuilder(ContentCatalog.Instance, game, generation)
-            : PresetLevelBuilder.FromPreset(ContentCatalog.Instance, generation.PresetLevel);
+    public LevelState Generate(LevelDefinition definition, int seed)
+    {
+        IThemeFactory theme = ThemeFactories.For(definition.Theme, catalog);
+        List<string> errors = [];
+        for (var attempt = 0; attempt < generation.MaxAttempts; attempt++)
+        {
+            var attemptSeed = unchecked(seed + attempt * 7919);
+            var builder = new ProceduralLevelBuilder(catalog, definition, theme, attemptSeed, game, generation);
+            try
+            {
+                var level = _director.Construct(builder);
+                errors = LevelValidator.Validate(level, generation.MinZombieDistanceFromStart);
+                if (errors.Count == 0)
+                {
+                    return level;
+                }
+            }
+            catch (LevelBuildException ex)
+            {
+                errors = [ex.Message];
+            }
+        }
+        throw new LevelGenerationException(definition.Index, errors);
+    }
+
+    public LevelState BuildPreset(LevelDefinition definition, string presetName, int seed = 0)
+    {
+        IThemeFactory theme = ThemeFactories.For(definition.Theme, catalog);
+        var builder = new PresetLevelBuilder(catalog, definition, theme, PresetMaps.ReadRows(presetName), seed);
+        return _director.Construct(builder);
+    }
 }

@@ -1,4 +1,5 @@
 using CastleEscape.Game.Content;
+using CastleEscape.Game.Patterns;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Items;
@@ -7,6 +8,7 @@ namespace CastleEscape.Game.Items;
 /// Places an item on a level. <see cref="Spawn"/> is the same for every kind (check the tile,
 /// name the item, register it); only the <see cref="CreateItem"/> step differs, and subclasses decide it.
 /// </summary>
+[DesignPattern("Factory Method", "Creator")]
 public abstract class ItemSpawner
 {
     /// <summary>The content kind this spawner creates.</summary>
@@ -36,18 +38,21 @@ public abstract class ItemSpawner
     protected abstract ItemEntity CreateItem(string id, Consumable definition, GridPos pos);
 }
 
+[DesignPattern("Factory Method", "ConcreteCreator")]
 public sealed class HealthItemSpawner : ItemSpawner
 {
     public override ConsumableKind Kind => ConsumableKind.Health;
     protected override ItemEntity CreateItem(string id, Consumable definition, GridPos pos) => new HealthItem(id, (Health)definition, pos);
 }
 
+[DesignPattern("Factory Method", "ConcreteCreator")]
 public sealed class RewardItemSpawner : ItemSpawner
 {
     public override ConsumableKind Kind => ConsumableKind.Reward;
     protected override ItemEntity CreateItem(string id, Consumable definition, GridPos pos) => new RewardItem(id, (Reward)definition, pos);
 }
 
+[DesignPattern("Factory Method", "ConcreteCreator")]
 public sealed class PowerItemSpawner : ItemSpawner
 {
     public override ConsumableKind Kind => ConsumableKind.Power;

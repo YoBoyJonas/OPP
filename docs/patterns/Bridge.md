@@ -94,7 +94,7 @@ classDiagram
         +Read(sessionId, afterSeq) List~BufferedMessage~
     }
     class GameLoopService
-    class GameplayEndpoints {
+    class GameplayController {
         GetMessages(sessionId, afterSeq, format)
     }
     ClientNotifier <|-- StateNotifier
@@ -103,8 +103,8 @@ classDiagram
     IClientChannel <|.. SignalRClientChannel
     IClientChannel <|.. PollingBufferChannel
     GameLoopService --> ClientNotifier : Dispatch(every message)
-    GameplayEndpoints ..> PollingBufferChannel : Read
-    GameplayEndpoints ..> IMessageSerializer : Adapter
+    GameplayController ..> PollingBufferChannel : Read
+    GameplayController ..> IMessageSerializer : Adapter
 ```
 
 ## Key code

@@ -19,11 +19,12 @@ dotnet run --project src/CastleEscape.Server        # http://localhost:5035
 | Open | What |
 |---|---|
 | http://localhost:5035/scalar | API reference; try every endpoint (Course → Patterns runs the pattern demos) |
-| http://localhost:5035/openapi/v1.json | OpenAPI document |
+| http://localhost:5035/playground | Browser playground: **Quickstart** gives two links, open each in its own tab and play with arrows/WASD (also on the deployed site) |
+| http://localhost:5035/openapi/v1.json | OpenAPI document (also exported to [docs/openapi.json](docs/openapi.json)) |
 | ws://localhost:5035/hubs/game | SignalR hub, see [FRONTEND_INTEGRATION](docs/FRONTEND_INTEGRATION.md) |
 
 ```bash
-dotnet test                                                       # rules, generation, patterns, REST, SignalR: rules, generation, patterns, REST, SignalR
+dotnet test                                                       # 215 tests: rules, generation, patterns, REST, SignalR
 dotnet run --project src/CastleEscape.PatternDemos                # all 12 pattern demos in the console
 dotnet run --project src/CastleEscape.PatternDemos -- prototype --mode Shallow
 ```
@@ -44,7 +45,7 @@ Rule interpretations are recorded in [DECISIONS.md](docs/DECISIONS.md).
 src/
   CastleEscape.Contracts/     DTOs and message records shared with clients (no logic)
   CastleEscape.Game/          the game: content, world, rules, sessions, all 12 patterns, demos
-  CastleEscape.Server/        ASP.NET Core host: REST endpoints, SignalR hub, game loop
+  CastleEscape.Server/        ASP.NET Core host: REST endpoints, SignalR hub, game loop, playground
   CastleEscape.PatternDemos/  console runner for the pattern demos
 tests/
   CastleEscape.Game.Tests/    rules, generation, and one test class per pattern
@@ -57,7 +58,7 @@ docs/                         design documents (below)
 
 | Pattern | Where | Owner |
 |---|---|---|
-| [Singleton](docs/patterns/Singleton.md) | `ContentCatalog`: content loaded once, one shared instance | C |
+| [Singleton](docs/patterns/Singleton.md) | `ContentCatalog`: content loaded once, thread-safe | C |
 | [Adapter](docs/patterns/Adapter.md) | `IMessageSerializer` over `JsonSerializer` / `DataContractSerializer` (JSON and XML) | C |
 | [Bridge](docs/patterns/Bridge.md) | state/event notifiers × SignalR/polling channels | C |
 | [Factory Method](docs/patterns/FactoryMethod.md) | `ItemSpawner.CreateItem` → Health/Reward/Power items | B |
@@ -67,9 +68,10 @@ docs/                         design documents (below)
 | [Builder](docs/patterns/Builder.md) | `LevelDirector` + procedural and preset level builders | A |
 | [Prototype](docs/patterns/Prototype.md) | restart = deep (or shallow, switchable) clone of the pristine level | A |
 | [Command](docs/patterns/Command.md) | every input and step is an undoable command | D |
-| [Observer](docs/patterns/Observer.md) | game events → client messages, HUD stats | D |
+| [Observer](docs/patterns/Observer.md) | game events → client messages, HUD stats, log, sound cues | D |
 | [Facade](docs/patterns/Facade.md) | `GameFacade`, the single entry point for hub, REST and loop | D |
 
+Every participant carries `[DesignPattern("…", "role")]`; `GET /api/patterns` lists them from the code.
 The tag `p1-prototype-before-patterns` marks the working game before any pattern was applied.
 
 ## Documentation
@@ -83,6 +85,7 @@ The tag `p1-prototype-before-patterns` marks the working game before any pattern
 | [DECISIONS](docs/DECISIONS.md) | how ambiguous or conflicting requirements were interpreted |
 | [DEFENCE_NOTES](docs/DEFENCE_NOTES.md) | demo script, switches, comparison answers, likely live changes |
 | [P2_ROADMAP](docs/P2_ROADMAP.md) | where the 11 P2 patterns plug in (the seams are already there) |
+| [IMPLEMENTATION_PLAN](docs/IMPLEMENTATION_PLAN.md), [REPO_AUDIT](docs/REPO_AUDIT.md) | how the work was planned and what was there before |
 
 ## Configuration
 
@@ -92,14 +95,16 @@ Settings live in `src/CastleEscape.Server/appsettings.json` and are validated at
 |---|---|---|
 | `Game:TickRate` | 20 | simulation ticks per second |
 | `Game:PowerDurationSeconds` | 10 | power duration when the item doesn't set one |
+| `Game:DoorMode` | `Latch` | `Latch` (door stays open) or `HoldWhileActive` (D1) |
 | `Game:MaxLevel` | 10 | levels in a run |
 | `Generation:PresetLevel` | — | play a preset map (`tutorial`, `arena`) on every level |
 | `Patterns:PrototypeCloneMode` | `Deep` | `Shallow` shows the shallow-copy restart bug (also switchable at runtime in dev tools) |
 | `Realtime:EnabledChannels` | `SignalR, Polling` | delivery channels (Bridge) |
+| `DevTools:Enabled` | `true` (set `DevTools__Enabled=false` in Azure to hide them) | `/api/dev/*` and `/playground` |
 | `Cors:AllowedOrigins` | localhost dev ports | browser origins allowed to call the API and hub |
 
 ## Deployment
 
 CI (`.github/workflows/main_castleescapeserver.yml`) builds the solution, runs the tests, and
-publishes `src/CastleEscape.Server` to Azure on pushes to `main`. Dev tools are off outside
-Development.
+publishes `src/CastleEscape.Server` to Azure on pushes to `main`. Dev tools (and so `/playground`)
+are on in the deployment too; set the app setting `DevTools__Enabled=false` in Azure to turn them off.

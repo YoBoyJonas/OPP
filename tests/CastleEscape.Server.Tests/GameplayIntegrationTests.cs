@@ -225,7 +225,7 @@ public class PollingChannelTests(TutorialFactory factory) : IClassFixture<Tutori
 public class SessionDiagnosticsTests(TutorialFactory factory) : IClassFixture<TutorialFactory>
 {
     [Fact]
-    public async Task Commands_AreListed()
+    public async Task CommandsAndEvents_AreListed()
     {
         var http = factory.CreateClient();
         var (sessionId, p1, _) = await Api.StartTwoPlayerGame(http);
