@@ -9,7 +9,7 @@ public sealed class DungeonThemeFactory(Wall wallTemplate, Water waterTemplate, 
     public Wall CreateWall() => new StoneWall(wallTemplate);
     public Water CreateWater() => new MurkyWater(waterTemplate);
     public Pit CreatePit() => new SpikePit(pitTemplate);
-    public ZombieEntity CreateZombie(string id, ZombieDefinition definition, GridPos spawn) => new DungeonZombie(id, definition, spawn);
+    public Zombie CreateZombie(string id, ZombieDefinition definition, GridPos spawn) => new DungeonZombie(id, definition, spawn);
 }
 
 public sealed class StoneWall : Wall
@@ -39,4 +39,4 @@ public sealed class SpikePit : Pit
     }
 }
 
-public sealed class DungeonZombie(string id, ZombieDefinition definition, GridPos spawn) : ZombieEntity(id, definition, spawn);
+public sealed class DungeonZombie(string id, ZombieDefinition definition, GridPos spawn) : Zombie(id, definition, spawn);

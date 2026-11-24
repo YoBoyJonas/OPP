@@ -76,7 +76,7 @@ classDiagram
     class LevelState {
         <<ConcretePrototype>>
         -_items List~ItemEntity~
-        -_zombies List~ZombieEntity~
+        -_zombies List~Zombie~
         -_levers List~Lever~
         +Grid Grid
         +Door ExitDoor
@@ -116,7 +116,7 @@ public LevelState DeepClone()
 {
     var copy = new LevelState(Definition, Seed, Grid.Copy());          // new tile array, same immutable tiles
     copy._items.AddRange(_items.Select(i => (ItemEntity)i.CloneEntity()));
-    copy._zombies.AddRange(_zombies.Select(z => (ZombieEntity)z.CloneEntity()));
+    copy._zombies.AddRange(_zombies.Select(z => (Zombie)z.CloneEntity()));
     copy._levers.AddRange(_levers.Select(l => (Lever)l.CloneEntity()));
     ...
     copy.Door = (ExitDoor?)Door?.CloneEntity();

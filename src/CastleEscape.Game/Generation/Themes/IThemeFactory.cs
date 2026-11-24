@@ -9,5 +9,5 @@ public interface IThemeFactory
     Wall CreateWall();
     Water CreateWater();
     Pit CreatePit();
-    ZombieEntity CreateZombie(string id, ZombieDefinition definition, GridPos spawn);
+    Zombie CreateZombie(string id, ZombieDefinition definition, GridPos spawn);
 }

@@ -141,7 +141,7 @@ the same director, but a `PresetLevelBuilder` that reads the map from `content/p
 |---|---|
 | Abstract factory | `IThemeFactory` |
 | Concrete factories | `DungeonThemeFactory`, `CryptThemeFactory` |
-| Abstract products | `Wall`, `Water`, `Pit`, `ZombieEntity` |
+| Abstract products | `Wall`, `Water`, `Pit`, `Zombie` |
 | Concrete products | `StoneWall`, `MurkyWater`, `SpikePit`, `DungeonZombie` / `BoneWall`, `PoisonWater`, `AbyssPit`, `CryptZombie` |
 | Builder | `ILevelBuilder` |
 | Concrete builders | `ProceduralLevelBuilder`, `PresetLevelBuilder` |

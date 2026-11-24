@@ -13,7 +13,7 @@ src/
     Configuration/            Game/Generation/Patterns/Realtime options (validated at startup)
     Content/                  ContentCatalog (Singleton), *Definition, StatModifiers, JSON loading
     World/                    GridPos, Direction helpers, Grid, TerrainKind, Entity, PlayerEntity,
-                              ZombieEntity, Lever, ExitDoor, LevelState, WorldView, MovementRules,
+                              Zombie, Lever, ExitDoor, LevelState, WorldView, MovementRules,
                               InteractionResolver, ExitMechanism, SnapshotMapper
     Generation/               ILevelBuilder, Procedural/Preset builders, LevelDirector,
                               LevelValidator, ILevelProvider;  Themes/ (Abstract Factory)

@@ -93,7 +93,7 @@ Missing at audit time. Added on 2026-09-25 from the team's exports (commit `810c
 | `Game/Characters.cs` | `content/characters.json` | **keep the team's characters** (warrior/scout/swimmer + their numbers) instead of the brief's Knight/Ranger/Rogue example |
 | `Models/Direction`, `PowerType` | `CastleEscape.Contracts` | move |
 | `Models/CellType` | `Game/World/TerrainKind` (+ `Floor, Wall, Water, Pit, Door, Exit`) | rename/extend |
-| `Models/*State` | `Game/World` entities (`PlayerEntity`, `ZombieEntity`, `ItemEntity`, `Lever`, `ExitDoor`) | replace |
+| `Models/*State` | `Game/World` entities (`PlayerEntity`, `Zombie`, `ItemEntity`, `Lever`, `ExitDoor`) | replace |
 | `Models/GameStateSnapshot`, `JoinResult`, `PlayerInputMessage` | `Contracts` records (`TickStateMessage`, `JoinSessionResponse`, …) | replace |
 | `CastleEscapeClient/Models/*` | `src/CastleEscape.Game/Content/*` | `git mv` + fix: `Character`→`CharacterDefinition`, `Zombie`→`ZombieDefinition`, `Level`→`LevelDefinition` (names the diagram's catalog uses); add `Reward`, `ScoreValue`, `Theme`, `MovementStrategy`; JSON polymorphism for `Consumable`/`Obstacle`/`PowerGrant` subclasses; level tables become `{id, weight}` references (the existing `Validate()` already checks them by id) |
 | `ContentCatalog.Validate/ValidateOrThrow/ComputeContentHash` | same | keep, extend, becomes the Singleton |

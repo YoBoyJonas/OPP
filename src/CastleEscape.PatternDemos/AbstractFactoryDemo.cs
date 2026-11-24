@@ -44,7 +44,7 @@ public static class AbstractFactoryDemo
         Wall wall = factory.CreateWall();
         Water water = factory.CreateWater();
         Pit pit = factory.CreatePit();
-        ZombieEntity zombie = factory.CreateZombie("demo-zombie", zombieType, new GridPos(1, 1));
+        Zombie zombie = factory.CreateZombie("demo-zombie", zombieType, new GridPos(1, 1));
 
         Console.WriteLine($"  wall:   {wall.GetType().Name}");
         Console.WriteLine($"  water:  {water.GetType().Name} (speed x{water.MoveSpeedMultiplier})");

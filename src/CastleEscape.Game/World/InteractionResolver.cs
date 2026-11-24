@@ -1,4 +1,3 @@
-using CastleEscape.Contracts;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Events;
 
@@ -33,7 +32,7 @@ public static class InteractionResolver
     }
 
     /// <summary>Contact: same tile, swapping tiles, or closer than 0.6 tiles.</summary>
-    public static bool IsInContact(ZombieEntity zombie, PlayerEntity player)
+    public static bool IsInContact(Zombie zombie, PlayerEntity player)
     {
         if (zombie.Tile == player.Tile)
         {
@@ -56,20 +55,10 @@ public static class InteractionResolver
         foreach (var zombie in level.Zombies)
         {
             var victim = players.FirstOrDefault(p => !p.IsDead && IsInContact(zombie, p));
-            if (victim is null)
+            if (victim is not null)
             {
-                continue;
+                zombie.OnContact(victim, settings, events);
             }
-
-            victim.LoseLives(zombie.Definition.ContactDamage);
-            zombie.ResetToSpawn();
-            if (settings.RespawnPlayerOnHit)
-            {
-                victim.PlaceAt(victim.StartTile);
-            }
-
-            events.Add(new LifeLost(victim.PlayerId, $"{zombie.Definition.Name} caught {victim.Name}! {victim.Lives} lives left.",
-                zombie.Id, victim.Lives));
         }
     }
 }

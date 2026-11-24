@@ -29,7 +29,7 @@ that picks between them. No framework, attributes or reflection.
 |---|---|
 | AbstractFactory | `IThemeFactory` (`CreateWall`, `CreateWater`, `CreatePit`, `CreateZombie`) |
 | ConcreteFactory | `DungeonThemeFactory`, `CryptThemeFactory` |
-| AbstractProduct | `Wall`, `Water`, `Pit` (content classes), `ZombieEntity` (abstract) |
+| AbstractProduct | `Wall`, `Water`, `Pit` (content classes), `Zombie` (abstract) |
 | ConcreteProduct | Dungeon: `StoneWall`, `MurkyWater`, `SpikePit`, `DungeonZombie` · Crypt: `BoneWall`, `PoisonWater`, `AbyssPit`, `CryptZombie` |
 | Client | `ProceduralLevelBuilder`, `PresetLevelBuilder` (they use the factory); `LevelProvider` (it picks the factory with `ThemeFactories.For`) |
 
@@ -57,14 +57,14 @@ classDiagram
     class Wall
     class Water
     class Pit
-    class ZombieEntity {
+    class Zombie {
         +Speed double
     }
     LevelGenerator ..> ContentCatalog : OfType~Wall~().First()
     LevelGenerator ..> Wall
     LevelGenerator ..> Water
     LevelGenerator ..> Pit
-    LevelGenerator ..> ZombieEntity : new ZombieEntity(...)
+    LevelGenerator ..> Zombie : new Zombie(...)
     note for LevelGenerator "Same generic parts for\nDungeon and Crypt levels"
 ```
 
@@ -77,7 +77,7 @@ classDiagram
         +CreateWall() Wall
         +CreateWater() Water
         +CreatePit() Pit
-        +CreateZombie(id, definition, spawn) ZombieEntity
+        +CreateZombie(id, definition, spawn) Zombie
     }
     class DungeonThemeFactory
     class CryptThemeFactory
@@ -87,7 +87,7 @@ classDiagram
     class Wall
     class Water
     class Pit
-    class ZombieEntity {
+    class Zombie {
         <<abstract>>
         +Speed double
         +MovementStrategy MovementStrategyKind
@@ -98,8 +98,8 @@ classDiagram
     Water <|-- PoisonWater
     Pit <|-- SpikePit
     Pit <|-- AbyssPit
-    ZombieEntity <|-- DungeonZombie
-    ZombieEntity <|-- CryptZombie
+    Zombie <|-- DungeonZombie
+    Zombie <|-- CryptZombie
 
     DungeonThemeFactory ..> StoneWall
     DungeonThemeFactory ..> MurkyWater
@@ -150,7 +150,7 @@ public sealed class CryptThemeFactory(Wall wallTemplate, Water waterTemplate, Pi
     public Wall CreateWall() => new BoneWall(wallTemplate);
     public Water CreateWater() => new PoisonWater(waterTemplate);
     public Pit CreatePit() => new AbyssPit(pitTemplate);
-    public ZombieEntity CreateZombie(string id, ZombieDefinition definition, GridPos spawn) => new CryptZombie(id, definition, spawn);
+    public Zombie CreateZombie(string id, ZombieDefinition definition, GridPos spawn) => new CryptZombie(id, definition, spawn);
 }
 ```
 

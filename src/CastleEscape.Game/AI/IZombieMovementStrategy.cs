@@ -13,7 +13,7 @@ public interface IZombieMovementStrategy
 {
     MovementStrategyKind Kind { get; }
 
-    Direction NextStep(ZombieEntity zombie, WorldView world);
+    Direction NextStep(Zombie zombie, WorldView world);
 }
 
 /// <summary>What a strategy may look at: the grid, the players, and where zombies may walk. Read-only.</summary>
@@ -26,7 +26,7 @@ public sealed class WorldView(LevelState level, IReadOnlyList<PlayerEntity> play
     public bool CanZombieEnter(GridPos pos) => MovementRules.CanZombieEnter(pos, level);
 
     /// <summary>The living player closest in a straight line (D16), or null if none.</summary>
-    public PlayerEntity? NearestPlayer(ZombieEntity zombie)
+    public PlayerEntity? NearestPlayer(Zombie zombie)
     {
         var (zx, zy) = zombie.RenderPosition;
         return players
@@ -48,7 +48,7 @@ public abstract class ChaseStrategy : IZombieMovementStrategy
 {
     public abstract MovementStrategyKind Kind { get; }
 
-    public Direction NextStep(ZombieEntity zombie, WorldView world)
+    public Direction NextStep(Zombie zombie, WorldView world)
     {
         var target = world.NearestPlayer(zombie);
         if (target is null || target.Tile == zombie.Tile)
@@ -59,11 +59,11 @@ public abstract class ChaseStrategy : IZombieMovementStrategy
     }
 
     /// <summary>Where to head for. Default: the tile the player is on.</summary>
-    protected virtual GridPos Goal(ZombieEntity zombie, PlayerEntity target, WorldView world) => target.Tile;
+    protected virtual GridPos Goal(Zombie zombie, PlayerEntity target, WorldView world) => target.Tile;
 
-    protected abstract Direction StepTowards(ZombieEntity zombie, GridPos goal, WorldView world);
+    protected abstract Direction StepTowards(Zombie zombie, GridPos goal, WorldView world);
 
     /// <summary>The first step of a path, or None if there is no path.</summary>
-    protected static Direction FirstStep(ZombieEntity zombie, IReadOnlyList<GridPos>? path) =>
+    protected static Direction FirstStep(Zombie zombie, IReadOnlyList<GridPos>? path) =>
         path is { Count: > 0 } ? zombie.Tile.DirectionTo(path[0]) : Direction.None;
 }

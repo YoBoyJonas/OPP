@@ -106,7 +106,7 @@ public static class SnapshotMapper
     private static ActivePowerDto[] ToPowers(PlayerEntity p) =>
         p.Powers.Active.OrderBy(a => a.Power).Select(a => new ActivePowerDto(a.Power, Math.Round(a.RemainingSeconds, 2), a.Level)).ToArray();
 
-    private static ZombieStateDto ToZombieState(ZombieEntity z)
+    private static ZombieStateDto ToZombieState(Zombie z)
     {
         var (x, y) = z.RenderPosition;
         return new ZombieStateDto(z.Id, z.Definition.Id, z.Tile.X, z.Tile.Y, Math.Round(x, 3), Math.Round(y, 3), z.Facing, z.Strategy.Kind);

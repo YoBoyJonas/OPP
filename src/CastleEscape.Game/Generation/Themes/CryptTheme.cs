@@ -10,7 +10,7 @@ public sealed class CryptThemeFactory(Wall wallTemplate, Water waterTemplate, Pi
     public Wall CreateWall() => new BoneWall(wallTemplate);
     public Water CreateWater() => new PoisonWater(waterTemplate);
     public Pit CreatePit() => new AbyssPit(pitTemplate);
-    public ZombieEntity CreateZombie(string id, ZombieDefinition definition, GridPos spawn) => new CryptZombie(id, definition, spawn);
+    public Zombie CreateZombie(string id, ZombieDefinition definition, GridPos spawn) => new CryptZombie(id, definition, spawn);
 }
 
 public sealed class BoneWall : Wall
@@ -46,7 +46,7 @@ public sealed class AbyssPit : Pit
     }
 }
 
-public sealed class CryptZombie(string id, ZombieDefinition definition, GridPos spawn) : ZombieEntity(id, definition, spawn)
+public sealed class CryptZombie(string id, ZombieDefinition definition, GridPos spawn) : Zombie(id, definition, spawn)
 {
     public const double SpeedBonus = 1.2;
 

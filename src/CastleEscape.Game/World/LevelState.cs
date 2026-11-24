@@ -9,7 +9,7 @@ namespace CastleEscape.Game.World;
 public class LevelState(LevelDefinition definition, int seed, Grid grid) : ILevelPrototype<LevelState>
 {
     private readonly List<ItemEntity> _items = [];
-    private readonly List<ZombieEntity> _zombies = [];
+    private readonly List<Zombie> _zombies = [];
     private readonly List<Lever> _levers = [];
     private readonly List<GridPos> _exitTiles = [];
     private readonly List<GridPos> _startTiles = [];
@@ -24,7 +24,7 @@ public class LevelState(LevelDefinition definition, int seed, Grid grid) : ILeve
     public ExitDoor? Door { get; private set; }
 
     public IReadOnlyList<ItemEntity> Items => _items;
-    public IReadOnlyList<ZombieEntity> Zombies => _zombies;
+    public IReadOnlyList<Zombie> Zombies => _zombies;
     public IReadOnlyList<Lever> Levers => _levers;
     public IReadOnlyList<GridPos> ExitTiles => _exitTiles;
 
@@ -41,7 +41,7 @@ public class LevelState(LevelDefinition definition, int seed, Grid grid) : ILeve
     public bool RemoveItem(ItemEntity item) => _items.Remove(item);
     public ItemEntity? ItemAt(GridPos pos) => _items.FirstOrDefault(i => i.Tile == pos);
 
-    public void AddZombie(ZombieEntity zombie) => _zombies.Add(zombie);
+    public void AddZombie(Zombie zombie) => _zombies.Add(zombie);
 
     public void AddLever(Lever lever) => _levers.Add(lever);
     public Lever? LeverAt(GridPos pos) => _levers.FirstOrDefault(l => l.Tile == pos);
@@ -61,7 +61,7 @@ public class LevelState(LevelDefinition definition, int seed, Grid grid) : ILeve
     {
         var copy = new LevelState(Definition, Seed, Grid.Copy());
         copy._items.AddRange(_items.Select(i => (ItemEntity)i.CloneEntity()));
-        copy._zombies.AddRange(_zombies.Select(z => (ZombieEntity)z.CloneEntity()));
+        copy._zombies.AddRange(_zombies.Select(z => (Zombie)z.CloneEntity()));
         copy._levers.AddRange(_levers.Select(l => (Lever)l.CloneEntity()));
         copy._exitTiles.AddRange(_exitTiles);
         copy._startTiles.AddRange(_startTiles);

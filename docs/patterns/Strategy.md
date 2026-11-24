@@ -28,7 +28,7 @@ one instance per kind is shared by all zombies (`ZombieStrategies.For(kind)`).
 |---|---|
 | Strategy | `IZombieMovementStrategy` (`Kind`, `NextStep(zombie, world)`) |
 | ConcreteStrategy | `GreedyChaseStrategy`, `BfsChaseStrategy`, `AStarChaseStrategy`, `PredictiveChaseStrategy` |
-| Context | `ZombieEntity` (`Strategy` property, set from its type, or from its theme for `CryptZombie`) |
+| Context | `Zombie` (`Strategy` property, set from its type, or from its theme for `CryptZombie`) |
 | Data the strategies see | `WorldView` (grid, players, `CanZombieEnter`, `NearestPlayer`), read-only |
 | Client | `GameSession.MoveZombies` |
 
@@ -83,7 +83,7 @@ classDiagram
         +LookAhead int$
         #Goal(...) GridPos
     }
-    class ZombieEntity {
+    class Zombie {
         <<Context>>
         +MovementStrategy MovementStrategyKind
         +Strategy IZombieMovementStrategy
@@ -106,10 +106,10 @@ classDiagram
     ChaseStrategy <|-- BfsChaseStrategy
     ChaseStrategy <|-- AStarChaseStrategy
     ChaseStrategy <|-- PredictiveChaseStrategy
-    ZombieEntity o--> IZombieMovementStrategy : Strategy
-    ZombieEntity ..> ZombieStrategies : default from kind
+    Zombie o--> IZombieMovementStrategy : Strategy
+    Zombie ..> ZombieStrategies : default from kind
     IZombieMovementStrategy ..> WorldView
-    GameSession ..> ZombieEntity : zombie.Strategy.NextStep(zombie, world)
+    GameSession ..> Zombie : zombie.Strategy.NextStep(zombie, world)
 ```
 
 ## Key code
@@ -117,13 +117,13 @@ classDiagram
 ```csharp
 var direction = zombie.Strategy.NextStep(zombie, world);     // GameSession: the same line for every strategy
 
-public IZombieMovementStrategy Strategy                     // ZombieEntity
+public IZombieMovementStrategy Strategy                     // Zombie
 {
     get => _strategy ??= ZombieStrategies.For(MovementStrategy);
     set => _strategy = value;                                // runtime swap
 }
 
-protected override GridPos Goal(ZombieEntity zombie, PlayerEntity target, WorldView world)   // Predictive
+protected override GridPos Goal(Zombie zombie, PlayerEntity target, WorldView world)   // Predictive
 {
     if (target.NextTile is not { } next) return target.Tile;
     var goal = next;

@@ -13,7 +13,7 @@ public sealed class GreedyChaseStrategy : ChaseStrategy
 {
     public override MovementStrategyKind Kind => MovementStrategyKind.Greedy;
 
-    protected override Direction StepTowards(ZombieEntity zombie, GridPos goal, WorldView world)
+    protected override Direction StepTowards(Zombie zombie, GridPos goal, WorldView world)
     {
         var best = Direction.None;
         var bestDistance = zombie.Tile.ManhattanTo(goal);
@@ -37,7 +37,7 @@ public sealed class BfsChaseStrategy : ChaseStrategy
 {
     public override MovementStrategyKind Kind => MovementStrategyKind.Bfs;
 
-    protected override Direction StepTowards(ZombieEntity zombie, GridPos goal, WorldView world) =>
+    protected override Direction StepTowards(Zombie zombie, GridPos goal, WorldView world) =>
         FirstStep(zombie, PathFinder.ShortestPath(world.Grid, zombie.Tile, goal, world.CanZombieEnter));
 }
 
@@ -47,7 +47,7 @@ public sealed class AStarChaseStrategy : ChaseStrategy
 {
     public override MovementStrategyKind Kind => MovementStrategyKind.AStar;
 
-    protected override Direction StepTowards(ZombieEntity zombie, GridPos goal, WorldView world) =>
+    protected override Direction StepTowards(Zombie zombie, GridPos goal, WorldView world) =>
         FirstStep(zombie, PathFinder.AStar(world.Grid, zombie.Tile, goal, world.CanZombieEnter, out _));
 }
 
@@ -62,7 +62,7 @@ public sealed class PredictiveChaseStrategy : ChaseStrategy
 
     public override MovementStrategyKind Kind => MovementStrategyKind.Predictive;
 
-    protected override GridPos Goal(ZombieEntity zombie, PlayerEntity target, WorldView world)
+    protected override GridPos Goal(Zombie zombie, PlayerEntity target, WorldView world)
     {
         if (target.NextTile is not { } next)
         {
@@ -76,7 +76,7 @@ public sealed class PredictiveChaseStrategy : ChaseStrategy
         return goal == zombie.Tile ? target.Tile : goal;
     }
 
-    protected override Direction StepTowards(ZombieEntity zombie, GridPos goal, WorldView world)
+    protected override Direction StepTowards(Zombie zombie, GridPos goal, WorldView world)
     {
         var step = FirstStep(zombie, PathFinder.AStar(world.Grid, zombie.Tile, goal, world.CanZombieEnter, out _));
         if (step != Direction.None)

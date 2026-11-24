@@ -187,9 +187,17 @@ public class GameSession
     public void RequestRestart(Guid playerId) =>
         _commands.Enqueue(new RestartLevelCommand(_commands.NextSequence(), playerId));
 
-    /// <summary>Dev tools: every zombie of the current level chases with <paramref name="kind"/>, from the next tick (undoable).</summary>
-    public void SetZombieStrategy(MovementStrategyKind kind) =>
-        _commands.Enqueue(new SetZombieStrategyCommand(_commands.NextSequence(), kind));
+    /// <summary>Dev tools: every zombie of the current level chases with <paramref name="kind"/>, from the next tick.</summary>
+    public void SetZombieStrategy(MovementStrategyKind kind)
+    {
+        lock (_gate)
+        {
+            foreach (var zombie in _world.Level?.Zombies ?? [])
+            {
+                zombie.Strategy = AI.ZombieStrategies.For(kind);
+            }
+        }
+    }
 
     /// <summary>Dev tools: completes the current level now, as if both players had reached the exit.</summary>
     public void SkipLevel()
@@ -352,26 +360,8 @@ public class GameSession
         var world = new WorldView(level, players);
         foreach (var zombie in level.Zombies)
         {
-            if (!zombie.IsMoving)
-            {
-                TryStartZombieStep(zombie, world);
-            }
-            if (zombie.Advance(zombie.Speed * seconds, out var leftover) && TryStartZombieStep(zombie, world))
-            {
-                zombie.Advance(Math.Min(leftover, 0.99), out _);
-            }
+            zombie.Update(world, seconds);
         }
-    }
-
-    private static bool TryStartZombieStep(ZombieEntity zombie, WorldView world)
-    {
-        var direction = zombie.Strategy.NextStep(zombie, world);
-        if (direction == Direction.None || !world.CanZombieEnter(zombie.Tile.Step(direction)))
-        {
-            return false;
-        }
-        zombie.BeginStep(direction);
-        return true;
     }
 
 

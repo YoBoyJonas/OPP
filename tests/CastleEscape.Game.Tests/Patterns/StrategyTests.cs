@@ -16,7 +16,7 @@ public class StrategyTests
     private static LevelState Level(string[] rows) =>
         new RowsLevelProvider(Catalog, rows).CreateLevel(1, seed: 0);
 
-    private static (ZombieEntity Zombie, PlayerEntity Player, WorldView World) Setup(string[] rows)
+    private static (Zombie Zombie, PlayerEntity Player, WorldView World) Setup(string[] rows)
     {
         var level = Level(rows);
         var player = new PlayerEntity(Guid.NewGuid(), "Ana", Catalog.GetCharacter("scout"), level.StartTiles[0]);
@@ -24,7 +24,7 @@ public class StrategyTests
     }
 
     /// <summary>Lets the zombie walk (teleporting tile by tile) until it waits, arrives, or runs out of steps.</summary>
-    private static int Walk(ZombieEntity zombie, PlayerEntity player, WorldView world, int maxSteps = 40)
+    private static int Walk(Zombie zombie, PlayerEntity player, WorldView world, int maxSteps = 40)
     {
         var steps = 0;
         while (steps < maxSteps && zombie.Tile != player.Tile)

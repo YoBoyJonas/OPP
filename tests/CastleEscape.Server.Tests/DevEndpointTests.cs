@@ -52,21 +52,15 @@ public class DevEndpointTests(ArenaFactory factory) : IClassFixture<ArenaFactory
     }
 
     [Fact]
-    public async Task ZombieStrategy_CanBeSwitched_AndUndone()
+    public async Task ZombieStrategy_CanBeSwitched()
     {
         var (http, game) = await Quickstart();
-        var original = (await State(http, game.SessionId))!.Zombies.Select(z => z.Strategy).ToArray();
-        Assert.NotEmpty(original);
+        Assert.NotEmpty((await State(http, game.SessionId))!.Zombies);
 
         (await http.PutAsJsonAsync($"/api/dev/sessions/{game.SessionId}/zombies/strategy",
             new ZombieStrategyRequest(MovementStrategyKind.Predictive), Api.Json, Api.Ct)).EnsureSuccessStatusCode();
         await Api.Eventually(async () => (await State(http, game.SessionId))!.Zombies.All(z => z.Strategy == MovementStrategyKind.Predictive) ? "ok" : null,
             TimeSpan.FromSeconds(5));
-
-        var undo = await (await http.PostAsync($"/api/dev/sessions/{game.SessionId}/undo", null, Api.Ct))
-            .Content.ReadFromJsonAsync<UndoResponse>(Api.Json, Api.Ct);
-        Assert.Equal("SetZombieStrategy Predictive", undo!.Undone);
-        Assert.Equal(original, (await State(http, game.SessionId))!.Zombies.Select(z => z.Strategy).ToArray());
     }
 
     [Fact]

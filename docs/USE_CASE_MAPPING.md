@@ -48,7 +48,7 @@ IDs are the ones used in code comments and test names.
 | PWR-3 | The same power stacks (time and effect) | `ActivePower.Stack`, one decorator per level | `Powers_SamePowerStacks_Pwr3`, `StackedPower_IsOneDecoratorPerLevel_Pwr3` |
 | ZMB-1 | Zombies chase the nearest player, re-deciding on each tile (D16) | `IZombieMovementStrategy`, `WorldView.NearestPlayer` | `Zombie_BfsChasesAroundWalls_Zmb1`, `StrategyTests` |
 | ZMB-2 | Contact damage: −1 life | `InteractionResolver.ResolveZombieContacts` | `Zombie_ContactCostsALife…` |
-| ZMB-3 | After contact the zombie returns to its spawn | `ZombieEntity.ResetToSpawn` | same |
+| ZMB-3 | After contact the zombie returns to its spawn | `Zombie.ResetToSpawn` | same |
 | ZMB-4 | Zombie count never decreases with level | `content/levels.json`, catalog validation | `Levels_ZombieCountNeverDecreases_Zmb4`, `Validate_ZombieCountDecreases_ReportsZmb4` |
 | GEN-1 | Generated layout always has a path start → exit | `ProceduralLevelBuilder` + `LevelValidator` (D5: without powers) | `EveryLevel_ManySeeds_PassesValidation` (250 levels) |
 | GEN-2 | No item, zombie or lever on walls or start tiles | builders, `ItemSpawner.Spawn`, `LevelValidator` | same, `FactoryMethodTests` |
