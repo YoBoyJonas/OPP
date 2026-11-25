@@ -93,7 +93,7 @@ async function connect() {
     addEvent(`Level ${m.levelIndex} (${m.theme}) started`);
     draw();
   });
-  connection.on("StateUpdated", (m) => { view.state = m; draw(); renderHud(); });
+  connection.on("StateUpdated", (m) => { view.state = m; if (m.visibleRows) view.rows = m.visibleRows; draw(); renderHud(); });
   connection.on("GameEvent", (m) => {
     addEvent(m.message);
   });
@@ -164,7 +164,7 @@ const COLORS = {
 
 function terrainAt(x, y) {
   const c = view.rows[y]?.[x] ?? "#";
-  return "#~ODE".includes(c) ? c : ".";
+  return "#~ODE ".includes(c) ? c : "."; // " " = outside the view radius
 }
 
 function draw() {
@@ -176,7 +176,7 @@ function draw() {
   for (let y = 0; y < view.height; y++) {
     for (let x = 0; x < view.width; x++) {
       const t = terrainAt(x, y);
-      ctx.fillStyle = { "#": palette.wall, "~": "#3f7fd8", O: "#1b1b1b", E: "#7bd389", D: state?.doorOpen ? "#c9a46a" : "#8a5a2b" }[t] ?? palette.floor;
+      ctx.fillStyle = { " ": "#000", "#": palette.wall, "~": "#3f7fd8", O: "#1b1b1b", E: "#7bd389", D: state?.doorOpen ? "#c9a46a" : "#8a5a2b" }[t] ?? palette.floor;
       ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
       ctx.strokeStyle = "rgba(0,0,0,0.08)";
       ctx.strokeRect(x * TILE, y * TILE, TILE, TILE);

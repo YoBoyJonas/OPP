@@ -19,6 +19,7 @@ public sealed class TutorialFactory : WebApplicationFactory<Program>
     protected override void ConfigureWebHost(Microsoft.AspNetCore.Hosting.IWebHostBuilder builder)
     {
         builder.UseSetting("Generation:PresetLevel", "tutorial");
+        builder.UseSetting("Game:ViewRadius", "0"); // the test clients plan paths on the whole map
         builder.UseSetting("Game:LevelTransitionSeconds", "0.1");
     }
 }

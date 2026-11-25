@@ -14,6 +14,7 @@ public sealed class ArenaFactory : WebApplicationFactory<Program>
     protected override void ConfigureWebHost(Microsoft.AspNetCore.Hosting.IWebHostBuilder builder)
     {
         builder.UseSetting("Generation:PresetLevel", "arena");
+        builder.UseSetting("Game:ViewRadius", "0");
         builder.UseSetting("Game:LevelTransitionSeconds", "0.1");
         builder.UseSetting("DevTools:Enabled", "true");
     }

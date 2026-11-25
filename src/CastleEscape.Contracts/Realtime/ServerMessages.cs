@@ -59,6 +59,7 @@ public sealed record LevelStartedMessage(
 /// <param name="Zombies">All zombies.</param>
 /// <param name="Items">Items still on the map.</param>
 /// <param name="Levers">All levers.</param>
+/// <param name="VisibleRows">With a view radius: the terrain rows, ' ' for tiles no player can see (zombies, items and levers there are left out). Null when the whole map is visible.</param>
 [DataContract(Namespace = Xml.Namespace)]
 public sealed record TickStateMessage(
     [property: DataMember] Guid SessionId,
@@ -70,7 +71,8 @@ public sealed record TickStateMessage(
     [property: DataMember] PlayerStateDto[] Players,
     [property: DataMember] ZombieStateDto[] Zombies,
     [property: DataMember] ItemStateDto[] Items,
-    [property: DataMember] LeverStateDto[] Levers) : IServerMessage;
+    [property: DataMember] LeverStateDto[] Levers,
+    [property: DataMember] string[]? VisibleRows = null) : IServerMessage;
 
 /// <summary>A player in the tick state. <c>X</c>/<c>Y</c> are interpolated for smooth rendering.</summary>
 [DataContract(Namespace = Xml.Namespace)]

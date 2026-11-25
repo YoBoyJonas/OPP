@@ -17,16 +17,66 @@ public static class SnapshotMapper
         new(sessionId, joinCode, phase, levelIndex, maxLevel,
             slots.Select(s => new SessionPlayerDto(s.PlayerId, s.Slot, s.Name, s.CharacterId, s.Connected)).ToArray());
 
+    /// <param name="viewRadius">Above 0, only what lies within this many tiles of a player is sent (fog of war).</param>
     public static TickStateMessage ToTickState(Guid sessionId, long seq, long tick, SessionPhase phase, LevelState level,
-        IEnumerable<PlayerSlot> slots) =>
-        new(sessionId, seq, tick, phase, level.Index, level.Door is { IsOpen: true },
-            slots.Where(s => s.Entity is not null).Select(s => ToPlayerState(s, s.Entity!)).ToArray(),
-            level.Zombies.Select(ToZombieState).ToArray(),
-            level.Items.Select(ToItemState).ToArray(),
-            level.Levers.Select(l => new LeverStateDto(l.Id, l.Tile.X, l.Tile.Y, l.IsActive)).ToArray());
+        IEnumerable<PlayerSlot> slots, int viewRadius = 0)
+    {
+        var players = slots.Where(s => s.Entity is not null).ToList();
+        var visible = viewRadius > 0 ? VisibleTiles(level.Grid, players.Select(s => s.Entity!.Tile), viewRadius) : null;
+        return new(sessionId, seq, tick, phase, level.Index, level.Door is { IsOpen: true },
+            players.Select(s => ToPlayerState(s, s.Entity!)).ToArray(),
+            InView(level.Zombies, visible).Select(ToZombieState).ToArray(),
+            InView(level.Items, visible).Select(ToItemState).ToArray(),
+            InView(level.Levers, visible).Select(l => new LeverStateDto(l.Id, l.Tile.X, l.Tile.Y, l.IsActive)).ToArray(),
+            visible is null ? null : FogRows(level.Grid, visible));
+    }
 
     public static LevelStartedMessage ToLevelStarted(Guid sessionId, long seq, long tick, LevelState level, TickStateMessage state) =>
-        new(sessionId, seq, tick, level.Index, level.Theme, level.Grid.Width, level.Grid.Height, ToRows(level), state);
+        new(sessionId, seq, tick, level.Index, level.Theme, level.Grid.Width, level.Grid.Height, state.VisibleRows ?? ToRows(level), state);
+
+    /// <summary>Every tile within the radius of any player (the 2D grid, walked by <see cref="GridRadiusIterator"/>).</summary>
+    private static HashSet<GridPos> VisibleTiles(Grid grid, IEnumerable<GridPos> centers, int radius)
+    {
+        var visible = new HashSet<GridPos>();
+        foreach (var center in centers)
+        {
+            var cells = new GridRadiusIterator(grid, center, radius);
+            while (cells.HasNext())
+            {
+                visible.Add(cells.Next());
+            }
+        }
+        return visible;
+    }
+
+    /// <summary>The entities standing on a visible tile (a list, walked by <see cref="ListIterator{T}"/>); all of them without fog.</summary>
+    private static List<T> InView<T>(IReadOnlyList<T> entities, HashSet<GridPos>? visible) where T : Entity
+    {
+        var result = new List<T>();
+        var it = new ListIterator<T>(entities);
+        while (it.HasNext())
+        {
+            var entity = it.Next();
+            if (visible is null || visible.Contains(entity.Tile))
+            {
+                result.Add(entity);
+            }
+        }
+        return result;
+    }
+
+    /// <summary>Terrain rows with ' ' everywhere except the visible tiles (a hash set, walked by <see cref="SetIterator{T}"/>).</summary>
+    private static string[] FogRows(Grid grid, HashSet<GridPos> visible)
+    {
+        var chars = Enumerable.Range(0, grid.Height).Select(_ => Enumerable.Repeat(' ', grid.Width).ToArray()).ToArray();
+        var it = new SetIterator<GridPos>(visible);
+        while (it.HasNext())
+        {
+            var pos = it.Next();
+            chars[pos.Y][pos.X] = MapLegend.ForTerrain(grid.GetTerrain(pos));
+        }
+        return chars.Select(r => new string(r)).ToArray();
+    }
 
     public static LevelLayoutResponse ToLayout(Guid sessionId, LevelState level) =>
         new(sessionId, level.Index, level.Theme, level.Seed, level.Grid.Width, level.Grid.Height, ToRows(level),

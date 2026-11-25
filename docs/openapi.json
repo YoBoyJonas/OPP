@@ -3762,6 +3762,16 @@
               "$ref": "#/components/schemas/LeverStateDto"
             },
             "description": "All levers."
+          },
+          "visibleRows": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "With a view radius: the terrain rows, \u0027 \u0027 for tiles no player can see (zombies, items and levers there are left out). Null when the whole map is visible."
           }
         },
         "description": "Dynamic state, sent every tick while playing."

@@ -396,7 +396,7 @@ public class GameSession
         _announcedLevelVersion = _world.LevelVersion;
         SetPhase(SessionPhase.Playing);
 
-        var state = SnapshotMapper.ToTickState(Id, _messageSequence, _tick, Phase, _world.Level!, _slots);
+        var state = SnapshotMapper.ToTickState(Id, _messageSequence, _tick, Phase, _world.Level!, _slots, _options.ViewRadius);
         _lastState = state;
         _lastLevelStarted = SnapshotMapper.ToLevelStarted(Id, NextSeq(), _tick, _world.Level!, state);
         Send(ClientMethods.LevelStarted, _lastLevelStarted);
@@ -443,7 +443,7 @@ public class GameSession
 
     private void SendState()
     {
-        _lastState = SnapshotMapper.ToTickState(Id, NextSeq(), _tick, Phase, _world.Level!, _slots);
+        _lastState = SnapshotMapper.ToTickState(Id, NextSeq(), _tick, Phase, _world.Level!, _slots, _options.ViewRadius);
         Send(ClientMethods.StateUpdated, _lastState);
     }
 

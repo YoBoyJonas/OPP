@@ -38,6 +38,10 @@ public sealed class GameOptions
     [Range(15, 200)]
     public int GridHeight { get; set; } = 16;
 
+    /// <summary>Clients only get tiles and entities within this many tiles of a player (fog of war). 0 = whole map.</summary>
+    [Range(0, 50)]
+    public int ViewRadius { get; set; }
+
     /// <summary>Number of levels in a run (LVL-1).</summary>
     [Range(1, 100)]
     public int MaxLevel { get; set; } = 10;

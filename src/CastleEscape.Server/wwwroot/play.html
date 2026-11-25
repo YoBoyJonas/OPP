@@ -41,7 +41,7 @@ async function start(joinCode) {
       .withAutomaticReconnect().build();
     conn.on("SessionUpdated", (m) => { session = m.session; });
     conn.on("LevelStarted", (m) => { rows = m.rows; st = m.state; $("cv").width = m.width * T; $("cv").height = m.height * T; });
-    conn.on("StateUpdated", (m) => { st = m; });
+    conn.on("StateUpdated", (m) => { st = m; rows = m.visibleRows ?? rows; });
     conn.on("GameEvent", (m) => { logLines = [...logLines.slice(-7), m.message]; $("log").textContent = logLines.join("\n"); });
     conn.on("Error", (m) => alert(m.code + ": " + m.message));
     await conn.start();
@@ -54,7 +54,7 @@ async function start(joinCode) {
   } catch (e) { alert(e.message); }
 }
 
-const colors = { "#": "#555", "~": "#26c", O: "#000", E: "#2a2", D: "#a62" };
+const colors = { " ": "#000", "#": "#555", "~": "#26c", O: "#000", E: "#2a2", D: "#a62" };
 const ctx = $("cv").getContext("2d");
 (function draw() {
   requestAnimationFrame(draw);
