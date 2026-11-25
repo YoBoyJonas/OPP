@@ -1,7 +1,6 @@
 # Bridge — notifiers over delivery channels
 
 **Owner:** Student C · **Category:** Structural · **Code:** `src/CastleEscape.Game/Messaging/` (`ClientNotifiers.cs`, `ClientChannels.cs`), `src/CastleEscape.Server/Realtime/SignalRClientChannel.cs`
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- bridge --ticks 40 --pollingEvery 5 --format json` · `POST /api/patterns/bridge/demo?ticks=40&pollingEvery=5&format=xml`
 **Used by:** `GameLoopService` (every outgoing message of every session), `GET /api/sessions/{id}/messages?afterSeq=&format=` (polling clients).
 **Switch:** `Realtime:EnabledChannels = [SignalR, Polling]`, `Realtime:PollingStateEveryNthTick`, `Realtime:PollingBufferSize`.
 
@@ -94,7 +93,7 @@ classDiagram
         +Read(sessionId, afterSeq) List~BufferedMessage~
     }
     class GameLoopService
-    class GameplayController {
+    class GameplayEndpoints {
         GetMessages(sessionId, afterSeq, format)
     }
     ClientNotifier <|-- StateNotifier
@@ -103,8 +102,8 @@ classDiagram
     IClientChannel <|.. SignalRClientChannel
     IClientChannel <|.. PollingBufferChannel
     GameLoopService --> ClientNotifier : Dispatch(every message)
-    GameplayController ..> PollingBufferChannel : Read
-    GameplayController ..> IMessageSerializer : Adapter
+    GameplayEndpoints ..> PollingBufferChannel : Read
+    GameplayEndpoints ..> IMessageSerializer : Adapter
 ```
 
 ## Key code

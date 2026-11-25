@@ -24,21 +24,21 @@
     "type": "Power",
     "id": "jump-boots",
     "name": "Jump Boots",
-    "grant": { "type": "Jump", "modifiers": { "jumpForceMultiplier": 1.2 } },
+    "grant": { "power": "Jump", "modifiers": { "jumpForceMultiplier": 1.2 } },
     "iconPath": "icons/jump-boots.png"
   },
   {
     "type": "Power",
     "id": "sprint-elixir",
     "name": "Sprint Elixir",
-    "grant": { "type": "Sprint", "modifiers": { "moveSpeedMultiplier": 1.5 } },
+    "grant": { "power": "Sprint", "modifiers": { "moveSpeedMultiplier": 1.5 } },
     "iconPath": "icons/sprint-elixir.png"
   },
   {
     "type": "Power",
     "id": "swim-fins",
     "name": "Swim Fins",
-    "grant": { "type": "Swim", "modifiers": { "swimSpeedMultiplier": 1.2 } },
+    "grant": { "power": "Swim", "modifiers": { "swimSpeedMultiplier": 1.2 } },
     "iconPath": "icons/swim-fins.png"
   }
 ]

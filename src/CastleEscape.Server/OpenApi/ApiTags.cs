@@ -11,7 +11,6 @@ public static class ApiTags
     public const string Realtime = "Realtime";
     public const string Content = "Content";
     public const string Levels = "Levels";
-    public const string Patterns = "Patterns";
     public const string Diagnostics = "Diagnostics";
     public const string Dev = "Dev";
 
@@ -34,10 +33,6 @@ public static class ApiTags
         [
             new(Content, "Static game content: characters, items, powers, combos, obstacles, zombies, levels."),
             new(Levels, "Preview generated or preset levels with their validation report."),
-        ]),
-        new("Course",
-        [
-            new(Patterns, "The P1 design patterns: participants, requirements and runnable demos."),
         ]),
         new("Ops",
         [

@@ -3,7 +3,6 @@ using CastleEscape.Contracts.Realtime;
 using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Generation;
-using CastleEscape.Game.PatternDemos;
 using CastleEscape.Game.Sessions;
 using CastleEscape.Game.World;
 
@@ -15,7 +14,7 @@ public class FacadeTests
 
     private static GameFacade Facade(ILevelProvider? levels = null)
     {
-        var registry = new SessionRegistry(Catalog, levels ?? new RowsLevelProvider(Catalog, FacadeDemo.Map),
+        var registry = new SessionRegistry(Catalog, levels ?? new RowsLevelProvider(Catalog, TestWorld.LeverDoorMap),
             new GameOptions { LevelTransitionSeconds = 0 });
         return new GameFacade(registry, new GameLoopScheduler(registry), Catalog);
     }
@@ -100,13 +99,5 @@ public class FacadeTests
         Assert.Equal(SessionPhase.Aborted, game.GetSession(ana.SessionId).Phase);
         Assert.Contains(messages, m => m.Message.Method == ClientMethods.Error);
         Assert.Empty(healthy.Tick(0.05)); // other facades/sessions are unaffected
-    }
-
-    [Fact]
-    public void Demo_WinsTheGame()
-    {
-        var result = new FacadeDemo().Run(DemoOptions.None);
-
-        Assert.Equal(nameof(SessionPhase.Victory), result.Evidence["finalPhase"]);
     }
 }

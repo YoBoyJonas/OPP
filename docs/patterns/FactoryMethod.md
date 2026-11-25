@@ -1,7 +1,6 @@
 # Factory Method — item spawners
 
 **Owner:** Student B · **Category:** Creational · **Code:** `src/CastleEscape.Game/Items/`, `World/ItemEntity.cs`
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- factory-method --kind power` · `POST /api/patterns/factory-method/demo?kind=health|reward|power|all`
 **Used by:** the level generator and the preset parser (placing items), `InteractionResolver.CollectItems` (pickup).
 
 ## Problem in this game

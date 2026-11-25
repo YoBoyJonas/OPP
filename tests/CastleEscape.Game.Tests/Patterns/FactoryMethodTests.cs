@@ -2,7 +2,6 @@ using CastleEscape.Contracts.Realtime;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Events;
 using CastleEscape.Game.Items;
-using CastleEscape.Game.PatternDemos;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.Tests.Patterns;
@@ -94,20 +93,10 @@ public class FactoryMethodTests
     [Fact]
     public void GeneratedLevels_ContainOnlyConcreteProducts()
     {
-        var level = DemoWorld.TutorialLevel();
+        var level = TestWorld.TutorialLevel();
 
         Assert.NotEmpty(level.Items);
         Assert.All(level.Items, i => Assert.True(i is HealthItem or RewardItem or PowerItem));
         Assert.Equal(level.Items.Count, level.Items.Select(i => i.Id).Distinct().Count());
-    }
-
-    [Fact]
-    public void Demo_CreatesAllThreeProducts()
-    {
-        var result = new FactoryMethodDemo().Run(DemoOptions.None);
-
-        var family = Assert.IsType<string[]>(result.Evidence["productFamily"]);
-        Assert.Equal(["HealthItem", "PowerItem", "RewardItem"], family);
-        Assert.Equal(3, Assert.IsType<List<Dictionary<string, object?>>>(result.Evidence["created"]).Count);
     }
 }

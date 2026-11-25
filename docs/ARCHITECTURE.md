@@ -7,11 +7,9 @@ flowchart LR
     Contracts["CastleEscape.Contracts<br/>DTOs, message records, enums"]
     Game["CastleEscape.Game<br/>content, world, rules, sessions, patterns"]
     Server["CastleEscape.Server<br/>ASP.NET Core: REST, SignalR, loop"]
-    Demos["CastleEscape.PatternDemos<br/>console"]
     Game --> Contracts
     Server --> Game
     Server --> Contracts
-    Demos --> Game
 ```
 
 - **Contracts** is everything a client sees: request/response records, the realtime messages
@@ -37,7 +35,6 @@ flowchart LR
 | `Events/` | `GameEvent` records, `GameEventPublisher`, observers | Observer |
 | `Messaging/` | serializer adapters, client notifiers and channels, realtime examples | Adapter, Bridge |
 | `Sessions/` | `GameSession`, `GameWorld`, `PlayerMovement`, `SessionRegistry`, `GameLoopScheduler`, `GameFacade`, `DevActions`, `SnapshotMapper` | Facade |
-| `Patterns/`, `PatternDemos/` | `[DesignPattern]` attribute, the pattern catalog, one demo per pattern | |
 
 ## The tick
 

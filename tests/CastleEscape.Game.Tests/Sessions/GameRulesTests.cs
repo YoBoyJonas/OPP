@@ -325,7 +325,7 @@ public class GameRulesTests
     {
         var game = TestGame.Start(["#####", "#1.2#", "#####"]);
 
-        game.Session.Leave(game.P2.PlayerId);
+        game.Session.RemovePlayer(game.P2.PlayerId);
 
         Assert.Equal(SessionPhase.Aborted, game.Session.Phase);
     }

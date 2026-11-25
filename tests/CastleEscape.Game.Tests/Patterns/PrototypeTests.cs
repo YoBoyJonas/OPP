@@ -2,7 +2,6 @@ using CastleEscape.Contracts;
 using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Generation;
 using CastleEscape.Game.Generation.Themes;
-using CastleEscape.Game.PatternDemos;
 using CastleEscape.Game.Sessions;
 using CastleEscape.Game.Tests.Sessions;
 using CastleEscape.Game.World;
@@ -14,7 +13,7 @@ public class PrototypeTests
     [Fact]
     public void DeepClone_CopiesEveryMutablePart_AndSharesImmutableOnes()
     {
-        var original = DemoWorld.TutorialLevel();
+        var original = TestWorld.TutorialLevel();
 
         var clone = original.Clone(CloneMode.Deep);
 
@@ -33,7 +32,7 @@ public class PrototypeTests
     [Fact]
     public void ShallowClone_SharesEverythingButTheLevelObject()
     {
-        var original = DemoWorld.TutorialLevel();
+        var original = TestWorld.TutorialLevel();
 
         var clone = original.Clone(CloneMode.Shallow);
 
@@ -48,7 +47,7 @@ public class PrototypeTests
     [InlineData(CloneMode.Shallow, true)]
     public void PlayingOnTheClone_ChangesTheOriginalOnlyWhenShallow(CloneMode mode, bool originalChanges)
     {
-        var original = DemoWorld.TutorialLevel();
+        var original = TestWorld.TutorialLevel();
         var clone = original.Clone(mode);
 
         clone.RemoveItem(clone.Items[0]);
@@ -63,8 +62,8 @@ public class PrototypeTests
     [Fact]
     public void DeepClone_EntitiesMoveIndependently()
     {
-        var original = DemoWorld.TutorialLevel();
-        var zombie = new DungeonZombie("z", DemoWorld.Catalog.Data.Zombies[0], new GridPos(3, 5));
+        var original = TestWorld.TutorialLevel();
+        var zombie = new DungeonZombie("z", TestWorld.Catalog.Data.Zombies[0], new GridPos(3, 5));
         original.AddZombie(zombie);
 
         var clone = original.DeepClone();
@@ -91,27 +90,5 @@ public class PrototypeTests
         game.Tick();
 
         Assert.Equal(itemsAfterRestart, game.State.Items.Length);
-    }
-
-    [Fact]
-    public void Addresses_AreEqualForTheSameObjectOnly()
-    {
-        var a = new object();
-        var b = new object();
-
-        var (sameA, aVsB) = ObjectAddress.WhileGcPaused(() => (ObjectAddress.Of(a) == ObjectAddress.Of(a), ObjectAddress.Of(a) == ObjectAddress.Of(b)));
-
-        Assert.True(sameA);
-        Assert.False(aVsB);
-    }
-
-    [Fact]
-    public void Demo_ShowsShallowRestartBug()
-    {
-        var result = new PrototypeDemo().Run(DemoOptions.None);
-
-        var modes = Assert.IsType<Dictionary<string, object?>>(result.Evidence["modes"]);
-        Assert.True((bool)((Dictionary<string, object?>)modes["Deep"]!)["restartRestoresLevel"]!);
-        Assert.False((bool)((Dictionary<string, object?>)modes["Shallow"]!)["restartRestoresLevel"]!);
     }
 }

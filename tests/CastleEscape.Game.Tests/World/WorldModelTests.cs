@@ -89,7 +89,7 @@ public class WorldModelTests
     public void Player_LivesAreCappedAndFloored()
     {
         var player = new PlayerEntity(Guid.NewGuid(), "Ana",
-            new CharacterDefinition { Id = "scout", MaxHealth = 3, BaseMoveSpeed = 6 }, new GridPos(1, 1));
+            new Character { Id = "scout", MaxHealth = 3, BaseMoveSpeed = 6 }, new GridPos(1, 1));
 
         player.GainLives(5);
         Assert.Equal(3, player.Lives);
@@ -102,7 +102,7 @@ public class WorldModelTests
     [Fact]
     public void LevelState_FindsAndRemovesItems()
     {
-        var level = new LevelState(new LevelDefinition { Id = "l", Index = 1 }, seed: 1, new Grid(20, 15));
+        var level = new LevelState(new Level { Id = "l", Index = 1 }, seed: 1, new Grid(20, 15));
         var item = ItemSpawners.Spawn(level, new Health { Id = "h", HealthValue = 1 }, new GridPos(4, 4));
 
         Assert.Same(item, level.ItemAt(new GridPos(4, 4)));
@@ -113,7 +113,7 @@ public class WorldModelTests
     [Fact]
     public void LevelState_StartTilesMustBeDistinct_Lvl3()
     {
-        var level = new LevelState(new LevelDefinition { Id = "l", Index = 1 }, seed: 1, new Grid(20, 15));
+        var level = new LevelState(new Level { Id = "l", Index = 1 }, seed: 1, new Grid(20, 15));
         level.AddStartTile(new GridPos(1, 1));
 
         Assert.Throws<InvalidOperationException>(() => level.AddStartTile(new GridPos(1, 1)));

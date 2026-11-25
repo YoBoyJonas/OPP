@@ -22,9 +22,9 @@ public sealed class ContentCatalog
 
     public ContentData Data { get; }
 
-    public CharacterDefinition? FindCharacter(string id) => Data.Characters.FirstOrDefault(c => c.Id == id);
+    public Character? FindCharacter(string id) => Data.Characters.FirstOrDefault(c => c.Id == id);
 
-    public CharacterDefinition GetCharacter(string id) =>
+    public Character GetCharacter(string id) =>
         FindCharacter(id) ?? throw new KeyNotFoundException($"Unknown character '{id}'.");
 
     public Consumable GetConsumable(string id) =>
@@ -37,6 +37,6 @@ public sealed class ContentCatalog
         Data.Zombies.FirstOrDefault(z => z.Id == id) ?? throw new KeyNotFoundException($"Unknown zombie '{id}'.");
 
     /// <summary>The level at a 1-based position in the sequence.</summary>
-    public LevelDefinition GetLevel(int index) =>
+    public Level GetLevel(int index) =>
         Data.Levels.FirstOrDefault(l => l.Index == index) ?? throw new KeyNotFoundException($"Unknown level index {index}.");
 }

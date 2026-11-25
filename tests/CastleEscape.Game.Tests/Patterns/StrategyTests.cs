@@ -3,7 +3,6 @@ using CastleEscape.Game.AI;
 using CastleEscape.Game.Content;
 using CastleEscape.Game.Generation;
 using CastleEscape.Game.Generation.Themes;
-using CastleEscape.Game.PatternDemos;
 using CastleEscape.Game.Sessions;
 using CastleEscape.Game.World;
 
@@ -56,7 +55,7 @@ public class StrategyTests
     {
         foreach (var kind in Enum.GetValues<MovementStrategyKind>())
         {
-            var (zombie, player, world) = Setup(StrategyDemo.Map);
+            var (zombie, player, world) = Setup(TestWorld.WallMap);
             zombie.Strategy = ZombieStrategies.For(kind);
 
             Walk(zombie, player, world);
@@ -76,7 +75,7 @@ public class StrategyTests
     [Fact]
     public void AStar_IsAsShortAsBfs_AndSearchesLess()
     {
-        var level = Level(StrategyDemo.Map);
+        var level = Level(TestWorld.WallMap);
         bool Passable(GridPos p) => MovementRules.CanZombieEnter(p, level);
         var from = level.Zombies[0].Tile;
         var to = level.StartTiles[0];
@@ -131,21 +130,12 @@ public class StrategyTests
     [Fact]
     public void TickState_ReportsEachZombiesCurrentStrategy()
     {
-        var level = Level(StrategyDemo.Map);
+        var level = Level(TestWorld.WallMap);
         level.Zombies[0].Strategy = ZombieStrategies.For(MovementStrategyKind.AStar);
-        var (p1, p2) = DemoWorld.TwoPlayers(level);
+        var (p1, p2) = TestWorld.TwoPlayers(level);
 
         var state = SnapshotMapper.ToTickState(Guid.NewGuid(), 1, 1, SessionPhase.Playing, level, [p1, p2]);
 
         Assert.Equal(MovementStrategyKind.AStar, state.Zombies[0].Strategy);
-    }
-
-    [Fact]
-    public void Demo_RunsAllFourStrategies()
-    {
-        var result = new StrategyDemo().Run(DemoOptions.None);
-
-        var runs = Assert.IsType<Dictionary<string, object?>>(result.Evidence["runs"]);
-        Assert.Equal(4, runs.Count);
     }
 }

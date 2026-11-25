@@ -27,12 +27,12 @@ public static class ContentLoader
 
         return new ContentData
         {
-            Characters = Read<CharacterDefinition>(directory, "characters.json"),
+            Characters = Read<Character>(directory, "characters.json"),
             Consumables = Read<Consumable>(directory, "consumables.json"),
             Combos = Read<PowerCombo>(directory, "combos.json"),
             Obstacles = Read<Obstacle>(directory, "obstacles.json"),
             Zombies = Read<ZombieDefinition>(directory, "zombies.json"),
-            Levels = Read<LevelDefinition>(directory, "levels.json"),
+            Levels = Read<Level>(directory, "levels.json"),
         };
     }
 

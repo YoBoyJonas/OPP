@@ -1,7 +1,7 @@
 namespace CastleEscape.Game.Content;
 
 /// <summary>A playable character (PLR-1). Loaded from <c>content/characters.json</c>.</summary>
-public class CharacterDefinition
+public class Character
 {
     public string Id { get; init; } = string.Empty;
     public string Name { get; init; } = string.Empty;

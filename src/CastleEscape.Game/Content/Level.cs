@@ -3,10 +3,10 @@ using CastleEscape.Contracts;
 namespace CastleEscape.Game.Content;
 
 /// <summary>
-/// Static settings for one of the 10 levels (the class diagram's <c>Level</c>). The generator
+/// Static settings for one of the 10 levels. The generator
 /// turns it into a runtime <c>LevelState</c>.
 /// </summary>
-public class LevelDefinition
+public class Level
 {
     public string Id { get; init; } = string.Empty;
 

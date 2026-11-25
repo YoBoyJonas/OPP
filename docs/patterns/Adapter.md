@@ -1,7 +1,6 @@
 # Adapter — message serialization (JSON / XML)
 
 **Owner:** Student C · **Category:** Structural · **Code:** `src/CastleEscape.Game/Messaging/`
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- adapter --format xml` · `POST /api/patterns/adapter/demo?format=json|xml`
 **Used by:** `GET /api/sessions/{id}/state?format=xml` (or `Accept: application/xml`); Phase 4 Bridge's `PollingBufferChannel`.
 
 ## Problem in this game
@@ -27,13 +26,13 @@ an existing, incompatible API adapted to the interface the client expects.
 | Target | `IMessageSerializer` (`ContentType`, `Serialize<T>`, `Deserialize<T>`) |
 | Adapter | `JsonMessageSerializerAdapter`, `XmlMessageSerializerAdapter` |
 | Adaptee | `System.Text.Json.JsonSerializer`, `System.Runtime.Serialization.DataContractSerializer` |
-| Client | `GameplayController.GetState` (and the polling channel, Bridge) via `MessageSerializers.Choose` |
+| Client | `GameplayEndpoints.GetState` (and the polling channel, Bridge) via `MessageSerializers.Choose` |
 
 ## Before (tag `p1-prototype-before-patterns`)
 
 ```mermaid
 classDiagram
-    class GameplayController {
+    class GameplayEndpoints {
         GetState(sessionId) Ok~TickStateMessage~
     }
     class JsonSerializer {
@@ -43,8 +42,8 @@ classDiagram
         +SerializeAsync(stream, value) Task$
         +…100+ overloads$
     }
-    GameplayController ..> JsonSerializer : JSON only (framework)
-    note for GameplayController "XML (NET-2) impossible without\nwriting DataContractSerializer code here"
+    GameplayEndpoints ..> JsonSerializer : JSON only (framework)
+    note for GameplayEndpoints "XML (NET-2) impossible without\nwriting DataContractSerializer code here"
 ```
 
 ## After
@@ -86,7 +85,7 @@ classDiagram
         +Xml IMessageSerializer$
         +Choose(format, accept) IMessageSerializer$
     }
-    class GameplayController {
+    class GameplayEndpoints {
         GetState(sessionId, format) IResult
     }
     IMessageSerializer <|.. JsonMessageSerializerAdapter
@@ -94,8 +93,8 @@ classDiagram
     JsonMessageSerializerAdapter ..> JsonSerializer : delegates
     XmlMessageSerializerAdapter --> DataContractSerializer : delegates
     MessageSerializers ..> IMessageSerializer
-    GameplayController ..> MessageSerializers
-    GameplayController ..> IMessageSerializer
+    GameplayEndpoints ..> MessageSerializers
+    GameplayEndpoints ..> IMessageSerializer
 ```
 
 ## Key code
@@ -125,7 +124,7 @@ Round-trip tests cover every server message in both formats.
 
 ## Requirement: "adapter and adaptee have different numbers of methods"
 
-Counted by reflection in `AdapterDemo.MemberCounts()` (and asserted in `AdapterTests`):
+Counted by reflection in `AdapterTests.AdapterAndAdapteeHaveDifferentMethodCounts`:
 
 | Type | Public members |
 |---|---|

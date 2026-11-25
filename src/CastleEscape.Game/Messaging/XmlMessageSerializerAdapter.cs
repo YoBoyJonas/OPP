@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
-using CastleEscape.Game.Patterns;
 
 namespace CastleEscape.Game.Messaging;
 
@@ -11,7 +10,6 @@ namespace CastleEscape.Game.Messaging;
 /// with WriteObject/ReadObject/WriteStartObject/IsStartObject… overloads) to <see cref="IMessageSerializer"/>.
 /// The protocol messages carry [DataContract] so they can be written as XML.
 /// </summary>
-[DesignPattern("Adapter", "Adapter")]
 public sealed class XmlMessageSerializerAdapter : IMessageSerializer
 {
     private static readonly XmlWriterSettings WriterSettings = new() { Indent = true, OmitXmlDeclaration = false };

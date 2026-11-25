@@ -13,11 +13,11 @@ public sealed class PowerManager
 {
     private static readonly PowerType[] BaseOrder = [PowerType.Jump, PowerType.Sprint, PowerType.Swim];
 
-    private readonly CharacterDefinition _character;
+    private readonly Character _character;
     private readonly Dictionary<PowerType, ActivePower> _powers = [];
     private readonly List<PowerCombo> _combos = [];
 
-    public PowerManager(CharacterDefinition character)
+    public PowerManager(Character character)
     {
         _character = character;
         Abilities = new CharacterAbilities(character);
@@ -107,7 +107,8 @@ public sealed class PowerManager
         Rebuild();
     }
 
-    private void Rebuild()
+    /// <summary>Rebuilds the decorator chain from the active powers and combos.</summary>
+    public void Rebuild()
     {
         IAbilities abilities = new CharacterAbilities(_character);
         foreach (var type in BaseOrder)
@@ -129,16 +130,16 @@ public sealed class PowerManager
 
     private static IAbilities Decorate(IAbilities inner, PowerGrant grant) => grant.Power switch
     {
-        PowerType.Jump => new JumpDecorator(inner, grant.Modifiers),
-        PowerType.Sprint => new SprintDecorator(inner, grant.Modifiers),
-        PowerType.Swim => new SwimDecorator(inner, grant.Modifiers),
+        PowerType.Jump => new Jump(inner, grant.Modifiers),
+        PowerType.Sprint => new Sprint(inner, grant.Modifiers),
+        PowerType.Swim => new Swim(inner, grant.Modifiers),
         _ => throw new ArgumentOutOfRangeException(nameof(grant), grant.Power, "Not a base power."),
     };
 
     private static IAbilities Decorate(IAbilities inner, PowerCombo combo) => combo.Granted switch
     {
-        PowerType.JumpDash => new JumpDashDecorator(inner, combo.Modifiers),
-        PowerType.FastSwim => new FastSwimDecorator(inner, combo.Modifiers),
+        PowerType.JumpDash => new JumpDash(inner, combo.Modifiers),
+        PowerType.FastSwim => new FastSwim(inner, combo.Modifiers),
         _ => throw new ArgumentOutOfRangeException(nameof(combo), combo.Granted, "Not a combo."),
     };
 }

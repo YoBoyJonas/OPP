@@ -1,7 +1,6 @@
 # Decorator — power stacking
 
 **Owner:** Student B · **Category:** Structural · **Code:** `src/CastleEscape.Game/Powers/` (`Abilities.cs`, `PowerManager.cs`)
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- decorator --character swimmer --sprints 3` · `POST /api/patterns/decorator/demo?character=scout&sprints=2`
 **Used by:** `MovementRules.CanPlayerEnter` (`player.Abilities.CanEnter`), `GameSession.MovePlayers` (`player.Abilities.SpeedOn`).
 
 ## Problem in this game
@@ -20,9 +19,9 @@ nothing in the code showed that a combo is "the same abilities, plus a bit".
 ## Why Decorator
 
 Each power *adds a behaviour on top of* the abilities below it, keeping the same interface. That is
-exactly a decorator. A `SprintDecorator` wraps any `IAbilities` and multiplies its speed. A
-`JumpDecorator` wraps any `IAbilities` and also allows pits. Stacking is wrapping again: Sprint
-level 2 is two `SprintDecorator`s. Combos are decorators too, added last. The movement code only
+exactly a decorator. A `Sprint` decorator wraps any `IAbilities` and multiplies its speed. A
+`Jump` decorator wraps any `IAbilities` and also allows pits. Stacking is wrapping again: Sprint
+level 2 is two `Sprint` decorators. Combos are decorators too, added last. The movement code only
 ever calls `player.Abilities`; it doesn't know how many layers there are. A new power is a new
 decorator class and nothing else changes.
 
@@ -30,10 +29,10 @@ decorator class and nothing else changes.
 
 | Role | Class |
 |---|---|
-| Component | `IAbilities` (`MoveSpeed`, `CanEnter(terrain)`, `SpeedOn(tile)`, `Describe()`) |
+| Component | `IAbilities` (`MoveSpeed`, `CanEnter(terrain)`, `SpeedOn(tile)`) |
 | ConcreteComponent | `CharacterAbilities` (the character's base stats: floor only) |
 | Decorator | `AbilityDecorator` (abstract; holds `Inner` and passes everything through) |
-| ConcreteDecorator | `JumpDecorator`, `SprintDecorator`, `SwimDecorator`, `JumpDashDecorator`, `FastSwimDecorator` |
+| ConcreteDecorator | `Jump`, `Sprint`, `Swim`, `JumpDash`, `FastSwim` |
 | Builds the chain | `PowerManager.Rebuild()`: character, then one decorator per stack level of Jump, Sprint, Swim, then combos |
 | Client | `MovementRules`, `GameSession.MovePlayers` |
 
@@ -68,7 +67,6 @@ classDiagram
         +MoveSpeed double
         +CanEnter(terrain) bool
         +SpeedOn(tile) double
-        +Describe() string
     }
     class CharacterAbilities {
         <<ConcreteComponent>>
@@ -77,11 +75,11 @@ classDiagram
         <<abstract, Decorator>>
         +Inner IAbilities
     }
-    class JumpDecorator
-    class SprintDecorator
-    class SwimDecorator
-    class JumpDashDecorator
-    class FastSwimDecorator
+    class Jump
+    class Sprint
+    class Swim
+    class JumpDash
+    class FastSwim
     class PowerManager {
         +Abilities IAbilities
         +Gain(grant, duration, maxLevel) ActivePower
@@ -96,11 +94,11 @@ classDiagram
     IAbilities <|.. CharacterAbilities
     IAbilities <|.. AbilityDecorator
     AbilityDecorator o--> IAbilities : Inner
-    AbilityDecorator <|-- JumpDecorator
-    AbilityDecorator <|-- SprintDecorator
-    AbilityDecorator <|-- SwimDecorator
-    AbilityDecorator <|-- JumpDashDecorator
-    AbilityDecorator <|-- FastSwimDecorator
+    AbilityDecorator <|-- Jump
+    AbilityDecorator <|-- Sprint
+    AbilityDecorator <|-- Swim
+    AbilityDecorator <|-- JumpDash
+    AbilityDecorator <|-- FastSwim
     PowerManager --> IAbilities : rebuilds on every change
     PlayerEntity --> PowerManager
     MovementRules ..> IAbilities : player.Abilities.CanEnter
@@ -110,13 +108,13 @@ classDiagram
 ## Key code
 
 ```csharp
-public sealed class SprintDecorator(IAbilities inner, StatModifiers modifiers) : AbilityDecorator(inner)
+public sealed class Sprint(IAbilities inner, StatModifiers modifiers) : AbilityDecorator(inner)
 {
     public override double MoveSpeed => Inner.MoveSpeed * modifiers.MoveSpeedMultiplier;
     public override double SpeedOn(Tile tile) => Inner.SpeedOn(tile) * modifiers.MoveSpeedMultiplier;
 }
 
-public sealed class FastSwimDecorator(IAbilities inner, StatModifiers modifiers) : AbilityDecorator(inner)
+public sealed class FastSwim(IAbilities inner, StatModifiers modifiers) : AbilityDecorator(inner)
 {
     // Replaces what the inner chain says about water instead of multiplying it.
     public override double SpeedOn(Tile tile) =>
@@ -159,9 +157,9 @@ prototype's formulas exactly, so the refactor changed no game rule.
 
 | Request | Where to edit |
 |---|---|
-| "Add a new power (e.g. Ghost: walk through walls for 5 s)" | `PowerType.Ghost`, a `PowerGrant` subclass and item in content, a `GhostDecorator` (`CanEnter(Wall) = true`, which also needs the wall check in `MovementRules` to ask the abilities), and one case in `PowerManager.Decorate`. |
+| "Add a new power (e.g. Ghost: walk through walls for 5 s)" | `PowerType.Ghost`, a Power item with that grant in content, a `GhostDecorator` (`CanEnter(Wall) = true`, which also needs the wall check in `MovementRules` to ask the abilities), and one case in `PowerManager.Decorate`. |
 | "Add a combo" | Data in `content/combos.json`, plus a decorator class if it does something new. |
 | "Sprint should not stack" | `Game:MaxPowerStackLevel = 1` (no code). |
-| "Show the chain in the HUD" | `player.Abilities.Describe()`. |
+| "Show the chain in the HUD" | walk `AbilityDecorator.Inner` from `player.Abilities` and print each layer's type name. |
 | "Decorator vs Composite?" | Both wrap objects of the same interface. A decorator has exactly one inner object and adds behaviour to it. A composite has many children and combines them into a tree (P2's Composite could group level parts). |
 | "Why not just multiply the numbers?" | Powers change more than numbers: Jump and Swim change *where* you can go, and FastSwim *replaces* the water rule. Each is one small class instead of branches in one method. |

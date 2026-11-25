@@ -1,7 +1,6 @@
 # Abstract Factory — level themes
 
 **Owner:** Student A · **Category:** Creational · **Code:** `src/CastleEscape.Game/Generation/Themes/`
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- abstract-factory` (plain console code: `src/CastleEscape.PatternDemos/AbstractFactoryDemo.cs`)
 **Used by:** `LevelProvider` picks the factory, the two level builders use it; `GET /api/sessions/{id}/level` lists the variants used (`obstacles`).
 
 ## Problem in this game

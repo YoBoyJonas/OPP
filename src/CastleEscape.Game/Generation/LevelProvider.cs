@@ -35,7 +35,7 @@ public class LevelProvider(ContentCatalog catalog, GameOptions game, GenerationO
         throw new LevelGenerationException(levelIndex, errors);
     }
 
-    public LevelState Generate(LevelDefinition definition, int seed)
+    public LevelState Generate(Level definition, int seed)
     {
         IThemeFactory theme = ThemeFactories.For(definition.Theme, catalog);
         List<string> errors = [];
@@ -60,7 +60,7 @@ public class LevelProvider(ContentCatalog catalog, GameOptions game, GenerationO
         throw new LevelGenerationException(definition.Index, errors);
     }
 
-    public LevelState BuildPreset(LevelDefinition definition, string presetName, int seed = 0)
+    public LevelState BuildPreset(Level definition, string presetName, int seed = 0)
     {
         IThemeFactory theme = ThemeFactories.For(definition.Theme, catalog);
         var builder = new PresetLevelBuilder(catalog, definition, theme, PresetMaps.ReadRows(presetName), seed);

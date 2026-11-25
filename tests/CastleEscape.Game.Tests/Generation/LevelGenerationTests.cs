@@ -12,7 +12,7 @@ public class LevelGenerationTests
     private static readonly GenerationOptions Generation = new();
     private static readonly LevelProvider Levels = new(TestGame.Catalog, new GameOptions(), Generation);
 
-    private static LevelState Generate(LevelDefinition definition, int seed) => Levels.Generate(definition, seed);
+    private static LevelState Generate(Level definition, int seed) => Levels.Generate(definition, seed);
 
     private static LevelState Preset(string[] rows) => new RowsLevelProvider(TestGame.Catalog, rows).CreateLevel(1, seed: 0);
 

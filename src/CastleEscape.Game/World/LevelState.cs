@@ -1,12 +1,10 @@
 using CastleEscape.Contracts;
 using CastleEscape.Game.Configuration;
 using CastleEscape.Game.Content;
-using CastleEscape.Game.Patterns;
 
 namespace CastleEscape.Game.World;
 
-[DesignPattern("Prototype", "ConcretePrototype")]
-public class LevelState(LevelDefinition definition, int seed, Grid grid) : ILevelPrototype<LevelState>
+public class LevelState(Level definition, int seed, Grid grid) : ILevelPrototype<LevelState>
 {
     private readonly List<ItemEntity> _items = [];
     private readonly List<Zombie> _zombies = [];
@@ -15,7 +13,7 @@ public class LevelState(LevelDefinition definition, int seed, Grid grid) : ILeve
     private readonly List<GridPos> _startTiles = [];
     private readonly Dictionary<string, int> _idCounters = [];
 
-    public LevelDefinition Definition { get; } = definition;
+    public Level Definition { get; } = definition;
     public int Index => Definition.Index;
     public LevelTheme Theme => Definition.Theme;
     public int Seed { get; } = seed;

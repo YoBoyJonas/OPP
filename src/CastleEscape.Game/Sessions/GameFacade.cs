@@ -4,7 +4,6 @@ using CastleEscape.Contracts.Gameplay;
 using CastleEscape.Contracts.Realtime;
 using CastleEscape.Contracts.Sessions;
 using CastleEscape.Game.Content;
-using CastleEscape.Game.Patterns;
 
 namespace CastleEscape.Game.Sessions;
 
@@ -17,7 +16,6 @@ public sealed record ConnectResult(Guid SessionId, Guid PlayerId, SessionUpdated
 /// sessions and their command queues, the loop scheduler, and the content catalog.
 /// Callers never see a <see cref="GameSession"/> or a <see cref="PlayerSlot"/>; they get contract DTOs.
 /// </summary>
-[DesignPattern("Facade", "Facade")]
 public sealed class GameFacade(SessionRegistry registry, GameLoopScheduler scheduler, ContentCatalog catalog)
 {
     // ---------------------------------------------------------------- lobby
@@ -44,7 +42,7 @@ public sealed class GameFacade(SessionRegistry registry, GameLoopScheduler sched
     public void LeaveSession(Guid sessionId, string? playerToken)
     {
         var (session, player) = registry.Authenticate(sessionId, playerToken);
-        session.Leave(player.PlayerId);
+        session.RemovePlayer(player.PlayerId);
     }
 
     public IReadOnlyList<SessionSummary> ListSessions() =>

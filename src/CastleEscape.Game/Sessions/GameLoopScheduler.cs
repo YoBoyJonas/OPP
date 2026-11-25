@@ -1,4 +1,3 @@
-using CastleEscape.Game.Patterns;
 
 namespace CastleEscape.Game.Sessions;
 
@@ -10,7 +9,6 @@ public sealed record SessionMessage(Guid SessionId, OutgoingMessage Message);
 /// whose tick throws is stopped (with an Error message to its clients); the others are not affected.
 /// The host decides when to call it (a timer in the server, a loop in demos and tests).
 /// </summary>
-[DesignPattern("Facade", "Subsystem")]
 public sealed class GameLoopScheduler(SessionRegistry registry)
 {
     /// <summary>Called when a session's tick fails, before the session is stopped.</summary>

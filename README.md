@@ -18,15 +18,13 @@ dotnet run --project src/CastleEscape.Server        # http://localhost:5035
 
 | Open | What |
 |---|---|
-| http://localhost:5035/scalar | API reference; try every endpoint (Course → Patterns runs the pattern demos) |
+| http://localhost:5035/scalar | API reference; try every endpoint |
 | http://localhost:5035/playground | Browser playground: **Quickstart** gives two links, open each in its own tab and play with arrows/WASD (also on the deployed site) |
 | http://localhost:5035/openapi/v1.json | OpenAPI document (also exported to [docs/openapi.json](docs/openapi.json)) |
 | ws://localhost:5035/hubs/game | SignalR hub, see [FRONTEND_INTEGRATION](docs/FRONTEND_INTEGRATION.md) |
 
 ```bash
-dotnet test                                                       # 215 tests: rules, generation, patterns, REST, SignalR
-dotnet run --project src/CastleEscape.PatternDemos                # all 12 pattern demos in the console
-dotnet run --project src/CastleEscape.PatternDemos -- prototype --mode Shallow
+dotnet test                                                       # rules, generation, patterns, REST, SignalR
 ```
 
 ## The game in one paragraph
@@ -44,9 +42,8 @@ Rule interpretations are recorded in [DECISIONS.md](docs/DECISIONS.md).
 ```
 src/
   CastleEscape.Contracts/     DTOs and message records shared with clients (no logic)
-  CastleEscape.Game/          the game: content, world, rules, sessions, all 12 patterns, demos
+  CastleEscape.Game/          the game: content, world, rules, sessions, all the patterns
   CastleEscape.Server/        ASP.NET Core host: REST endpoints, SignalR hub, game loop, playground
-  CastleEscape.PatternDemos/  console runner for the pattern demos
 tests/
   CastleEscape.Game.Tests/    rules, generation, and one test class per pattern
   CastleEscape.Server.Tests/  REST, SignalR (two real hub clients), polling, OpenAPI export
@@ -71,7 +68,7 @@ docs/                         design documents (below)
 | [Observer](docs/patterns/Observer.md) | game events → client messages, HUD stats, log, sound cues | D |
 | [Facade](docs/patterns/Facade.md) | `GameFacade`, the single entry point for hub, REST and loop | D |
 
-Every participant carries `[DesignPattern("…", "role")]`; `GET /api/patterns` lists them from the code.
+Each pattern has a test class in `tests/CastleEscape.Game.Tests/Patterns/` that proves its course requirement.
 The tag `p1-prototype-before-patterns` marks the working game before any pattern was applied.
 
 ## Documentation

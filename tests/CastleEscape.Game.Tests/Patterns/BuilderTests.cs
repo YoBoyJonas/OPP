@@ -90,7 +90,7 @@ public class BuilderTests
     public void Provider_GivesUpAfterMaxAttempts()
     {
         var level1 = Catalog.GetLevel(1);
-        var impossible = new LevelDefinition
+        var impossible = new Level
         {
             Index = 1, Theme = level1.Theme, ObstacleCount = level1.ObstacleCount, ObstacleTable = level1.ObstacleTable,
             ZombieCount = 1000, ZombieTable = level1.ZombieTable,

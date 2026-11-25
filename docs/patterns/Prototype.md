@@ -1,7 +1,6 @@
 # Prototype — level restart copies
 
 **Owner:** Student A · **Category:** Creational · **Code:** `src/CastleEscape.Game/World/LevelState.cs` (`Clone`, `DeepClone`, `ShallowClone`), `World/ILevelPrototype.cs`, `Entity.CloneEntity`, `Grid.Copy`
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- prototype --mode Shallow` · `POST /api/patterns/prototype/demo?mode=Deep|Shallow|both`
 **Used by:** `GameSession.LoadLevel` (play on a clone) and `GameSession.RestartLevel` (D8: restart = a new clone).
 **Switch:** `Patterns:PrototypeCloneMode = Deep | Shallow` in appsettings. The session reads it on every restart.
 
@@ -40,7 +39,7 @@ and the restart comes back with the items already collected.
 | `Tile` objects | shared (immutable) | shared |
 | item/zombie/lever lists | new lists | **shared** |
 | item, zombie, lever and door objects | new (`CloneEntity`) | **shared** |
-| `LevelDefinition`, obstacles, consumables | shared (read-only content) | shared |
+| `Level`, obstacles, consumables | shared (read-only content) | shared |
 
 Sharing the immutable parts is intentional. A deep copy only needs to copy what play can change.
 Copying immutable tiles would cost memory and gain nothing (the P2 Flyweight will share them further).

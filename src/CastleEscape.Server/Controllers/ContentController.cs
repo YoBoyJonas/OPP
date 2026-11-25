@@ -26,7 +26,7 @@ public sealed class ContentController(ContentCatalog catalog, IOptions<GameOptio
     }
 
     [HttpGet("characters", Name = "GetCharacters")]
-    public ActionResult<IReadOnlyList<CharacterDefinition>> GetCharacters()
+    public ActionResult<IReadOnlyList<Character>> GetCharacters()
     {
         return Ok(catalog.Data.Characters);
     }
@@ -76,13 +76,13 @@ public sealed class ContentController(ContentCatalog catalog, IOptions<GameOptio
     }
 
     [HttpGet("levels", Name = "GetLevelDefinitions")]
-    public ActionResult<IReadOnlyList<LevelDefinition>> GetLevels()
+    public ActionResult<IReadOnlyList<Level>> GetLevels()
     {
         return Ok(catalog.Data.Levels);
     }
 
     [HttpGet("levels/{index:int}", Name = "GetLevelDefinition")]
-    public ActionResult<LevelDefinition> GetLevel([FromRoute] int index)
+    public ActionResult<Level> GetLevel([FromRoute] int index)
     {
         var level = catalog.Data.Levels.FirstOrDefault(l => l.Index == index);
         if (level is null)

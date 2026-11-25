@@ -1,8 +1,7 @@
 # Facade — one entry point to the game
 
 **Owner:** Student D · **Category:** Structural · **Code:** `src/CastleEscape.Game/Sessions/GameFacade.cs`, `Sessions/GameLoopScheduler.cs`
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- facade` · `POST /api/patterns/facade/demo`
-**Used by:** `GameHub` (all hub methods), `SessionsController` and `GameplayController` (all lobby and gameplay REST), `GameLoopService` (`Tick`), and `FacadeDemo`, which plays a whole game in-process.
+**Used by:** `GameHub` (all hub methods), `SessionsController` and `GameplayEndpoints` (all lobby and gameplay REST) and `GameLoopService` (`Tick`).
 
 ## Problem in this game
 
@@ -33,7 +32,7 @@ diagnostics endpoint use them directly. A facade simplifies; it doesn't lock any
 |---|---|
 | Facade | `GameFacade` (lobby: `CreateSession`, `JoinSession`, `SelectCharacter`, `LeaveSession`, `ListSessions`, `GetSession`, `CharacterIds`; input: `SubmitDirection`, `RequestRestart`; reads: `GetState`, `GetLevelLayout`, `GetHud`; hub: `Connect`, `Disconnect`, `Ping`; loop: `Tick`) |
 | Subsystems | `SessionRegistry` (lookup, join codes, tokens), `GameSession` (and behind it `CommandProcessor`, `GameWorld`, `GameEventPublisher`), `GameLoopScheduler` (new: ticks all sessions, isolates failures, drains outboxes), `ContentCatalog`; level creation runs through `ILevelProvider` → `LevelDirector` |
-| Clients | `GameHub`, `SessionsController`, `GameplayController`, `GameLoopService`, `FacadeDemo` |
+| Clients | `GameHub`, `SessionsController`, `GameplayEndpoints`, `GameLoopService` |
 
 ## Before (tag `p1-prototype-before-patterns`)
 
@@ -41,7 +40,7 @@ diagnostics endpoint use them directly. A facade simplifies; it doesn't lock any
 classDiagram
     class GameHub
     class SessionsController
-    class GameplayController
+    class GameplayEndpoints
     class GameLoopService
     class SessionRegistry {
         +Create(name)
@@ -63,11 +62,11 @@ classDiagram
     GameHub --> PlayerSlot
     SessionsController --> SessionRegistry
     SessionsController --> GameSession
-    GameplayController --> SessionRegistry
-    GameplayController --> GameSession
+    GameplayEndpoints --> SessionRegistry
+    GameplayEndpoints --> GameSession
     GameLoopService --> SessionRegistry
     GameLoopService --> GameSession
-    note for GameplayController "Each handler: Authenticate, then\nsession.X(player.PlayerId), then map to DTO"
+    note for GameplayEndpoints "Each handler: Authenticate, then\nsession.X(player.PlayerId), then map to DTO"
 ```
 
 ## After
@@ -102,14 +101,12 @@ classDiagram
     class ContentCatalog { <<Subsystem>> }
     class GameHub
     class SessionsController
-    class GameplayController
+    class GameplayEndpoints
     class GameLoopService
-    class FacadeDemo
     GameHub --> GameFacade
     SessionsController --> GameFacade
-    GameplayController --> GameFacade
+    GameplayEndpoints --> GameFacade
     GameLoopService --> GameFacade : Tick
-    FacadeDemo --> GameFacade
     GameFacade --> SessionRegistry
     GameFacade --> GameLoopScheduler
     GameFacade --> ContentCatalog
@@ -149,28 +146,12 @@ var sends = game.Tick(tickSeconds)                                              
 
 ## Requirement: "at least 2 client classes, at least 3 subsystem classes"
 
-- **Clients (5):** `GameHub`, `SessionsController`, `GameplayController`, `GameLoopService` (server) and `FacadeDemo` (console).
+- **Clients (4):** `GameHub`, `SessionsController`, `GameplayEndpoints` and `GameLoopService`.
 - **Subsystems (4, plus what they own):** `SessionRegistry`, `GameSession` (with `CommandProcessor`, `GameWorld`,
   `GameEventPublisher`), `GameLoopScheduler`, `ContentCatalog`.
 
 `FacadeRequirementTests` (server) counts the server classes that depend on `GameFacade`.
 
-## Demonstration
-
-`FacadeDemo` builds the subsystems once, the way `Program.cs` does, and then plays a complete
-one-level game using nothing but `GameFacade`. Two bots walk onto the levers, through the door and
-onto the exits:
-
-```text
-CreateSession, JoinSession(code J8B8WP), SelectCharacter x2 -> phase Playing, level 1.
-Ana and Ben walk onto the levers (SubmitDirection, Tick): door open = True.
-Both walk through the door onto the exit tiles -> phase Victory after 60 ticks.
-32 lobby and input calls to the facade (plus state reads); it delivered 89 messages (GameEvent 21, LevelStarted 1, ...).
-```
-
-`FacadeTests` covers the lobby, token errors, the "no level yet" error, connection catch-up, and a
-broken session being stopped by the scheduler. The server's integration tests (REST lobby,
-two SignalR clients finishing a level, polling, XML) all run through the facade.
 
 ## Likely live-change requests
 

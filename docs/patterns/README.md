@@ -17,18 +17,9 @@ The "before" diagrams show the naive prototype at git tag `p1-prototype-before-p
 
 No pattern is used twice, as the course requires.
 
-## Running the demos
-
-```bash
-dotnet run --project src/CastleEscape.PatternDemos                      # all 12
-dotnet run --project src/CastleEscape.PatternDemos -- prototype --mode Shallow
-```
-
-The same demos run as `POST /api/patterns/{key}/demo` in Scalar (Course → Patterns).
-
 ## Defence switches
 
 | Switch | Where |
 |---|---|
-| Prototype deep ↔ shallow | `Patterns:PrototypeCloneMode` in appsettings, or `?mode=` on the demo |
+| Prototype deep ↔ shallow | `Patterns:PrototypeCloneMode` in appsettings |
 | Delivery channels | `Realtime:EnabledChannels` |

@@ -1,7 +1,6 @@
 # Builder — level construction
 
 **Owner:** Student A · **Category:** Creational · **Code:** `src/CastleEscape.Game/Generation/` (`ILevelBuilder`, `LevelDirector`, `ProceduralLevelBuilder`, `PresetLevelBuilder`)
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- builder` (plain console code: `src/CastleEscape.PatternDemos/BuilderDemo.cs`)
 **Used by:** `LevelProvider` (every level a session plays), `RowsLevelProvider` (test and demo maps), `LevelPreviewer` (`GET /api/levels/{index}/preview`).
 
 ## Problem in this game
@@ -134,7 +133,7 @@ public sealed class LevelDirector
 ```
 
 ```csharp
-public LevelState Generate(LevelDefinition definition, int seed)   // LevelProvider, the client
+public LevelState Generate(Level definition, int seed)   // LevelProvider, the client
 {
     IThemeFactory theme = ThemeFactories.For(definition.Theme, catalog);
     List<string> errors = [];

@@ -5,12 +5,12 @@ using CastleEscape.Game.Powers;
 namespace CastleEscape.Game.World;
 
 /// <summary>A player's character in the world. Lives across levels; placed on a start tile per level.</summary>
-public class PlayerEntity(Guid playerId, string name, CharacterDefinition character, GridPos start)
+public class PlayerEntity(Guid playerId, string name, Character character, GridPos start)
     : MovableEntity(playerId.ToString("N"), start)
 {
     public Guid PlayerId { get; } = playerId;
     public string Name { get; } = name;
-    public CharacterDefinition Character { get; } = character;
+    public Character Character { get; } = character;
 
     /// <summary>The start tile of the current level.</summary>
     public GridPos StartTile { get; private set; } = start;

@@ -3,7 +3,6 @@ using CastleEscape.Contracts;
 using CastleEscape.Contracts.Realtime;
 using CastleEscape.Contracts.Sessions;
 using CastleEscape.Game.Messaging;
-using CastleEscape.Game.PatternDemos;
 
 namespace CastleEscape.Game.Tests.Patterns;
 
@@ -23,7 +22,7 @@ public class AdapterTests
     public void EveryServerMessage_RoundTrips(string format)
     {
         var serializer = MessageSerializers.Choose(format);
-        var state = DemoWorld.SampleState();
+        var state = TestWorld.SampleState();
         var session = new SessionDto(state.SessionId, "ABC123", SessionPhase.Playing, 1, 10,
             [new SessionPlayerDto(Guid.NewGuid(), 1, "Ana", "scout", true), new SessionPlayerDto(Guid.NewGuid(), 2, "Ben", null, false)]);
 
@@ -39,7 +38,7 @@ public class AdapterTests
     [Fact]
     public void Xml_IsRealXml()
     {
-        var xml = MessageSerializers.Xml.Serialize(DemoWorld.SampleState());
+        var xml = MessageSerializers.Xml.Serialize(TestWorld.SampleState());
 
         var root = XDocument.Parse(xml).Root!;
         Assert.Equal("TickStateMessage", root.Name.LocalName);
@@ -58,10 +57,13 @@ public class AdapterTests
     [Fact]
     public void AdapterAndAdapteeHaveDifferentMethodCounts()
     {
-        var counts = AdapterDemo.MemberCounts();
+        // Properties plus ordinary methods (a property's get_ method is not counted twice).
+        var target = typeof(IMessageSerializer).GetProperties().Length + typeof(IMessageSerializer).GetMethods().Count(m => !m.IsSpecialName);
+        var json = typeof(System.Text.Json.JsonSerializer).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static).Length;
+        var xml = typeof(System.Runtime.Serialization.DataContractSerializer).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance).Length;
 
-        Assert.Equal(3, counts["IMessageSerializer (target)"]);
-        Assert.True(counts["JsonSerializer (adaptee)"] > 3);
-        Assert.True(counts["DataContractSerializer (adaptee)"] > 3);
+        Assert.Equal(3, target);
+        Assert.True(json > 3);
+        Assert.True(xml > 3);
     }
 }

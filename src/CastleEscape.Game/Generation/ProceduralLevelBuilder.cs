@@ -11,7 +11,7 @@ namespace CastleEscape.Game.Generation;
 public sealed class ProceduralLevelBuilder : ILevelBuilder
 {
     private readonly ContentCatalog _catalog;
-    private readonly LevelDefinition _definition;
+    private readonly Level _definition;
     private readonly IThemeFactory _theme;
     private readonly int _minZombieDistanceFromStart;
     private readonly Random _rng;
@@ -27,7 +27,7 @@ public sealed class ProceduralLevelBuilder : ILevelBuilder
     private GridPos _start1, _start2;
     private readonly List<GridPos> _levers = [];
 
-    public ProceduralLevelBuilder(ContentCatalog catalog, LevelDefinition definition, IThemeFactory theme, int seed,
+    public ProceduralLevelBuilder(ContentCatalog catalog, Level definition, IThemeFactory theme, int seed,
         GameOptions game, GenerationOptions generation)
     {
         _catalog = catalog;

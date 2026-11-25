@@ -1,7 +1,6 @@
 using CastleEscape.Contracts;
 using CastleEscape.Contracts.Realtime;
 using CastleEscape.Game.Messaging;
-using CastleEscape.Game.PatternDemos;
 using CastleEscape.Game.Sessions;
 
 namespace CastleEscape.Game.Tests.Patterns;
@@ -19,7 +18,7 @@ public class BridgeTests
     [Fact]
     public void AnyNotifierWorksOverAnyChannel()
     {
-        var counting = new BridgeDemo.CountingChannel();
+        var counting = new TestWorld.CountingChannel();
         var polling = new PollingBufferChannel(10);
 
         var notifiers = ClientNotifiers.For([counting, polling]);
@@ -32,7 +31,7 @@ public class BridgeTests
     [Fact]
     public void Notifiers_OnlySendTheirOwnMessages()
     {
-        var channel = new BridgeDemo.CountingChannel();
+        var channel = new TestWorld.CountingChannel();
         var state = new StateNotifier(channel);
         var events = new EventNotifier(channel);
 
@@ -46,7 +45,7 @@ public class BridgeTests
     [Fact]
     public void StateNotifier_ThinsStates_ButNeverEvents()
     {
-        var channel = new BridgeDemo.CountingChannel();
+        var channel = new TestWorld.CountingChannel();
         var notifiers = new ClientNotifier[] { new StateNotifier(channel, everyNthTick: 5), new EventNotifier(channel) };
 
         for (var tick = 1; tick <= 20; tick++)
@@ -72,14 +71,5 @@ public class BridgeTests
         Assert.Equal([3L, 4L, 5L], polling.Read(Session, 0).Select(m => m.Seq));
         Assert.Equal([5L], polling.Read(Session, 4).Select(m => m.Seq));
         Assert.Empty(polling.Read(Guid.NewGuid(), 0));
-    }
-
-    [Fact]
-    public void Demo_PollingGetsFewerStatesThanTheFullChannel()
-    {
-        var result = new BridgeDemo().Run(DemoOptions.None);
-
-        var counting = Assert.IsType<Dictionary<string, int>>(result.Evidence["countingChannel"]);
-        Assert.True((int)result.Evidence["pollingStateUpdates"]! < counting[ClientMethods.StateUpdated]);
     }
 }

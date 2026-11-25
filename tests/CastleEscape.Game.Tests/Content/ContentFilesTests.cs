@@ -44,7 +44,7 @@ public class ContentFilesTests
         Assert.IsType<Health>(Catalog.GetConsumable("health-potion"));
         Assert.IsType<Reward>(Catalog.GetConsumable("ruby"));
         var boots = Assert.IsType<Power>(Catalog.GetConsumable("jump-boots"));
-        Assert.IsType<Jump>(boots.Grant);
+        Assert.NotNull(boots.Grant);
         Assert.Equal(PowerType.Jump, boots.Grant.Power);
     }
 

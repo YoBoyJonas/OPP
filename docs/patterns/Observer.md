@@ -1,7 +1,6 @@
 # Observer — game events
 
 **Owner:** Student D · **Category:** Behavioral · **Code:** `src/CastleEscape.Game/Events/` (`GameEvents.cs`, `GameEventPublisher.cs`, `Observers.cs`)
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- observer` · `POST /api/patterns/observer/demo`
 **Used by:** every `GameSession` (one publisher per session). The game rules report events; clients receive them as `GameEvent` messages.
 
 ## Problem in this game

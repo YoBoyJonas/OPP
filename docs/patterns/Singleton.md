@@ -1,7 +1,6 @@
 # Singleton — `ContentCatalog`
 
 **Owner:** Student C · **Category:** Creational · **Code:** `src/CastleEscape.Game/Content/ContentCatalog.cs`
-**Demo:** `dotnet run --project src/CastleEscape.PatternDemos -- singleton` · `POST /api/patterns/singleton/demo`
 
 ## Problem in this game
 

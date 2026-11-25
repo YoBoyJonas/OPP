@@ -56,7 +56,7 @@ public static class ApiDocumentation
             Errors: [Status401Unauthorized],
             PlayerToken: true),
 
-        // GameplayController
+        // GameplayEndpoints
         ["SubmitDirection"] = new("Set the held direction",
             "Same as the hub's SetDirection. Send a direction on key down and None on key up. "
                 + "Applied at the start of the next tick.",
@@ -130,51 +130,6 @@ public static class ApiDocumentation
             "Captured from a short real session on a small map, keyed by client method name. This is exactly "
                 + "the JSON SignalR sends."),
 
-        // PatternsController
-        ["ListPatterns"] = new("All P1 patterns",
-            "Name, owner, the problem solved, the course requirement and how it is met, "
-                + "and the participants found in the code by the [DesignPattern] attribute."),
-        ["GetPattern"] = new("One pattern",
-            "Details and participants (type, role, source file) of one pattern, by key, e.g. `decorator`.",
-            Errors: [Status404NotFound]),
-        ["DemoSingleton"] = new("Singleton: thread safety",
-            "Starts `threads` threads through a Barrier; all read ContentCatalog.Instance at once. Reports distinct "
-                + "instances (1) and creations (1). With `naive=true` the same race against a lock-free holder makes several."),
-        ["DemoAdapter"] = new("Adapter: JSON / XML serializers",
-            "Serializes a real tick state through IMessageSerializer (`format=json|xml`), round-trips it, and counts "
-                + "the members of the 3-member target against the adaptees JsonSerializer and DataContractSerializer."),
-        ["DemoFactoryMethod"] = new("Factory Method: item spawners",
-            "Spawns items on the tutorial level through ItemSpawners.For(consumable) (`kind=health|reward|power|all`), "
-                + "applies each to a player, and lists the product family (HealthItem, RewardItem, PowerItem)."),
-        ["DemoPrototype"] = new("Prototype: deep vs shallow level copies",
-            "Clones the tutorial level (`mode=Deep|Shallow|both`) and reports, for the level and its parts, the memory "
-                + "address and identity hash in the original and the clone. Then plays on the clone and restarts from the "
-                + "pristine level: deep restores it, shallow does not. The game itself uses `Patterns:PrototypeCloneMode`."),
-        ["DemoStrategy"] = new("Strategy: zombie chase algorithms",
-            "Puts the same zombie behind a wall and swaps its strategy (`strategy=Greedy|Bfs|AStar|Predictive|all`), "
-                + "running up to `steps` steps with each. Greedy gets stuck, BFS and A* go around, Predictive aims where the "
-                + "player is heading. Also compares BFS and A* search cost."),
-        ["DemoDecorator"] = new("Decorator: power stacking",
-            "Gives a character (`character=warrior|scout|swimmer`) `sprints` Sprint pickups, then Jump and Swim. After each "
-                + "pickup it prints the decorator chain, its depth and the floor/water/pit speeds. The combos JumpDash and FastSwim "
-                + "are added as decorators too. Then all timers expire and the chain unwinds."),
-        ["DemoCommand"] = new("Command: inputs with undo",
-            "Plays a scripted two-player session. Both players step into the same tile, and the later StartStep command is "
-                + "undone (D7). One player collects a coin, the other restarts the level, and UndoLastCommand() (`undoRestart`) "
-                + "puts the pre-restart level, score and positions back. Returns the command history."),
-        ["DemoObserver"] = new("Observer: game events",
-            "Plays a scripted session with an extra Recorder observer attached: a coin pickup and a zombie hit. Shows what "
-                + "each observer did (client messages, HUD statistics, event log, sound cues), then detaches the Recorder and "
-                + "shows it no longer receives events."),
-        ["DemoBridge"] = new("Bridge: notifiers over channels",
-            "Runs a real session for `ticks` ticks and dispatches its messages through a StateNotifier and an EventNotifier "
-                + "on each of two channels: the polling buffer (states every `pollingEvery` ticks) and a counting channel "
-                + "written for the demo. Shows what each pair sent and one polled message in `format`."),
-        ["DemoFacade"] = new("Facade: a whole game through GameFacade",
-            "Builds the subsystems once (registry, loop scheduler, content), then plays a full one-level game using only "
-                + "GameFacade: create, join, pick characters, walk both players onto the levers, through the door and onto the "
-                + "exits, to Victory. The same facade serves the hub and the REST endpoints."),
-
         // DiagnosticsController
         ["GetHealth"] = new("Server health",
             "Liveness check. Returns 200 with version and uptime while the server is running."),
@@ -195,8 +150,7 @@ public static class ApiDocumentation
                 + "restart brings back the level as it was before it.",
             Errors: [Status404NotFound, Status409Conflict]),
         ["DevSetZombieStrategy"] = new("Switch every zombie's chase strategy",
-            "Greedy, Bfs, AStar or Predictive, from the next tick (Strategy pattern). It is a command, so "
-                + "`/undo` switches the zombies back. The tick state shows each zombie's `strategy`.",
+            "Greedy, Bfs, AStar or Predictive (Strategy pattern). The tick state shows each zombie's `strategy`.",
             Success: Status202Accepted,
             Errors: [Status404NotFound]),
         ["DevGivePower"] = new("Give a player a power",

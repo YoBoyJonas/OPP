@@ -18,7 +18,7 @@ namespace CastleEscape.Server.Controllers;
 [ApiController]
 [Route("api/sessions/{sessionId:guid}")]
 [Tags(ApiTags.Gameplay)]
-public sealed class GameplayController(GameFacade game, PollingBufferChannel polling, IOptions<RealtimeOptions> realtime)
+public sealed class GameplayEndpoints(GameFacade game, PollingBufferChannel polling, IOptions<RealtimeOptions> realtime)
     : ControllerBase
 {
     [HttpPost("input", Name = "SubmitDirection")]

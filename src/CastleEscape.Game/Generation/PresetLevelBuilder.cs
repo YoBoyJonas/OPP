@@ -9,12 +9,12 @@ namespace CastleEscape.Game.Generation;
 public sealed class PresetLevelBuilder : ILevelBuilder
 {
     private readonly ContentCatalog _catalog;
-    private readonly LevelDefinition _definition;
+    private readonly Level _definition;
     private readonly IThemeFactory _theme;
     private readonly IReadOnlyList<string> _rows;
     private readonly LevelState _level;
 
-    public PresetLevelBuilder(ContentCatalog catalog, LevelDefinition definition, IThemeFactory theme, IReadOnlyList<string> rows, int seed = 0)
+    public PresetLevelBuilder(ContentCatalog catalog, Level definition, IThemeFactory theme, IReadOnlyList<string> rows, int seed = 0)
     {
         if (rows.Count == 0 || rows.Any(r => r.Length != rows[0].Length))
         {

@@ -1,5 +1,4 @@
 using CastleEscape.Contracts;
-using CastleEscape.Game.Patterns;
 using CastleEscape.Game.World;
 
 namespace CastleEscape.Game.AI;
@@ -8,7 +7,6 @@ namespace CastleEscape.Game.AI;
 /// Steps to the neighbour that most reduces the straight distance. Cheap and easy to fool:
 /// it waits behind a wall when no step gets closer.
 /// </summary>
-[DesignPattern("Strategy", "ConcreteStrategy")]
 public sealed class GreedyChaseStrategy : ChaseStrategy
 {
     public override MovementStrategyKind Kind => MovementStrategyKind.Greedy;
@@ -32,7 +30,6 @@ public sealed class GreedyChaseStrategy : ChaseStrategy
 }
 
 /// <summary>Follows a shortest path found by breadth-first search: never stuck, but searches in every direction.</summary>
-[DesignPattern("Strategy", "ConcreteStrategy")]
 public sealed class BfsChaseStrategy : ChaseStrategy
 {
     public override MovementStrategyKind Kind => MovementStrategyKind.Bfs;
@@ -42,7 +39,6 @@ public sealed class BfsChaseStrategy : ChaseStrategy
 }
 
 /// <summary>Follows a shortest path found by A*: as short as BFS, but searches towards the player first.</summary>
-[DesignPattern("Strategy", "ConcreteStrategy")]
 public sealed class AStarChaseStrategy : ChaseStrategy
 {
     public override MovementStrategyKind Kind => MovementStrategyKind.AStar;
@@ -55,7 +51,6 @@ public sealed class AStarChaseStrategy : ChaseStrategy
 /// Heads for where the player is going, not where the player is: up to <see cref="LookAhead"/> tiles
 /// ahead in the player's direction while the player moves. Cuts players off instead of trailing them.
 /// </summary>
-[DesignPattern("Strategy", "ConcreteStrategy")]
 public sealed class PredictiveChaseStrategy : ChaseStrategy
 {
     public const int LookAhead = 3;

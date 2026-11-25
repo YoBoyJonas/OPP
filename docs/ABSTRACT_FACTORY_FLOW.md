@@ -174,8 +174,7 @@ the same director, but a `PresetLevelBuilder` that reads the map from `content/p
 | `LevelProvider.Generate`, the `if (errors.Count == 0)` line | the validation result of this attempt |
 
 Then try `.../api/levels/1/preview?seed=42`: the factory becomes `DungeonThemeFactory`, the rest of
-the flow is the same. Without the server, run `dotnet run --project src/CastleEscape.PatternDemos -- abstract-factory`
-(or `-- builder`) and put the breakpoints in the demo.
+the flow is the same. Without the server, debug `AbstractFactoryTests` or `BuilderTests` with the same breakpoints.
 
 ## 7 A short explanation for the defence
 
